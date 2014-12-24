@@ -1,2 +1,5 @@
-In-Flight Waypoints 1.0
+In-Flight Waypoints 1.0.1
+- Fixed name in version file.
+
+In-Flight Waypoints 1.0.0
 - Initial release.
