@@ -12,6 +12,10 @@ namespace InFlightWaypoints
     [KSPAddon(KSPAddon.Startup.Flight, true)]
     class WaypointFlightRenderer : MonoBehaviour
     {
+        private GUIStyle NameStyle = null;
+        private GUIStyle ValueStyle = null;
+        private string[] UNITS = { "m", "km", "Mm", "Gm", "Tm" };
+
         // Store additional waypoint data
         protected class WaypointData
         {
@@ -39,6 +43,8 @@ namespace InFlightWaypoints
         {
             if (HighLogic.LoadedSceneIsFlight && !MapView.MapIsEnabled)
             {
+                SetupStyles();
+
                 if (WaypointManager.Instance() != null)
                 {
                     CacheWaypointData();
@@ -49,6 +55,40 @@ namespace InFlightWaypoints
                     }
                 }
             }
+        }
+
+        // Styles taken directly from Kerbal Engineer Redux - because they look great and this will
+        // make our display consistent with that
+        protected void SetupStyles()
+        {
+            if (NameStyle != null)
+            {
+                return;
+            }
+
+            NameStyle = new GUIStyle(HighLogic.Skin.label)
+            {
+                normal =
+                {
+                    textColor = Color.white
+                },
+                margin = new RectOffset(),
+                padding = new RectOffset(5, 0, 0, 0),
+                alignment = TextAnchor.MiddleRight,
+                fontSize = 11,
+                fontStyle = FontStyle.Bold,
+                fixedHeight = 20.0f
+            };
+
+            ValueStyle = new GUIStyle(HighLogic.Skin.label)
+            {
+                margin = new RectOffset(),
+                padding = new RectOffset(0, 5, 0, 0),
+                alignment = TextAnchor.MiddleLeft,
+                fontSize = 11,
+                fontStyle = FontStyle.Normal,
+                fixedHeight = 20.0f
+            };
         }
 
         // Updates the waypoint data cache
@@ -104,9 +144,12 @@ namespace InFlightWaypoints
             // Only handle on repaint events
             if (Event.current.type == EventType.Repaint)
             {
+                // Figure out waypoint label
+                string label = wpd.waypoint.name + (wpd.waypoint.isClustered ? (" " + StringUtilities.IntegerToGreek(wpd.waypoint.index)) : "");
+
                 // Decide whether to actually draw the waypoint
                 float alpha = 1.0f;
-                if (FlightGlobals.ActiveVessel != null && !IsNavPoint(wpd.waypoint))
+                if (FlightGlobals.ActiveVessel != null)
                 {
                     // Figure out the distance to the waypoint
                     Vessel v = FlightGlobals.ActiveVessel;
@@ -118,14 +161,31 @@ namespace InFlightWaypoints
                     double speed = v.srfSpeed < MIN_SPEED ? MIN_SPEED : v.srfSpeed;
                     double time = distance / speed; 
 
-                    // More than two minutes away
-                    if (time > MIN_TIME)
+                    // Only change alpha if the waypoint isn't the nav point
+                    if (!IsNavPoint(wpd.waypoint))
                     {
-                        return;
+                        // More than two minutes away
+                        if (time > MIN_TIME)
+                        {
+                            return;
+                        }
+                        else if (time >= MIN_TIME - FADE_TIME)
+                        {
+                            alpha = (float)((MIN_TIME - time) / FADE_TIME);
+                        }
                     }
-                    else if (time >= MIN_TIME - FADE_TIME)
+                    // Draw the distance information to the nav point
+                    else
                     {
-                        alpha = (float)((MIN_TIME - time) / FADE_TIME);
+                        int unit = 0;
+                        while (unit < 4 && distance >= 10000.0)
+                        {
+                            distance /= 1000.0;
+                            unit++;
+                        }
+                        // Draw the distance to waypoint text
+                        GUI.Label(new Rect((float)Screen.width / 2.0f - 168f, 72f, 240f, 32f), "Distance to " + label + ":", NameStyle);
+                        GUI.Label(new Rect((float)Screen.width / 2.0f + 88f,  72f, 160f, 32f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
                     }
                 }
 
@@ -155,7 +215,7 @@ namespace InFlightWaypoints
                 // Hint text!!
                 if (iconRect.Contains(Event.current.mousePosition))
                 {
-                    string label = wpd.waypoint.name + (wpd.waypoint.isClustered ? (" " + StringUtilities.IntegerToGreek(wpd.waypoint.index)) : "");
+                    // Add agency to label
                     if (wpd.waypoint.contractReference != null)
                     {
                         label += "\n" + wpd.waypoint.contractReference.Agent.Name;

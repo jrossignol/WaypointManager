@@ -1,5 +1,6 @@
 In-Flight Waypoints 1.1.0
 - Always show waypoint if it is activated for navigation.
+- Display distance information for the active waypoint.
 
 In-Flight Waypoints 1.0.3
 - Fix culling issue that caused waypoints that should've been behind the camera to be drawn.
