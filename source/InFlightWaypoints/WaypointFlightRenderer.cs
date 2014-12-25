@@ -106,7 +106,7 @@ namespace InFlightWaypoints
             {
                 // Decide whether to actually draw the waypoint
                 float alpha = 1.0f;
-                if (FlightGlobals.ActiveVessel != null)
+                if (FlightGlobals.ActiveVessel != null && !IsNavPoint(wpd.waypoint))
                 {
                     // Figure out the distance to the waypoint
                     Vessel v = FlightGlobals.ActiveVessel;
@@ -165,6 +165,18 @@ namespace InFlightWaypoints
                 }
 
             }
+        }
+
+        protected bool IsNavPoint(Waypoint waypoint)
+        {
+            NavWaypoint navPoint = WaypointManager.navWaypoint;
+            if (navPoint == null)
+            {
+                return false;
+            }
+
+            return navPoint.latitude == waypoint.latitude && navPoint.longitude == waypoint.longitude;
+
         }
     }
 }
