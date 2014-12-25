@@ -1,3 +1,9 @@
+In-Flight Waypoints 1.0.3
+- Fix culling issue that caused waypoints that should've been behind the camera to be drawn.
+
+In-Flight Waypoints 1.0.2
+- Include LICENSE.txt in download.
+
 In-Flight Waypoints 1.0.1
 - Fixed name in version file.
 

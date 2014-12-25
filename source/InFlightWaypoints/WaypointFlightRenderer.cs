@@ -115,7 +115,7 @@ namespace InFlightWaypoints
                     double distance = Vector3d.Distance(vesselLocation, waypointLocation);
 
                     // Get the distance to the waypoint at the current speed
-                    double speed = v.horizontalSrfSpeed < MIN_SPEED ? MIN_SPEED : v.horizontalSrfSpeed;
+                    double speed = v.srfSpeed < MIN_SPEED ? MIN_SPEED : v.srfSpeed;
                     double time = distance / speed; 
 
                     // More than two minutes away
@@ -129,9 +129,17 @@ namespace InFlightWaypoints
                     }
                 }
 
-                // Translate to screen position
+                // Translate to scaled space
                 Vector3d localSpacePoint = celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.height + wpd.waypoint.altitude);
                 Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
+
+                // Don't draw if it's behind the camera
+                if (Vector3d.Dot(MapView.MapCamera.camera.transform.forward, scaledSpacePoint.normalized) < 0.0)
+                {
+                    return;
+                }
+
+                // Translate to screen position
                 Vector3 screenPos = MapView.MapCamera.camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
 
                 // Draw the marker at half-resolution (30 x 45) - that seems to match the one in the map view
