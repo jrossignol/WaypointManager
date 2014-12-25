@@ -2,7 +2,7 @@
      "NAME":"In-Flight Waypoints",
 	 "URL":"https://raw.githubusercontent.com/jrossignol/InFlightWaypoints/master/GameData/InFlightWaypoints/InFlightWaypoints.version",
 	 "DOWNLOAD":"https://github.com/jrossignol/InFlightWaypoints/releases",
-     "CHANGE_LOG_URL":"https://raw.githubusercontent.com/jrossignol/InFlightWaypoints/1.0.0/CHANGES.txt",
+     "CHANGE_LOG_URL":"https://raw.githubusercontent.com/jrossignol/InFlightWaypoints/1.0.1/CHANGES.txt",
      "GITHUB":{
          "USERNAME":"jrossignol",
          "REPOSITORY":"InFlightWaypoints",
