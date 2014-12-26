@@ -16,6 +16,8 @@ namespace InFlightWaypoints
         private GUIStyle ValueStyle = null;
         private string[] UNITS = { "m", "km", "Mm", "Gm", "Tm" };
 
+        private bool visible = true;
+
         // Store additional waypoint data
         protected class WaypointData
         {
@@ -37,11 +39,32 @@ namespace InFlightWaypoints
             {
                 MapView.MapCamera.gameObject.AddComponent<WaypointFlightRenderer>();
             }
+
+            GameEvents.onHideUI.Add(new EventVoid.OnEvent(OnHideUI));
+            GameEvents.onShowUI.Add(new EventVoid.OnEvent(OnShowUI));
+
+        }
+
+        protected void OnDestroy()
+        {
+            GameEvents.onHideUI.Remove(OnHideUI);
+            GameEvents.onShowUI.Remove(OnShowUI);
+        }
+
+
+        public void OnHideUI()
+        {
+            visible = false;
+        }
+
+        public void OnShowUI()
+        {
+            visible = true;
         }
 
         public void OnGUI()
         {
-            if (HighLogic.LoadedSceneIsFlight && !MapView.MapIsEnabled)
+            if (HighLogic.LoadedSceneIsFlight && !MapView.MapIsEnabled && visible)
             {
                 SetupStyles();
 
@@ -153,7 +176,7 @@ namespace InFlightWaypoints
                 {
                     // Figure out the distance to the waypoint
                     Vessel v = FlightGlobals.ActiveVessel;
-                    Vector3d waypointLocation = celestialBody.GetRelSurfacePosition(wpd.waypoint.longitude, wpd.waypoint.latitude, wpd.waypoint.altitude);
+                    Vector3d waypointLocation = celestialBody.GetRelSurfacePosition(wpd.waypoint.longitude, wpd.waypoint.latitude, wpd.height + wpd.waypoint.altitude);
                     Vector3d vesselLocation = celestialBody.GetRelSurfacePosition(v.longitude, v.latitude, v.altitude);
                     double distance = Vector3d.Distance(vesselLocation, waypointLocation);
 
