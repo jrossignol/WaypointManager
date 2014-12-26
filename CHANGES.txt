@@ -1,6 +1,6 @@
 In-Flight Waypoints 1.1.1
 - Hide waypoints when the GUI is hidden (thanks DomDiaemus).
-- Take terraint height into account for distance calculations (thanks helaeon).
+- Take terrain height into account for distance calculations (thanks helaeon).
 
 In-Flight Waypoints 1.1.0
 - Always show waypoint if it is activated for navigation.
