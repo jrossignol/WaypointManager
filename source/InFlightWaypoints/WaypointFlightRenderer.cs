@@ -253,7 +253,7 @@ namespace InFlightWaypoints
         protected bool IsNavPoint(Waypoint waypoint)
         {
             NavWaypoint navPoint = WaypointManager.navWaypoint;
-            if (navPoint == null)
+            if (navPoint == null || WaypointManager.Instance() == null || !WaypointManager.navIsActive())
             {
                 return false;
             }
