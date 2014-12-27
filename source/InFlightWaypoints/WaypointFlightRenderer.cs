@@ -17,6 +17,10 @@ namespace InFlightWaypoints
         private string[] UNITS = { "m", "km", "Mm", "Gm", "Tm" };
 
         private bool visible = true;
+        private Waypoint selectedWaypoint = null;
+        private string waypointName = "";
+        private Rect windowPos;
+        private bool newClick = false;
 
         // Store additional waypoint data
         protected class WaypointData
@@ -38,11 +42,13 @@ namespace InFlightWaypoints
             if (MapView.MapCamera.gameObject.GetComponent<WaypointFlightRenderer>() == null)
             {
                 MapView.MapCamera.gameObject.AddComponent<WaypointFlightRenderer>();
+
+                // Destroy this object - otherwise we'll have two
+                Destroy(this);
             }
 
             GameEvents.onHideUI.Add(new EventVoid.OnEvent(OnHideUI));
             GameEvents.onShowUI.Add(new EventVoid.OnEvent(OnShowUI));
-
         }
 
         protected void OnDestroy()
@@ -50,7 +56,6 @@ namespace InFlightWaypoints
             GameEvents.onHideUI.Remove(OnHideUI);
             GameEvents.onShowUI.Remove(OnShowUI);
         }
-
 
         public void OnHideUI()
         {
@@ -70,12 +75,19 @@ namespace InFlightWaypoints
 
                 if (WaypointManager.Instance() != null)
                 {
+                    if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
+                    {
+                        newClick = true;
+                    }
+
                     CacheWaypointData();
 
                     foreach (WaypointData wpd in waypointData.Values)
                     {
                         DrawWaypoint(wpd);
                     }
+
+                    ShowNavigationWindow();
                 }
             }
         }
@@ -164,70 +176,95 @@ namespace InFlightWaypoints
                 return;
             }
 
+            // Figure out waypoint label
+            string label = wpd.waypoint.name + (wpd.waypoint.isClustered ? (" " + StringUtilities.IntegerToGreek(wpd.waypoint.index)) : "");
+
+            // Decide whether to actually draw the waypoint
+            float alpha = 1.0f;
+            if (FlightGlobals.ActiveVessel != null)
+            {
+                // Figure out the distance to the waypoint
+                Vessel v = FlightGlobals.ActiveVessel;
+                Vector3d waypointLocation = celestialBody.GetRelSurfacePosition(wpd.waypoint.longitude, wpd.waypoint.latitude, wpd.height + wpd.waypoint.altitude);
+                Vector3d vesselLocation = celestialBody.GetRelSurfacePosition(v.longitude, v.latitude, v.altitude);
+                double distance = Vector3d.Distance(vesselLocation, waypointLocation);
+
+                // Get the distance to the waypoint at the current speed
+                double speed = v.srfSpeed < MIN_SPEED ? MIN_SPEED : v.srfSpeed;
+                double time = distance / speed;
+
+                // Only change alpha if the waypoint isn't the nav point
+                if (!IsNavPoint(wpd.waypoint))
+                {
+                    // More than two minutes away
+                    if (time > MIN_TIME)
+                    {
+                        return;
+                    }
+                    else if (time >= MIN_TIME - FADE_TIME)
+                    {
+                        alpha = (float)((MIN_TIME - time) / FADE_TIME);
+                    }
+                }
+                // Draw the distance information to the nav point
+                else
+                {
+                    int unit = 0;
+                    while (unit < 4 && distance >= 10000.0)
+                    {
+                        distance /= 1000.0;
+                        unit++;
+                    }
+                    // Draw the distance to waypoint text
+                    if (Event.current.type == EventType.Repaint)
+                    {
+                        GUI.Label(new Rect((float)Screen.width / 2.0f - 168f, 72f, 240f, 32f), "Distance to " + label + ":", NameStyle);
+                        GUI.Label(new Rect((float)Screen.width / 2.0f + 88f, 72f, 160f, 32f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
+                    }
+                }
+            }
+
+            // Translate to scaled space
+            Vector3d localSpacePoint = celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.height + wpd.waypoint.altitude);
+            Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
+
+            // Don't draw if it's behind the camera
+            if (Vector3d.Dot(MapView.MapCamera.camera.transform.forward, scaledSpacePoint.normalized) < 0.0)
+            {
+                return;
+            }
+
+            // Translate to screen position
+            Vector3 screenPos = MapView.MapCamera.camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
+
+            // Draw the marker at half-resolution (30 x 45) - that seems to match the one in the map view
+            Rect markerRect = new Rect(screenPos.x - 15f, (float)Screen.height - screenPos.y - 45.0f, 30f, 45f);
+
+            // Set the window position relative to the selected waypoint
+            if (selectedWaypoint == wpd.waypoint)
+            {
+                windowPos = new Rect(markerRect.xMin - 97, markerRect.yMax + 12, 224, 60);
+            }
+
+            // Handling clicking on the waypoint
+            if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
+            {
+                if (markerRect.Contains(Event.current.mousePosition))
+                {
+                    selectedWaypoint = wpd.waypoint;
+                    windowPos = new Rect(markerRect.xMin - 97, markerRect.yMax + 12, 224, 60);
+                    waypointName = label;
+                    newClick = false;
+                }
+                else if (newClick)
+                {
+                    selectedWaypoint = null;
+                }
+            }
+
             // Only handle on repaint events
             if (Event.current.type == EventType.Repaint)
             {
-                // Figure out waypoint label
-                string label = wpd.waypoint.name + (wpd.waypoint.isClustered ? (" " + StringUtilities.IntegerToGreek(wpd.waypoint.index)) : "");
-
-                // Decide whether to actually draw the waypoint
-                float alpha = 1.0f;
-                if (FlightGlobals.ActiveVessel != null)
-                {
-                    // Figure out the distance to the waypoint
-                    Vessel v = FlightGlobals.ActiveVessel;
-                    Vector3d waypointLocation = celestialBody.GetRelSurfacePosition(wpd.waypoint.longitude, wpd.waypoint.latitude, wpd.height + wpd.waypoint.altitude);
-                    Vector3d vesselLocation = celestialBody.GetRelSurfacePosition(v.longitude, v.latitude, v.altitude);
-                    double distance = Vector3d.Distance(vesselLocation, waypointLocation);
-
-                    // Get the distance to the waypoint at the current speed
-                    double speed = v.srfSpeed < MIN_SPEED ? MIN_SPEED : v.srfSpeed;
-                    double time = distance / speed; 
-
-                    // Only change alpha if the waypoint isn't the nav point
-                    if (!IsNavPoint(wpd.waypoint))
-                    {
-                        // More than two minutes away
-                        if (time > MIN_TIME)
-                        {
-                            return;
-                        }
-                        else if (time >= MIN_TIME - FADE_TIME)
-                        {
-                            alpha = (float)((MIN_TIME - time) / FADE_TIME);
-                        }
-                    }
-                    // Draw the distance information to the nav point
-                    else
-                    {
-                        int unit = 0;
-                        while (unit < 4 && distance >= 10000.0)
-                        {
-                            distance /= 1000.0;
-                            unit++;
-                        }
-                        // Draw the distance to waypoint text
-                        GUI.Label(new Rect((float)Screen.width / 2.0f - 168f, 72f, 240f, 32f), "Distance to " + label + ":", NameStyle);
-                        GUI.Label(new Rect((float)Screen.width / 2.0f + 88f,  72f, 160f, 32f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
-                    }
-                }
-
-                // Translate to scaled space
-                Vector3d localSpacePoint = celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.height + wpd.waypoint.altitude);
-                Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
-
-                // Don't draw if it's behind the camera
-                if (Vector3d.Dot(MapView.MapCamera.camera.transform.forward, scaledSpacePoint.normalized) < 0.0)
-                {
-                    return;
-                }
-
-                // Translate to screen position
-                Vector3 screenPos = MapView.MapCamera.camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
-
-                // Draw the marker at half-resolution (30 x 45) - that seems to match the one in the map view
-                Rect markerRect = new Rect(screenPos.x - 15f, (float)Screen.height - screenPos.y - 45.0f, 30f, 45f);
-
                 // Half-res for the icon too (16 x 16)
                 Rect iconRect = new Rect(screenPos.x - 8f, (float)Screen.height - screenPos.y - 39.0f, 16f, 16f);
 
@@ -249,6 +286,40 @@ namespace InFlightWaypoints
 
             }
         }
+
+        private void ShowNavigationWindow()
+        {
+            if (selectedWaypoint != null)
+            {
+                GUI.skin = HighLogic.Skin;
+                windowPos = GUILayout.Window(10, windowPos, NavigationWindow, waypointName, GUILayout.MinWidth(224));
+            }
+        }
+
+        private void NavigationWindow(int windowID)
+        {
+            GUILayout.BeginVertical();
+            if (!IsNavPoint(selectedWaypoint))
+            {
+                if (GUILayout.Button("Activate Navigation", HighLogic.Skin.button, GUILayout.ExpandWidth(true)))
+                {
+                    WaypointManager.setupNavPoint(selectedWaypoint);
+                    WaypointManager.activateNavPoint();
+                    selectedWaypoint = null;
+                }
+            }
+            else
+            {
+                if (GUILayout.Button("Deactivate Navigation", HighLogic.Skin.button, GUILayout.ExpandWidth(true)))
+                {
+                    WaypointManager.clearNavPoint();
+                    selectedWaypoint = null;
+                }
+
+            }
+            GUILayout.EndVertical();
+        }
+
 
         protected bool IsNavPoint(Waypoint waypoint)
         {
