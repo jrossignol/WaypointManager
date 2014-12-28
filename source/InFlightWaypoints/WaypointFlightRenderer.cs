@@ -185,9 +185,7 @@ namespace InFlightWaypoints
             {
                 // Figure out the distance to the waypoint
                 Vessel v = FlightGlobals.ActiveVessel;
-                Vector3d waypointLocation = celestialBody.GetRelSurfacePosition(wpd.waypoint.longitude, wpd.waypoint.latitude, wpd.height + wpd.waypoint.altitude);
-                Vector3d vesselLocation = celestialBody.GetRelSurfacePosition(v.longitude, v.latitude, v.altitude);
-                double distance = Vector3d.Distance(vesselLocation, waypointLocation);
+                double distance = getDistanceToWaypoint(wpd);
 
                 // Get the distance to the waypoint at the current speed
                 double speed = v.srfSpeed < MIN_SPEED ? MIN_SPEED : v.srfSpeed;
@@ -335,6 +333,20 @@ namespace InFlightWaypoints
 
             return navPoint.latitude == waypoint.latitude && navPoint.longitude == waypoint.longitude;
 
+        }
+
+        /// <summary>
+        /// Get the distance in meter from the activeVessel to the current activated waypoint.
+        /// Returns 0 if the waypointmanager is not instantiate
+        /// </summary>
+        /// <param name="wpd">Activated waypoint</param>
+        /// <returns>Distance in meter</returns>
+        protected double getDistanceToWaypoint(WaypointData wpd)
+        {
+            WaypointManager wpm = WaypointManager.Instance();
+            if (wpm == null) return 0;
+
+            return wpm.LateralDistanceToVessel(wpd.waypoint);
         }
     }
 }
