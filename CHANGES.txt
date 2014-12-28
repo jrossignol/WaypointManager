@@ -1,5 +1,6 @@
 In-Flight Waypoints 1.2.1
 - Don't display dummy waypoints from orbits.
+- Blank active waypoint if the player is within range to complete the contract parameter.
 
 In-Flight Waypoints 1.2.0
 - Correctly detect deactivating navigation.
