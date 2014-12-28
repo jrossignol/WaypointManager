@@ -140,7 +140,7 @@ namespace InFlightWaypoints
             // Add new waypoints
             foreach (Waypoint w in WaypointManager.Instance().AllWaypoints())
             {
-                if (w != null && w.celestialName == celestialBody.name)
+                if (w != null && w.celestialName == celestialBody.name && w.isNavigatable)
                 {
                     if (!waypointData.ContainsKey(w))
                     {
@@ -272,7 +272,7 @@ namespace InFlightWaypoints
                 Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, alpha * 0.5f));
                 Graphics.DrawTexture(iconRect, ContractDefs.textures[wpd.waypoint.id], new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(wpd.waypoint.seed, alpha));
 
-                // Hint text!!
+                // Hint text!
                 if (iconRect.Contains(Event.current.mousePosition))
                 {
                     // Add agency to label
@@ -283,7 +283,6 @@ namespace InFlightWaypoints
                     float yoffset = label.Count(c => c == '\n') * 32.0f + 45.0f;
                     GUI.Label(new Rect(screenPos.x - 40f, (float)Screen.height - screenPos.y - yoffset, 80f, 32f), label, MapView.OrbitIconsTextSkin.label);
                 }
-
             }
         }
 
