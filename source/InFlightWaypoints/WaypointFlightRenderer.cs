@@ -216,14 +216,17 @@ namespace InFlightWaypoints
                     // Draw the distance to waypoint text
                     if (Event.current.type == EventType.Repaint)
                     {
-                        GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, 72f, 240f, 20f), "Distance to " + label + ":", NameStyle);
-                        GUI.Label(new Rect((float)Screen.width / 2.0f + 68f, 72f, 60f, 20f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
+                        AltimeterSliderButtons asb = UnityEngine.Object.FindObjectsOfType<AltimeterSliderButtons>().First();
+                        float ybase = Screen.currentResolution.height - Camera.main.ViewportToScreenPoint(asb.transform.position).y + 448;
+
+                        GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", NameStyle);
+                        GUI.Label(new Rect((float)Screen.width / 2.0f + 68f, ybase, 60f, 20f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
 
                         string timeToWP = GetTimeToWaypoint(wpd, distance);
                         if (timeToWP != null)
                         {
-                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, 90f, 240f, 20f), "ETA to " + label + ":", NameStyle);
-                            GUI.Label(new Rect((float)Screen.width / 2.0f + 68f, 90f, 60f, 20f), timeToWP, ValueStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase + 18f, 240f, 20f), "ETA to " + label + ":", NameStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 68f, ybase + 18f, 60f, 20f), timeToWP, ValueStyle);
                         }
 
                     }
