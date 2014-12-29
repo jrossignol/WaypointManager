@@ -1,3 +1,6 @@
+In-Flight Waypoints 1.2.4
+- Fixed issue with ETA for large distances.
+
 In-Flight Waypoints 1.2.3
 - Fixed text positioning to work correctly (or nearly correctly) across all resolutions and UI sizes.
 
