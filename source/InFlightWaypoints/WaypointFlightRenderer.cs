@@ -119,7 +119,7 @@ namespace InFlightWaypoints
             {
                 margin = new RectOffset(),
                 padding = new RectOffset(0, 5, 0, 0),
-                alignment = TextAnchor.MiddleLeft,
+                alignment = TextAnchor.MiddleRight,
                 fontSize = 11,
                 fontStyle = FontStyle.Normal,
                 fixedHeight = 20.0f
@@ -185,7 +185,7 @@ namespace InFlightWaypoints
             {
                 // Figure out the distance to the waypoint
                 Vessel v = FlightGlobals.ActiveVessel;
-                double distance = getDistanceToWaypoint(wpd);
+                double distance = GetDistanceToWaypoint(wpd);
 
                 // Get the distance to the waypoint at the current speed
                 double speed = v.srfSpeed < MIN_SPEED ? MIN_SPEED : v.srfSpeed;
@@ -216,8 +216,19 @@ namespace InFlightWaypoints
                     // Draw the distance to waypoint text
                     if (Event.current.type == EventType.Repaint)
                     {
-                        GUI.Label(new Rect((float)Screen.width / 2.0f - 168f, 72f, 240f, 32f), "Distance to " + label + ":", NameStyle);
-                        GUI.Label(new Rect((float)Screen.width / 2.0f + 88f, 72f, 160f, 32f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
+                        AltimeterSliderButtons asb = UnityEngine.Object.FindObjectsOfType<AltimeterSliderButtons>().First();
+                        float ybase = Screen.currentResolution.height - Camera.main.ViewportToScreenPoint(asb.transform.position).y + 448;
+
+                        GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", NameStyle);
+                        GUI.Label(new Rect((float)Screen.width / 2.0f + 68f, ybase, 60f, 20f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
+
+                        string timeToWP = GetTimeToWaypoint(wpd, distance);
+                        if (timeToWP != null)
+                        {
+                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase + 18f, 240f, 20f), "ETA to " + label + ":", NameStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 68f, ybase + 18f, 60f, 20f), timeToWP, ValueStyle);
+                        }
+
                     }
                 }
             }
@@ -341,12 +352,82 @@ namespace InFlightWaypoints
         /// </summary>
         /// <param name="wpd">Activated waypoint</param>
         /// <returns>Distance in meter</returns>
-        protected double getDistanceToWaypoint(WaypointData wpd)
+        protected double GetDistanceToWaypoint(WaypointData wpd)
         {
-            WaypointManager wpm = WaypointManager.Instance();
-            if (wpm == null) return 0;
+            Vessel v = FlightGlobals.ActiveVessel;
+            CelestialBody celestialBody = v.mainBody;
 
-            return wpm.LateralDistanceToVessel(wpd.waypoint);
+            // Use the haversine formula to calculate great circle distance.
+            double sin1 = Math.Sin(Math.PI / 180.0 * (v.latitude - wpd.waypoint.latitude) / 2);
+            double sin2 = Math.Sin(Math.PI / 180.0 * (v.longitude - wpd.waypoint.longitude) / 2);
+            double cos1 = Math.Cos(Math.PI / 180.0 * wpd.waypoint.latitude);
+            double cos2 = Math.Cos(Math.PI / 180.0 * v.latitude);
+
+            return 2 * (celestialBody.Radius + wpd.height + wpd.waypoint.altitude) *
+                Math.Asin(Math.Sqrt(sin1*sin1 + cos1*cos2*sin2*sin2));
+        }
+
+        /// <summary>
+        /// Calculates the time to the distance based on the vessels srfSpeed and transform it to a readable string.
+        /// </summary>
+        /// <param name="waypoint">The waypoint</param>
+        /// <param name="distance">Distance in meters</param>
+        /// <returns></returns>
+        protected string GetTimeToWaypoint(WaypointData wpd, double distance)
+        {
+            Vessel v = FlightGlobals.ActiveVessel;
+            if (v.srfSpeed < 0.1)
+            {
+                return null;
+            }
+
+            double time = (distance / v.horizontalSrfSpeed);
+
+            // Earthtime
+            uint SecondsPerYear = 31536000; // = 365d
+            uint SecondsPerDay = 86400;     // = 24h
+            uint SecondsPerHour = 3600;     // = 60m
+            uint SecondsPerMinute = 60;     // = 60s
+
+            if (GameSettings.KERBIN_TIME == true)
+            {
+                SecondsPerYear = 9201600;  // = 426d
+                SecondsPerDay = 21600;     // = 6h
+                SecondsPerHour = 3600;     // = 60m
+                SecondsPerMinute = 60;     // = 60s
+            }
+
+            int years = (int)(time / SecondsPerYear);
+            time -= years * SecondsPerYear;
+
+            int days = (int)(time / SecondsPerDay);
+            time -= days * SecondsPerDay;
+
+            int hours = (int)(time / SecondsPerHour);
+            time -= hours * SecondsPerHour;
+
+            int minutes = (int)(time / SecondsPerMinute);
+            time -= minutes * SecondsPerMinute;
+
+            int seconds = (int)(time);
+
+            string output = "";
+            if (years != 0)
+            {
+                output += years + (years == 1 ? "year" : " years");
+            }
+            if (days != 0)
+            {
+                if (output.Length != 0) output += ", ";
+                output += days + (days == 1 ? "days" : " days");
+            }
+            if (hours != 0 || minutes != 0 || seconds != 0 || output.Length == 0)
+            {
+                if (output.Length != 0) output += ", ";
+                output += hours.ToString("D2") + ":" + minutes.ToString("D2") + ":" + seconds.ToString("D2");
+            }
+
+            return output;
         }
     }
 }

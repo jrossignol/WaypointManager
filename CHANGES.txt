@@ -1,3 +1,8 @@
+In-Flight Waypoints 1.2.2
+- Improved calculation of distance to waypoint - now uses the distance along the planet (instead of through the planet).  (Thanks Peppie23)
+- Display ETA to waypoint.  (Thanks Peppie23)
+- Move out of the way when altimeter panel pops down (sort of).
+
 In-Flight Waypoints 1.2.1
 - Don't display dummy waypoints from orbits.
 - Blink active waypoint if the player is within range to complete the contract parameter.
