@@ -22,6 +22,9 @@ namespace InFlightWaypoints
         private Rect windowPos;
         private bool newClick = false;
 
+        private float referencePos = 0.0f;
+        private float referenceUISize = 0.0f;
+
         // Store additional waypoint data
         protected class WaypointData
         {
@@ -217,7 +220,13 @@ namespace InFlightWaypoints
                     if (Event.current.type == EventType.Repaint)
                     {
                         AltimeterSliderButtons asb = UnityEngine.Object.FindObjectsOfType<AltimeterSliderButtons>().First();
-                        float ybase = Screen.currentResolution.height - Camera.main.ViewportToScreenPoint(asb.transform.position).y + 448;
+                        if (referenceUISize != ScreenSafeUI.VerticalRatio)
+                        {
+                            referencePos = ScreenSafeUI.referenceCam.ViewportToScreenPoint(asb.transform.position).y;
+                            referenceUISize = ScreenSafeUI.VerticalRatio;
+                        }
+
+                        float ybase = (referencePos - ScreenSafeUI.referenceCam.ViewportToScreenPoint(asb.transform.position).y + 88f) / ScreenSafeUI.VerticalRatio;
 
                         GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", NameStyle);
                         GUI.Label(new Rect((float)Screen.width / 2.0f + 68f, ybase, 60f, 20f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
