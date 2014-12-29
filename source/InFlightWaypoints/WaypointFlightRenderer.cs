@@ -185,7 +185,7 @@ namespace InFlightWaypoints
             {
                 // Figure out the distance to the waypoint
                 Vessel v = FlightGlobals.ActiveVessel;
-                double distance = getDistanceToWaypoint(wpd);
+                double distance = GetDistanceToWaypoint(wpd);
 
                 // Get the distance to the waypoint at the current speed
                 double speed = v.srfSpeed < MIN_SPEED ? MIN_SPEED : v.srfSpeed;
@@ -341,12 +341,19 @@ namespace InFlightWaypoints
         /// </summary>
         /// <param name="wpd">Activated waypoint</param>
         /// <returns>Distance in meter</returns>
-        protected double getDistanceToWaypoint(WaypointData wpd)
+        protected double GetDistanceToWaypoint(WaypointData wpd)
         {
-            WaypointManager wpm = WaypointManager.Instance();
-            if (wpm == null) return 0;
+            Vessel v = FlightGlobals.ActiveVessel;
+            CelestialBody celestialBody = v.mainBody;
 
-            return wpm.LateralDistanceToVessel(wpd.waypoint);
+            // Use the haversine formula to calculate great circle distance.
+            double sin1 = Math.Sin(Math.PI / 180.0 * (v.latitude - wpd.waypoint.latitude) / 2);
+            double sin2 = Math.Sin(Math.PI / 180.0 * (v.longitude - wpd.waypoint.longitude) / 2);
+            double cos1 = Math.Cos(Math.PI / 180.0 * wpd.waypoint.latitude);
+            double cos2 = Math.Cos(Math.PI / 180.0 * v.latitude);
+
+            return 2 * (celestialBody.Radius + wpd.height + wpd.waypoint.altitude) *
+                Math.Asin(Math.Sqrt(sin1*sin1 + cos1*cos2*sin2*sin2));
         }
     }
 }
