@@ -217,7 +217,7 @@ namespace InFlightWaypoints
                     if (Event.current.type == EventType.Repaint)
                     {
                         AltimeterSliderButtons asb = UnityEngine.Object.FindObjectsOfType<AltimeterSliderButtons>().First();
-                        float ybase = Screen.currentResolution.height - Camera.main.ViewportToScreenPoint(asb.transform.position).y + 448;
+                        float ybase = Screen.height - Camera.main.ViewportToScreenPoint(asb.transform.position).y;
 
                         GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", NameStyle);
                         GUI.Label(new Rect((float)Screen.width / 2.0f + 68f, ybase, 60f, 20f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
