@@ -119,7 +119,7 @@ namespace InFlightWaypoints
             {
                 margin = new RectOffset(),
                 padding = new RectOffset(0, 5, 0, 0),
-                alignment = TextAnchor.MiddleLeft,
+                alignment = TextAnchor.MiddleRight,
                 fontSize = 11,
                 fontStyle = FontStyle.Normal,
                 fixedHeight = 20.0f
@@ -207,7 +207,6 @@ namespace InFlightWaypoints
                 // Draw the distance information to the nav point
                 else
                 {
-                    string timetowp = getTimeToWaypoint(distance);
                     int unit = 0;
                     while (unit < 4 && distance >= 10000.0)
                     {
@@ -217,8 +216,16 @@ namespace InFlightWaypoints
                     // Draw the distance to waypoint text
                     if (Event.current.type == EventType.Repaint)
                     {
-                        GUI.Label(new Rect((float)Screen.width / 2.0f - 208f, 72f, 240f, 32f), "Distance to " + label + ":", NameStyle);
-                        GUI.Label(new Rect((float)Screen.width / 2.0f + 58f, 72f, 160f, 32f), distance.ToString("N1") + " " + UNITS[unit] + " (" + timetowp + ")", ValueStyle);
+                        GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, 72f, 240f, 20f), "Distance to " + label + ":", NameStyle);
+                        GUI.Label(new Rect((float)Screen.width / 2.0f + 68f, 72f, 60f, 20f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
+
+                        string timeToWP = GetTimeToWaypoint(wpd, distance);
+                        if (timeToWP != null)
+                        {
+                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, 90f, 240f, 20f), "ETA to " + label + ":", NameStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 68f, 90f, 60f, 20f), timeToWP, ValueStyle);
+                        }
+
                     }
                 }
             }
@@ -360,15 +367,18 @@ namespace InFlightWaypoints
         /// <summary>
         /// Calculates the time to the distance based on the vessels srfSpeed and transform it to a readable string.
         /// </summary>
-        /// <param name="distance">Distance in meter</param>
+        /// <param name="waypoint">The waypoint</param>
+        /// <param name="distance">Distance in meters</param>
         /// <returns></returns>
-        protected string getTimeToWaypoint(double distance)
+        protected string GetTimeToWaypoint(WaypointData wpd, double distance)
         {
             Vessel v = FlightGlobals.ActiveVessel;
-            if (v.srfSpeed < 0.05 || distance == 0) return "-";
+            if (v.srfSpeed < 0.1)
+            {
+                return null;
+            }
 
-            Double time = (distance / v.srfSpeed) / TimeWarp.CurrentRate;
-            StringBuilder s = new StringBuilder();
+            double time = (distance / v.horizontalSrfSpeed);
 
             // Earthtime
             uint SecondsPerYear = 31536000; // = 365d
@@ -384,42 +394,37 @@ namespace InFlightWaypoints
                 SecondsPerMinute = 60;     // = 60s
             }
 
-            // extract years
-            if (time >= SecondsPerYear)
-                time = calcFromSecondsToSring(time, s, SecondsPerYear, "y ");
+            int years = (int)(time / SecondsPerYear);
+            time -= years * SecondsPerYear;
 
-            // extract days
-            if (time >= SecondsPerDay)
-                time = calcFromSecondsToSring(time, s, SecondsPerDay, "d ");
+            int days = (int)(time / SecondsPerDay);
+            time -= days * SecondsPerDay;
 
-            // extract hours
-            if (time >= SecondsPerHour)
-                time = calcFromSecondsToSring(time, s, SecondsPerHour, "h:");
+            int hours = (int)(time / SecondsPerHour);
+            time -= hours * SecondsPerHour;
 
-            // extract minutes
-            if (time >= SecondsPerMinute)
-                time = calcFromSecondsToSring(time, s, SecondsPerMinute, "m:");
+            int minutes = (int)(time / SecondsPerMinute);
+            time -= minutes * SecondsPerMinute;
 
-            // kill the micro seconds
-            s.Append(time.ToString("F0"));
-            s.Append("s");
+            int seconds = (int)(time);
 
-            return s.ToString();
-        }
+            string output = "";
+            if (years != 0)
+            {
+                output += years + (years == 1 ? "year" : " years");
+            }
+            if (days != 0)
+            {
+                if (output.Length != 0) output += ", ";
+                output += days + (days == 1 ? "days" : " days");
+            }
+            if (hours != 0 || minutes != 0 || seconds != 0 || output.Length == 0)
+            {
+                if (output.Length != 0) output += ", ";
+                output += hours.ToString("D2") + ":" + minutes.ToString("D2") + ":" + seconds.ToString("D2");
+            }
 
-        /// <summary>
-        /// This method extracts the time segments
-        /// </summary>
-        /// <param name="time">Seconds to convert</param>
-        /// <param name="appandTo">Stringbuilder to appand to</param>
-        /// <param name="baseSeconds">Base for the calculation</param>
-        /// <param name="prefix">Will be appand to the string builder</param>
-        /// <returns>The remaining seconds</returns>
-        private Double calcFromSecondsToSring(Double time, StringBuilder appandTo, uint baseSeconds, String prefix)
-        {
-            appandTo.Append(Math.Floor(time / baseSeconds));
-            appandTo.Append(prefix);
-            return (time % baseSeconds);
+            return output;
         }
     }
 }
