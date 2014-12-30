@@ -21,6 +21,7 @@ namespace InFlightWaypoints
         private string waypointName = "";
         private Rect windowPos;
         private bool newClick = false;
+        private AltimeterSliderButtons asb = null;
 
         private float referencePos = 0.0f;
         private float referenceUISize = 0.0f;
@@ -50,14 +51,21 @@ namespace InFlightWaypoints
                 Destroy(this);
             }
 
+            GameEvents.onGameSceneLoadRequested.Add(new EventData<GameScenes>.OnEvent(OnGameSceneLoadRequested));
             GameEvents.onHideUI.Add(new EventVoid.OnEvent(OnHideUI));
             GameEvents.onShowUI.Add(new EventVoid.OnEvent(OnShowUI));
         }
 
         protected void OnDestroy()
         {
+            GameEvents.onGameSceneLoadRequested.Remove(new EventData<GameScenes>.OnEvent(OnGameSceneLoadRequested));
             GameEvents.onHideUI.Remove(OnHideUI);
             GameEvents.onShowUI.Remove(OnShowUI);
+        }
+
+        public void OnGameSceneLoadRequested(GameScenes gameScene)
+        {
+            asb = null;
         }
 
         public void OnHideUI()
@@ -210,17 +218,14 @@ namespace InFlightWaypoints
                 // Draw the distance information to the nav point
                 else
                 {
-                    string timeToWP = GetTimeToWaypoint(wpd, distance);
-                    int unit = 0;
-                    while (unit < 4 && distance >= 10000.0)
-                    {
-                        distance /= 1000.0;
-                        unit++;
-                    }
                     // Draw the distance to waypoint text
                     if (Event.current.type == EventType.Repaint)
                     {
-                        AltimeterSliderButtons asb = UnityEngine.Object.FindObjectsOfType<AltimeterSliderButtons>().First();
+                        if (asb == null)
+                        {
+                            asb = UnityEngine.Object.FindObjectOfType<AltimeterSliderButtons>();
+                        }
+
                         if (referenceUISize != ScreenSafeUI.VerticalRatio)
                         {
                             referencePos = ScreenSafeUI.referenceCam.ViewportToScreenPoint(asb.transform.position).y;
@@ -229,6 +234,13 @@ namespace InFlightWaypoints
 
                         float ybase = (referencePos - ScreenSafeUI.referenceCam.ViewportToScreenPoint(asb.transform.position).y + 88f) / ScreenSafeUI.VerticalRatio;
 
+                        string timeToWP = GetTimeToWaypoint(wpd, distance);
+                        int unit = 0;
+                        while (unit < 4 && distance >= 10000.0)
+                        {
+                            distance /= 1000.0;
+                            unit++;
+                        }
                         GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", NameStyle);
                         GUI.Label(new Rect((float)Screen.width / 2.0f + 68f, ybase, 60f, 20f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
 
