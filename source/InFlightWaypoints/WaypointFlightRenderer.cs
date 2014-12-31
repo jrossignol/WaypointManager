@@ -244,6 +244,7 @@ namespace InFlightWaypoints
                         GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", NameStyle);
                         GUI.Label(new Rect((float)Screen.width / 2.0f + 68f, ybase, 60f, 20f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
 
+
                         if (timeToWP != null)
                         {
                             GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase + 18f, 240f, 20f), "ETA to " + label + ":", NameStyle);
@@ -416,6 +417,12 @@ namespace InFlightWaypoints
                 SecondsPerDay = 21600;     // = 6h
                 SecondsPerHour = 3600;     // = 60m
                 SecondsPerMinute = 60;     // = 60s
+            }
+
+            // Time of greater than a day is not particularly meaningful,m and doesn't display well
+            if (time < SecondsPerDay)
+            {
+                return null;
             }
 
             int years = (int)(time / SecondsPerYear);
