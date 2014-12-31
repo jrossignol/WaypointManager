@@ -232,7 +232,7 @@ namespace InFlightWaypoints
                             referenceUISize = ScreenSafeUI.VerticalRatio;
                         }
 
-                        float ybase = (referencePos - ScreenSafeUI.referenceCam.ViewportToScreenPoint(asb.transform.position).y + 88f) / ScreenSafeUI.VerticalRatio;
+                        float ybase = (referencePos - ScreenSafeUI.referenceCam.ViewportToScreenPoint(asb.transform.position).y + Screen.height / 11.67f) / ScreenSafeUI.VerticalRatio;
 
                         string timeToWP = GetTimeToWaypoint(wpd, distance);
                         int unit = 0;

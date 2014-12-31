@@ -1,5 +1,6 @@
 In-Flight Waypoints 1.2.5
 - Minor performance changes.
+- Fixed text positioning issue.  For EVERY resolution and EVERY UI scale setting.
 
 In-Flight Waypoints 1.2.4
 - Fixed issue with ETA for large distances.
