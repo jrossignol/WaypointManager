@@ -25,6 +25,8 @@ namespace InFlightWaypoints
 
         private float referencePos = 0.0f;
         private float referenceUISize = 0.0f;
+        private float lastPos = 0.0f;
+        private bool referenceSet = false;
 
         // Store additional waypoint data
         protected class WaypointData
@@ -226,10 +228,20 @@ namespace InFlightWaypoints
                             asb = UnityEngine.Object.FindObjectOfType<AltimeterSliderButtons>();
                         }
 
-                        if (referenceUISize != ScreenSafeUI.VerticalRatio)
+                        if (referenceUISize != ScreenSafeUI.VerticalRatio || !referenceSet)
                         {
                             referencePos = ScreenSafeUI.referenceCam.ViewportToScreenPoint(asb.transform.position).y;
                             referenceUISize = ScreenSafeUI.VerticalRatio;
+
+                            // Need two consistent numbers in a row to set the reference
+                            if (lastPos == referencePos)
+                            {
+                                referenceSet = true;
+                            }
+                            else
+                            {
+                                lastPos = referencePos;
+                            }
                         }
 
                         float ybase = (referencePos - ScreenSafeUI.referenceCam.ViewportToScreenPoint(asb.transform.position).y + Screen.height / 11.67f) / ScreenSafeUI.VerticalRatio;

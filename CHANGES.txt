@@ -1,3 +1,6 @@
+In-Flight Waypoints 1.2.6
+- Additional fix to text positioning issue.  HUGE thanks to robson1000.
+
 In-Flight Waypoints 1.2.5
 - Minor performance changes.
 - Fixed text positioning issue.  For EVERY resolution and EVERY UI scale setting.
