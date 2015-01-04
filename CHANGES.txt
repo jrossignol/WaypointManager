@@ -1,3 +1,7 @@
+In-Flight Waypoints 1.2.7
+- Fixed ETA text to actually display, and position correctly with long durations.
+- Prevent markers from showing up when at really high altitudes.
+
 In-Flight Waypoints 1.2.6
 - Additional fix to text positioning issue.  HUGE thanks to robson1000.
 

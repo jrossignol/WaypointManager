@@ -132,7 +132,7 @@ namespace InFlightWaypoints
             {
                 margin = new RectOffset(),
                 padding = new RectOffset(0, 5, 0, 0),
-                alignment = TextAnchor.MiddleRight,
+                alignment = TextAnchor.MiddleLeft,
                 fontSize = 11,
                 fontStyle = FontStyle.Normal,
                 fixedHeight = 20.0f
@@ -254,13 +254,12 @@ namespace InFlightWaypoints
                             unit++;
                         }
                         GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", NameStyle);
-                        GUI.Label(new Rect((float)Screen.width / 2.0f + 68f, ybase, 60f, 20f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
-
+                        GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
 
                         if (timeToWP != null)
                         {
                             GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase + 18f, 240f, 20f), "ETA to " + label + ":", NameStyle);
-                            GUI.Label(new Rect((float)Screen.width / 2.0f + 68f, ybase + 18f, 60f, 20f), timeToWP, ValueStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase + 18f, 120f, 20f), timeToWP, ValueStyle);
                         }
 
                     }
@@ -381,11 +380,10 @@ namespace InFlightWaypoints
         }
 
         /// <summary>
-        /// Get the distance in meter from the activeVessel to the current activated waypoint.
-        /// Returns 0 if the waypointmanager is not instantiate
+        /// Gets the  distance in meters from the activeVessel to the given waypoint.
         /// </summary>
         /// <param name="wpd">Activated waypoint</param>
-        /// <returns>Distance in meter</returns>
+        /// <returns>Distance in meters</returns>
         protected double GetDistanceToWaypoint(WaypointData wpd)
         {
             Vessel v = FlightGlobals.ActiveVessel;
@@ -397,8 +395,22 @@ namespace InFlightWaypoints
             double cos1 = Math.Cos(Math.PI / 180.0 * wpd.waypoint.latitude);
             double cos2 = Math.Cos(Math.PI / 180.0 * v.latitude);
 
-            return 2 * (celestialBody.Radius + wpd.height + wpd.waypoint.altitude) *
+            double lateralDist = 2 * (celestialBody.Radius + wpd.height + wpd.waypoint.altitude) *
                 Math.Asin(Math.Sqrt(sin1*sin1 + cos1*cos2*sin2*sin2));
+            double heightDist = Math.Abs(wpd.waypoint.altitude - v.altitude);
+
+            if (heightDist <= lateralDist / 2.0)
+            {
+                return lateralDist;
+            }
+            else
+            {
+                // Get the ratio to use in our formula
+                double x = (heightDist - lateralDist / 2.0) / lateralDist;
+
+                // x / (x + 1) starts at 0 when x = 0, and increases to 1
+                return (x / (x + 1)) * heightDist + lateralDist;
+            }
         }
 
         /// <summary>
@@ -431,12 +443,6 @@ namespace InFlightWaypoints
                 SecondsPerMinute = 60;     // = 60s
             }
 
-            // Time of greater than a day is not particularly meaningful,m and doesn't display well
-            if (time < SecondsPerDay)
-            {
-                return null;
-            }
-
             int years = (int)(time / SecondsPerYear);
             time -= years * SecondsPerYear;
 
@@ -454,12 +460,12 @@ namespace InFlightWaypoints
             string output = "";
             if (years != 0)
             {
-                output += years + (years == 1 ? "year" : " years");
+                output += years + "y";
             }
             if (days != 0)
             {
                 if (output.Length != 0) output += ", ";
-                output += days + (days == 1 ? "days" : " days");
+                output += days + "d";
             }
             if (hours != 0 || minutes != 0 || seconds != 0 || output.Length == 0)
             {
