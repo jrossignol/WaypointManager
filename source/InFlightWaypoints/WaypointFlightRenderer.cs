@@ -397,7 +397,7 @@ namespace InFlightWaypoints
 
             double lateralDist = 2 * (celestialBody.Radius + wpd.height + wpd.waypoint.altitude) *
                 Math.Asin(Math.Sqrt(sin1*sin1 + cos1*cos2*sin2*sin2));
-            double heightDist = Math.Abs(wpd.waypoint.altitude - v.altitude);
+            double heightDist = Math.Abs(wpd.waypoint.altitude + wpd.height - v.terrainAltitude);
 
             if (heightDist <= lateralDist / 2.0)
             {
