@@ -7,7 +7,7 @@ using KSP;
 using FinePrint;
 using FinePrint.Utilities;
 
-namespace InFlightWaypoints
+namespace WaypointManager
 {
     [KSPAddon(KSPAddon.Startup.Flight, true)]
     class WaypointFlightRenderer : MonoBehaviour
@@ -86,7 +86,7 @@ namespace InFlightWaypoints
             {
                 SetupStyles();
 
-                if (WaypointManager.Instance() != null)
+                if (FinePrint.WaypointManager.Instance() != null)
                 {
                     if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
                     {
@@ -151,7 +151,7 @@ namespace InFlightWaypoints
             }
 
             // Add new waypoints
-            foreach (Waypoint w in WaypointManager.Instance().AllWaypoints())
+            foreach (Waypoint w in FinePrint.WaypointManager.Instance().AllWaypoints())
             {
                 if (w != null && w.celestialName == celestialBody.name && w.isNavigatable)
                 {
@@ -314,7 +314,7 @@ namespace InFlightWaypoints
                 Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, alpha * 0.5f));
 
                 // Draw the icon, but support blinking
-                if (!IsNavPoint(wpd.waypoint) || !WaypointManager.navWaypoint.blinking || (int)((Time.fixedTime - (int)Time.fixedTime) * 4) % 2 == 0)
+                if (!IsNavPoint(wpd.waypoint) || !FinePrint.WaypointManager.navWaypoint.blinking || (int)((Time.fixedTime - (int)Time.fixedTime) * 4) % 2 == 0)
                 {
                     Graphics.DrawTexture(iconRect, ContractDefs.textures[wpd.waypoint.id], new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(wpd.waypoint.seed, alpha));
                 }
@@ -349,8 +349,8 @@ namespace InFlightWaypoints
             {
                 if (GUILayout.Button("Activate Navigation", HighLogic.Skin.button, GUILayout.ExpandWidth(true)))
                 {
-                    WaypointManager.setupNavPoint(selectedWaypoint);
-                    WaypointManager.activateNavPoint();
+                    FinePrint.WaypointManager.setupNavPoint(selectedWaypoint);
+                    FinePrint.WaypointManager.activateNavPoint();
                     selectedWaypoint = null;
                 }
             }
@@ -358,7 +358,7 @@ namespace InFlightWaypoints
             {
                 if (GUILayout.Button("Deactivate Navigation", HighLogic.Skin.button, GUILayout.ExpandWidth(true)))
                 {
-                    WaypointManager.clearNavPoint();
+                    FinePrint.WaypointManager.clearNavPoint();
                     selectedWaypoint = null;
                 }
 
@@ -369,8 +369,8 @@ namespace InFlightWaypoints
 
         protected bool IsNavPoint(Waypoint waypoint)
         {
-            NavWaypoint navPoint = WaypointManager.navWaypoint;
-            if (navPoint == null || WaypointManager.Instance() == null || !WaypointManager.navIsActive())
+            NavWaypoint navPoint = FinePrint.WaypointManager.navWaypoint;
+            if (navPoint == null || FinePrint.WaypointManager.Instance() == null || !FinePrint.WaypointManager.navIsActive())
             {
                 return false;
             }
