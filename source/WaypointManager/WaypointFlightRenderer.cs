@@ -14,7 +14,6 @@ namespace WaypointManager
     {
         private GUIStyle NameStyle = null;
         private GUIStyle ValueStyle = null;
-        private string[] UNITS = { "m", "km", "Mm", "Gm", "Tm" };
 
         private bool visible = true;
         private Waypoint selectedWaypoint = null;
@@ -27,16 +26,6 @@ namespace WaypointManager
         private float referenceUISize = 0.0f;
         private float lastPos = 0.0f;
         private bool referenceSet = false;
-
-        // Store additional waypoint data
-        protected class WaypointData
-        {
-            public Waypoint waypoint = null;
-            public double height = 0.0;
-            public double lastChecked = 0.0;
-        }
-
-        private Dictionary<Waypoint, WaypointData> waypointData = new Dictionary<Waypoint, WaypointData>();
 
         private const double MIN_TIME = 300;
         private const double MIN_DISTANCE = 25000;
@@ -93,9 +82,9 @@ namespace WaypointManager
                         newClick = true;
                     }
 
-                    CacheWaypointData();
+                    WaypointData.CacheWaypointData();
 
-                    foreach (WaypointData wpd in waypointData.Values)
+                    foreach (WaypointData wpd in WaypointData.Waypoints)
                     {
                         DrawWaypoint(wpd);
                     }
@@ -139,47 +128,6 @@ namespace WaypointManager
             };
         }
 
-        // Updates the waypoint data cache
-        protected void CacheWaypointData()
-        {
-            // Only handle the current celestial body
-            CelestialBody celestialBody = FlightGlobals.currentMainBody;
-            if (celestialBody == null)
-            {
-                waypointData.Clear();
-                return;
-            }
-
-            // Add new waypoints
-            foreach (Waypoint w in FinePrint.WaypointManager.Instance().AllWaypoints())
-            {
-                if (w != null && w.celestialName == celestialBody.name && w.isNavigatable)
-                {
-                    if (!waypointData.ContainsKey(w))
-                    {
-                        WaypointData wpd = new WaypointData();
-                        wpd.waypoint = w;
-
-                        // Figure out the terrain height
-                        double latRads = Math.PI / 180.0 * w.latitude;
-                        double lonRads = Math.PI / 180.0 * w.longitude;
-                        Vector3d radialVector = new Vector3d(Math.Cos(latRads) * Math.Cos(lonRads), Math.Sin(latRads), Math.Cos(latRads) * Math.Sin(lonRads));
-                        wpd.height = Math.Max(celestialBody.pqsController.GetSurfaceHeight(radialVector) - celestialBody.pqsController.radius, 0.0);
-
-                        // Add to waypoint data
-                        waypointData[w] = wpd;
-                    }
-                    waypointData[w].lastChecked = UnityEngine.Time.fixedTime;
-                }
-            }
-
-            // Remove unused waypoints
-            foreach (KeyValuePair<Waypoint, WaypointData> p in waypointData.Where(p => p.Value.lastChecked != UnityEngine.Time.fixedTime).ToArray())
-            {
-                waypointData.Remove(p.Key);
-            }
-        }
-
         protected void DrawWaypoint(WaypointData wpd)
         {
             // Not our planet
@@ -198,23 +146,22 @@ namespace WaypointManager
             {
                 // Figure out the distance to the waypoint
                 Vessel v = FlightGlobals.ActiveVessel;
-                double distance = GetDistanceToWaypoint(wpd);
-
-                // Get the distance to the waypoint at the current speed
-                double speed = v.srfSpeed < MIN_SPEED ? MIN_SPEED : v.srfSpeed;
-                double time = distance / speed;
 
                 // Only change alpha if the waypoint isn't the nav point
-                if (!IsNavPoint(wpd.waypoint))
+                if (!Util.IsNavPoint(wpd.waypoint))
                 {
+                    // Get the distance to the waypoint at the current speed
+                    double speed = v.srfSpeed < MIN_SPEED ? MIN_SPEED : v.srfSpeed;
+                    double directTime = Util.GetStraightDistance(wpd) / speed;
+
                     // More than two minutes away
-                    if (time > MIN_TIME)
+                    if (directTime > MIN_TIME || Config.waypointDisplay != Config.WaypointDisplay.ALL)
                     {
                         return;
                     }
-                    else if (time >= MIN_TIME - FADE_TIME)
+                    else if (directTime >= MIN_TIME - FADE_TIME)
                     {
-                        alpha = (float)((MIN_TIME - time) / FADE_TIME);
+                        alpha = (float)((MIN_TIME - directTime) / FADE_TIME);
                     }
                 }
                 // Draw the distance information to the nav point
@@ -246,24 +193,29 @@ namespace WaypointManager
 
                         float ybase = (referencePos - ScreenSafeUI.referenceCam.ViewportToScreenPoint(asb.transform.position).y + Screen.height / 11.67f) / ScreenSafeUI.VerticalRatio;
 
-                        string timeToWP = GetTimeToWaypoint(wpd, distance);
-                        int unit = 0;
-                        while (unit < 4 && distance >= 10000.0)
+                        string timeToWP = GetTimeToWaypoint(wpd);
+                        if (Config.hudDistance)
                         {
-                            distance /= 1000.0;
-                            unit++;
+                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", NameStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f), Util.PrintDistance(wpd), ValueStyle);
+                            ybase += 18f;
                         }
-                        GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", NameStyle);
-                        GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
 
-                        if (timeToWP != null)
+                        if (timeToWP != null && Config.hudTime)
                         {
-                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase + 18f, 240f, 20f), "ETA to " + label + ":", NameStyle);
-                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase + 18f, 120f, 20f), timeToWP, ValueStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "ETA to " + label + ":", NameStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f), timeToWP, ValueStyle);
+                            ybase += 18f;
                         }
 
                     }
                 }
+            }
+
+            // Don't draw the waypoint
+            if (Config.waypointDisplay == Config.WaypointDisplay.NONE)
+            {
+                return;
             }
 
             // Translate to scaled space
@@ -314,7 +266,7 @@ namespace WaypointManager
                 Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, alpha * 0.5f));
 
                 // Draw the icon, but support blinking
-                if (!IsNavPoint(wpd.waypoint) || !FinePrint.WaypointManager.navWaypoint.blinking || (int)((Time.fixedTime - (int)Time.fixedTime) * 4) % 2 == 0)
+                if (!Util.IsNavPoint(wpd.waypoint) || !FinePrint.WaypointManager.navWaypoint.blinking || (int)((Time.fixedTime - (int)Time.fixedTime) * 4) % 2 == 0)
                 {
                     Graphics.DrawTexture(iconRect, ContractDefs.textures[wpd.waypoint.id], new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(wpd.waypoint.seed, alpha));
                 }
@@ -345,7 +297,7 @@ namespace WaypointManager
         private void NavigationWindow(int windowID)
         {
             GUILayout.BeginVertical();
-            if (!IsNavPoint(selectedWaypoint))
+            if (!Util.IsNavPoint(selectedWaypoint))
             {
                 if (GUILayout.Button("Activate Navigation", HighLogic.Skin.button, GUILayout.ExpandWidth(true)))
                 {
@@ -366,60 +318,13 @@ namespace WaypointManager
             GUILayout.EndVertical();
         }
 
-
-        protected bool IsNavPoint(Waypoint waypoint)
-        {
-            NavWaypoint navPoint = FinePrint.WaypointManager.navWaypoint;
-            if (navPoint == null || FinePrint.WaypointManager.Instance() == null || !FinePrint.WaypointManager.navIsActive())
-            {
-                return false;
-            }
-
-            return navPoint.latitude == waypoint.latitude && navPoint.longitude == waypoint.longitude;
-
-        }
-
-        /// <summary>
-        /// Gets the  distance in meters from the activeVessel to the given waypoint.
-        /// </summary>
-        /// <param name="wpd">Activated waypoint</param>
-        /// <returns>Distance in meters</returns>
-        protected double GetDistanceToWaypoint(WaypointData wpd)
-        {
-            Vessel v = FlightGlobals.ActiveVessel;
-            CelestialBody celestialBody = v.mainBody;
-
-            // Use the haversine formula to calculate great circle distance.
-            double sin1 = Math.Sin(Math.PI / 180.0 * (v.latitude - wpd.waypoint.latitude) / 2);
-            double sin2 = Math.Sin(Math.PI / 180.0 * (v.longitude - wpd.waypoint.longitude) / 2);
-            double cos1 = Math.Cos(Math.PI / 180.0 * wpd.waypoint.latitude);
-            double cos2 = Math.Cos(Math.PI / 180.0 * v.latitude);
-
-            double lateralDist = 2 * (celestialBody.Radius + wpd.height + wpd.waypoint.altitude) *
-                Math.Asin(Math.Sqrt(sin1*sin1 + cos1*cos2*sin2*sin2));
-            double heightDist = Math.Abs(wpd.waypoint.altitude + wpd.height - v.terrainAltitude);
-
-            if (heightDist <= lateralDist / 2.0)
-            {
-                return lateralDist;
-            }
-            else
-            {
-                // Get the ratio to use in our formula
-                double x = (heightDist - lateralDist / 2.0) / lateralDist;
-
-                // x / (x + 1) starts at 0 when x = 0, and increases to 1
-                return (x / (x + 1)) * heightDist + lateralDist;
-            }
-        }
-
         /// <summary>
         /// Calculates the time to the distance based on the vessels srfSpeed and transform it to a readable string.
         /// </summary>
         /// <param name="waypoint">The waypoint</param>
         /// <param name="distance">Distance in meters</param>
         /// <returns></returns>
-        protected string GetTimeToWaypoint(WaypointData wpd, double distance)
+        protected string GetTimeToWaypoint(WaypointData wpd)
         {
             Vessel v = FlightGlobals.ActiveVessel;
             if (v.srfSpeed < 0.1)
@@ -427,7 +332,7 @@ namespace WaypointManager
                 return null;
             }
 
-            double time = (distance / v.horizontalSrfSpeed);
+            double time = (wpd.distanceToActive / v.horizontalSrfSpeed);
 
             // Earthtime
             uint SecondsPerYear = 31536000; // = 365d
