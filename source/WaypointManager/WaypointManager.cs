@@ -15,7 +15,7 @@ namespace WaypointManager
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     class WaypointManager : MonoBehaviour
     {
-        private const float SETTINGS_WIDTH = 240;
+        private const float SETTINGS_WIDTH = 280;
 
         private ApplicationLauncherButton launcherButton = null;
         private bool initialized = false;

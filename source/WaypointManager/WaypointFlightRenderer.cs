@@ -12,8 +12,9 @@ namespace WaypointManager
     [KSPAddon(KSPAddon.Startup.Flight, true)]
     class WaypointFlightRenderer : MonoBehaviour
     {
-        private GUIStyle NameStyle = null;
-        private GUIStyle ValueStyle = null;
+        private GUIStyle nameStyle = null;
+        private GUIStyle valueStyle = null;
+        private GUIStyle hintTextStyle = null;
 
         private bool visible = true;
         private Waypoint selectedWaypoint = null;
@@ -98,12 +99,12 @@ namespace WaypointManager
         // make our display consistent with that
         protected void SetupStyles()
         {
-            if (NameStyle != null)
+            if (nameStyle != null)
             {
                 return;
             }
 
-            NameStyle = new GUIStyle(HighLogic.Skin.label)
+            nameStyle = new GUIStyle(HighLogic.Skin.label)
             {
                 normal =
                 {
@@ -117,7 +118,7 @@ namespace WaypointManager
                 fixedHeight = 20.0f
             };
 
-            ValueStyle = new GUIStyle(HighLogic.Skin.label)
+            valueStyle = new GUIStyle(HighLogic.Skin.label)
             {
                 margin = new RectOffset(),
                 padding = new RectOffset(0, 5, 0, 0),
@@ -125,6 +126,18 @@ namespace WaypointManager
                 fontSize = 11,
                 fontStyle = FontStyle.Normal,
                 fixedHeight = 20.0f
+            };
+
+            hintTextStyle = new GUIStyle(HighLogic.Skin.box)
+            {
+                padding = new RectOffset(4, 4, 7, 4),
+                font = MapView.OrbitIconsTextSkin.label.font,
+                fontSize = MapView.OrbitIconsTextSkin.label.fontSize,
+                fontStyle = MapView.OrbitIconsTextSkin.label.fontStyle,
+                fixedWidth = 0,
+                fixedHeight = 0,
+                stretchHeight = true,
+                stretchWidth = true
             };
         }
 
@@ -196,15 +209,15 @@ namespace WaypointManager
                         string timeToWP = GetTimeToWaypoint(wpd);
                         if (Config.hudDistance)
                         {
-                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", NameStyle);
-                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f), Util.PrintDistance(wpd), ValueStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", nameStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f), Util.PrintDistance(wpd), valueStyle);
                             ybase += 18f;
                         }
 
                         if (timeToWP != null && Config.hudTime)
                         {
-                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "ETA to " + label + ":", NameStyle);
-                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f), timeToWP, ValueStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "ETA to " + label + ":", nameStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f), timeToWP, valueStyle);
                             ybase += 18f;
                         }
 
@@ -279,8 +292,10 @@ namespace WaypointManager
                     {
                         label += "\n" + wpd.waypoint.contractReference.Agent.Name;
                     }
-                    float yoffset = label.Count(c => c == '\n') * 32.0f + 45.0f;
-                    GUI.Label(new Rect(screenPos.x - 40f, (float)Screen.height - screenPos.y - yoffset, 80f, 32f), label, MapView.OrbitIconsTextSkin.label);
+                    float width = 240f;
+                    float height = hintTextStyle.CalcHeight(new GUIContent(label), width);
+                    float yoffset = height + 48.0f;
+                    GUI.Box(new Rect(screenPos.x - width/2.0f, (float)Screen.height - screenPos.y - yoffset, width, height), label, hintTextStyle);
                 }
             }
         }
