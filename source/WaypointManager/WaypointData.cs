@@ -19,6 +19,7 @@ namespace WaypointManager
         public double lastChecked = 0.0;
         public CelestialBody celestialBody = null;
         public bool isOccluded = false;
+        public double heading;
 
         private static double lastCacheUpdate = 0.0;
 
@@ -90,8 +91,21 @@ namespace WaypointManager
                         wpd.distanceToActive = Util.GetDistanceToWaypoint(wpd);
                         if (FlightGlobals.ActiveVessel != null && wpd.celestialBody == FlightGlobals.ActiveVessel.mainBody)
                         {
+                            // Get information about whether the waypoint is occluded
                             Vector3 pos = wpd.celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.height + wpd.waypoint.altitude);
                             wpd.isOccluded = IsOccluded(wpd.celestialBody, FlightCamera.fetch.transform.position, pos);
+
+                            Vector3 vHeading = FlightGlobals.ActiveVessel.transform.up;
+
+                            double vesselLat = FlightGlobals.ActiveVessel.latitude / 180.0 * Math.PI;
+                            double vesselLon = FlightGlobals.ActiveVessel.longitude / 180.0 * Math.PI;
+                            double wpLat = wpd.waypoint.latitude / 180.0 * Math.PI;
+                            double wpLon = wpd.waypoint.longitude / 180.0 * Math.PI;
+
+                            double y = Math.Sin(wpLon - vesselLon) * Math.Cos(wpLat);
+                            double x = (Math.Cos(vesselLat) * Math.Sin(wpLat)) - (Math.Sin(vesselLat) * Math.Cos(wpLat) * Math.Cos(wpLon - vesselLon));
+                            double requiredHeading = Math.Atan2(y, x) * 180.0 / Math.PI;
+                            wpd.heading = (requiredHeading + 360.0) % 360.0;
                         }
                     }
                 }

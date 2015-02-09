@@ -221,6 +221,12 @@ namespace WaypointManager
                             ybase += 18f;
                         }
 
+                        if (Config.hudHeading)
+                        {
+                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Heading to " + label + ":", nameStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f), wpd.heading.ToString("N1"), valueStyle);
+                            ybase += 18f;
+                        }
                     }
                 }
             }
