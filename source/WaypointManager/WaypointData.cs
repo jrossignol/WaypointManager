@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 using Contracts;
 using FinePrint;
 
@@ -17,6 +18,7 @@ namespace WaypointManager
         public double distanceToActive = 0.0;
         public double lastChecked = 0.0;
         public CelestialBody celestialBody = null;
+        public bool isOccluded = false;
 
         private static double lastCacheUpdate = 0.0;
 
@@ -86,6 +88,11 @@ namespace WaypointManager
                         // Update values that change every frame
                         wpd.lastChecked = UnityEngine.Time.fixedTime;
                         wpd.distanceToActive = Util.GetDistanceToWaypoint(wpd);
+                        if (FlightGlobals.ActiveVessel != null && wpd.celestialBody == FlightGlobals.ActiveVessel.mainBody)
+                        {
+                            Vector3 pos = wpd.celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.height + wpd.waypoint.altitude);
+                            wpd.isOccluded = IsOccluded(wpd.celestialBody, FlightCamera.fetch.transform.position, pos);
+                        }
                     }
                 }
 
@@ -126,6 +133,22 @@ namespace WaypointManager
                     waypointByBody[wpd.celestialBody].Add(wpd);
                 }
             }
+        }
+
+        /// <summary>
+        /// Checks if the camera can view the given point.
+        /// </summary>
+        /// <param name="body">The celestial body to check.</param>
+        /// <param name="camera">Camera position</param>
+        /// <param name="point">Waypoint position</param>
+        /// <returns>Whether the waypoint is considered occluded</returns>
+        private static bool IsOccluded(CelestialBody body, Vector3 camera, Vector3 point)
+        {
+            // Really quick and dirty calculation for occlusion - use the cosine law to get the angle formed by BPC.
+            // If the angle is < 90, then it is occluded
+            Vector3 PC = (camera - point).normalized;
+            Vector3 PB = (body.transform.position - point).normalized;
+            return Vector3.Dot(PC, PB) > 0.025; // Give a bit of grace for on the surface
         }
     }
 }

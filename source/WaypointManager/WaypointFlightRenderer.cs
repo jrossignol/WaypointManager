@@ -154,7 +154,7 @@ namespace WaypointManager
             string label = wpd.waypoint.name + (wpd.waypoint.isClustered ? (" " + StringUtilities.IntegerToGreek(wpd.waypoint.index)) : "");
 
             // Decide whether to actually draw the waypoint
-            float alpha = 1.0f;
+            float alpha = wpd.isOccluded ? 0.3f : 1.0f;
             if (FlightGlobals.ActiveVessel != null)
             {
                 // Figure out the distance to the waypoint
@@ -276,7 +276,10 @@ namespace WaypointManager
                 Rect iconRect = new Rect(screenPos.x - 8f, (float)Screen.height - screenPos.y - 39.0f, 16f, 16f);
 
                 // Draw the marker
-                Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, alpha * 0.5f));
+                if (!wpd.isOccluded)
+                {
+                    Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, alpha * 0.5f));
+                }
 
                 // Draw the icon, but support blinking
                 if (!Util.IsNavPoint(wpd.waypoint) || !FinePrint.WaypointManager.navWaypoint.blinking || (int)((Time.fixedTime - (int)Time.fixedTime) * 4) % 2 == 0)
