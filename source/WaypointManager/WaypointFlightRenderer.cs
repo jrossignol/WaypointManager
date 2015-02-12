@@ -210,21 +210,24 @@ namespace WaypointManager
                         if (Config.hudDistance)
                         {
                             GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", nameStyle);
-                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f), Util.PrintDistance(wpd), valueStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                                v.state != Vessel.State.DEAD ? Util.PrintDistance(wpd) : "N/A", valueStyle);
                             ybase += 18f;
                         }
 
                         if (timeToWP != null && Config.hudTime)
                         {
                             GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "ETA to " + label + ":", nameStyle);
-                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f), timeToWP, valueStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                                v.state != Vessel.State.DEAD ? timeToWP : "N/A", valueStyle);
                             ybase += 18f;
                         }
 
                         if (Config.hudHeading)
                         {
                             GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Heading to " + label + ":", nameStyle);
-                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f), wpd.heading.ToString("N1"), valueStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                                v.state != Vessel.State.DEAD ? wpd.heading.ToString("N1") : "N/A", valueStyle);
                             ybase += 18f;
                         }
                     }
