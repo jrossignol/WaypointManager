@@ -18,6 +18,11 @@ namespace WaypointManager
             public Contract contract;
             public bool hidden = false;
             public List<WaypointData> waypointByContract = new List<WaypointData>();
+
+            public ContractContainer(Contract c)
+            {
+                contract = c;
+            }
         }
 
         public Waypoint waypoint = null;
@@ -32,7 +37,7 @@ namespace WaypointManager
         private static Dictionary<Waypoint, WaypointData> waypointData = new Dictionary<Waypoint, WaypointData>();
         private static Dictionary<Contract, ContractContainer> waypointByContract = new Dictionary<Contract, ContractContainer>();
         private static Dictionary<CelestialBody, List<WaypointData>> waypointByBody = new Dictionary<CelestialBody, List<WaypointData>>();
-        private static ContractContainer customWaypoints = new ContractContainer();
+        private static ContractContainer customWaypoints = new ContractContainer(null);
 
         /// <summary>
         /// Gets all waypoint data items as an enumeration.
@@ -156,7 +161,7 @@ namespace WaypointManager
                     {
                         if (!waypointByContract.ContainsKey(wpd.waypoint.contractReference))
                         {
-                            waypointByContract[wpd.waypoint.contractReference] = new ContractContainer();
+                            waypointByContract[wpd.waypoint.contractReference] = new ContractContainer(wpd.waypoint.contractReference);
                         }
                         waypointByContract[wpd.waypoint.contractReference].waypointByContract.Add(wpd);
                     }
