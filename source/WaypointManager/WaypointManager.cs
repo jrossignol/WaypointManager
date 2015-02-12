@@ -20,6 +20,8 @@ namespace WaypointManager
         public static WaypointManager Instance;
 
         private ApplicationLauncherButton launcherButton = null;
+        private IButton toolbarButton;
+
         private bool initialized = false;
         private bool showGUI = false;
         private bool showSettings = false;
@@ -49,6 +51,7 @@ namespace WaypointManager
             {
                 LoadTextures();
                 LoadConfiguration();
+                LoadToolbar();
 
                 GameEvents.onGUIApplicationLauncherReady.Add(new EventVoid.OnEvent(SetupToolbar));
                 GameEvents.onGUIApplicationLauncherUnreadifying.Add(new EventData<GameScenes>.OnEvent(TeardownToolbar));
@@ -70,6 +73,8 @@ namespace WaypointManager
             GameEvents.onHideUI.Remove(OnHideUI);
             GameEvents.onShowUI.Remove(OnShowUI);
 
+            UnloadToolbar();
+
             Config.Save();
         }
 
@@ -85,7 +90,7 @@ namespace WaypointManager
 
         private void SetupToolbar()
         {
-            if (launcherButton == null)
+            if (launcherButton == null && Config.useStockToolbar)
             {
                 ApplicationLauncher.AppScenes visibleScenes = ApplicationLauncher.AppScenes.FLIGHT |
                     ApplicationLauncher.AppScenes.MAPVIEW |
@@ -102,6 +107,27 @@ namespace WaypointManager
                 ApplicationLauncher.Instance.RemoveModApplication(launcherButton);
                 launcherButton = null;
             }
+        }
+
+        private void LoadToolbar()
+        {
+            if (ToolbarManager.ToolbarAvailable)
+            {
+                toolbarButton = ToolbarManager.Instance.add("WaypointManager", "button");
+                toolbarButton.TexturePath = "WaypointManager/icons/toolbarSmall";
+                toolbarButton.ToolTip = "Waypoint Manager";
+                toolbarButton.Visibility = new GameScenesVisibility(GameScenes.FLIGHT, GameScenes.TRACKSTATION);
+                toolbarButton.OnClick += (e) =>
+                {
+                    ToggleWindow();
+                };
+            }
+        }
+
+        private void UnloadToolbar()
+        {
+            toolbarButton.Destroy();
+            toolbarButton = null;
         }
 
         private void OnGameSceneLoad(GameScenes scene)
@@ -493,7 +519,20 @@ namespace WaypointManager
                 Config.hudHeading = !Config.hudHeading;
             }
 
-            // TODO - tool bars
+            // Toolbar
+            GUILayout.Label("Toolbar Display", headingStyle);
+            if (GUILayout.Toggle(Config.useStockToolbar, "Show icon in stock toolbar") != Config.useStockToolbar)
+            {
+                Config.useStockToolbar = !Config.useStockToolbar;
+                if (Config.useStockToolbar)
+                {
+                    SetupToolbar();
+                }
+                else
+                {
+                    TeardownToolbar(GameScenes.FLIGHT);
+                }
+            }
 
             GUILayout.EndVertical();
 

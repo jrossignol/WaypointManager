@@ -48,6 +48,8 @@ namespace WaypointManager
         public static bool hudTime = true;
         public static bool hudHeading = false;
 
+        public static bool useStockToolbar = true;
+
         public static Texture2D toolbarIcon;
         public static Texture2D addWaypointIcon;
         public static Texture2D editWaypointIcon;
