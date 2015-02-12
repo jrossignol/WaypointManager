@@ -1,3 +1,10 @@
+Waypoint Manager 2.0.0
+- New GUI for displaying waypoints.
+- New settings menu to allow customization of what information is displayed and how it's displayed.
+- Dim waypoints that are on the other side of the planet/moon (like stock does in the map view).
+- Support displaying heading information to waypoint.
+- Support creation of custom waypoints.
+
 In-Flight Waypoints 1.2.8
 - Fixed distance text to take waypoint height properly into account (thanks raath).
 

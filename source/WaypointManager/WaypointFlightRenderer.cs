@@ -7,14 +7,14 @@ using KSP;
 using FinePrint;
 using FinePrint.Utilities;
 
-namespace InFlightWaypoints
+namespace WaypointManager
 {
     [KSPAddon(KSPAddon.Startup.Flight, true)]
     class WaypointFlightRenderer : MonoBehaviour
     {
-        private GUIStyle NameStyle = null;
-        private GUIStyle ValueStyle = null;
-        private string[] UNITS = { "m", "km", "Mm", "Gm", "Tm" };
+        private GUIStyle nameStyle = null;
+        private GUIStyle valueStyle = null;
+        private GUIStyle hintTextStyle = null;
 
         private bool visible = true;
         private Waypoint selectedWaypoint = null;
@@ -27,16 +27,6 @@ namespace InFlightWaypoints
         private float referenceUISize = 0.0f;
         private float lastPos = 0.0f;
         private bool referenceSet = false;
-
-        // Store additional waypoint data
-        protected class WaypointData
-        {
-            public Waypoint waypoint = null;
-            public double height = 0.0;
-            public double lastChecked = 0.0;
-        }
-
-        private Dictionary<Waypoint, WaypointData> waypointData = new Dictionary<Waypoint, WaypointData>();
 
         private const double MIN_TIME = 300;
         private const double MIN_DISTANCE = 25000;
@@ -86,16 +76,16 @@ namespace InFlightWaypoints
             {
                 SetupStyles();
 
-                if (WaypointManager.Instance() != null)
+                if (FinePrint.WaypointManager.Instance() != null)
                 {
                     if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
                     {
                         newClick = true;
                     }
 
-                    CacheWaypointData();
+                    WaypointData.CacheWaypointData();
 
-                    foreach (WaypointData wpd in waypointData.Values)
+                    foreach (WaypointData wpd in WaypointData.Waypoints)
                     {
                         DrawWaypoint(wpd);
                     }
@@ -109,12 +99,12 @@ namespace InFlightWaypoints
         // make our display consistent with that
         protected void SetupStyles()
         {
-            if (NameStyle != null)
+            if (nameStyle != null)
             {
                 return;
             }
 
-            NameStyle = new GUIStyle(HighLogic.Skin.label)
+            nameStyle = new GUIStyle(HighLogic.Skin.label)
             {
                 normal =
                 {
@@ -128,7 +118,7 @@ namespace InFlightWaypoints
                 fixedHeight = 20.0f
             };
 
-            ValueStyle = new GUIStyle(HighLogic.Skin.label)
+            valueStyle = new GUIStyle(HighLogic.Skin.label)
             {
                 margin = new RectOffset(),
                 padding = new RectOffset(0, 5, 0, 0),
@@ -137,47 +127,18 @@ namespace InFlightWaypoints
                 fontStyle = FontStyle.Normal,
                 fixedHeight = 20.0f
             };
-        }
 
-        // Updates the waypoint data cache
-        protected void CacheWaypointData()
-        {
-            // Only handle the current celestial body
-            CelestialBody celestialBody = FlightGlobals.currentMainBody;
-            if (celestialBody == null)
+            hintTextStyle = new GUIStyle(HighLogic.Skin.box)
             {
-                waypointData.Clear();
-                return;
-            }
-
-            // Add new waypoints
-            foreach (Waypoint w in WaypointManager.Instance().AllWaypoints())
-            {
-                if (w != null && w.celestialName == celestialBody.name && w.isNavigatable)
-                {
-                    if (!waypointData.ContainsKey(w))
-                    {
-                        WaypointData wpd = new WaypointData();
-                        wpd.waypoint = w;
-
-                        // Figure out the terrain height
-                        double latRads = Math.PI / 180.0 * w.latitude;
-                        double lonRads = Math.PI / 180.0 * w.longitude;
-                        Vector3d radialVector = new Vector3d(Math.Cos(latRads) * Math.Cos(lonRads), Math.Sin(latRads), Math.Cos(latRads) * Math.Sin(lonRads));
-                        wpd.height = Math.Max(celestialBody.pqsController.GetSurfaceHeight(radialVector) - celestialBody.pqsController.radius, 0.0);
-
-                        // Add to waypoint data
-                        waypointData[w] = wpd;
-                    }
-                    waypointData[w].lastChecked = UnityEngine.Time.fixedTime;
-                }
-            }
-
-            // Remove unused waypoints
-            foreach (KeyValuePair<Waypoint, WaypointData> p in waypointData.Where(p => p.Value.lastChecked != UnityEngine.Time.fixedTime).ToArray())
-            {
-                waypointData.Remove(p.Key);
-            }
+                padding = new RectOffset(4, 4, 7, 4),
+                font = MapView.OrbitIconsTextSkin.label.font,
+                fontSize = MapView.OrbitIconsTextSkin.label.fontSize,
+                fontStyle = MapView.OrbitIconsTextSkin.label.fontStyle,
+                fixedWidth = 0,
+                fixedHeight = 0,
+                stretchHeight = true,
+                stretchWidth = true
+            };
         }
 
         protected void DrawWaypoint(WaypointData wpd)
@@ -193,28 +154,27 @@ namespace InFlightWaypoints
             string label = wpd.waypoint.name + (wpd.waypoint.isClustered ? (" " + StringUtilities.IntegerToGreek(wpd.waypoint.index)) : "");
 
             // Decide whether to actually draw the waypoint
-            float alpha = 1.0f;
+            float alpha = wpd.isOccluded ? 0.3f : 1.0f;
             if (FlightGlobals.ActiveVessel != null)
             {
                 // Figure out the distance to the waypoint
                 Vessel v = FlightGlobals.ActiveVessel;
-                double distance = GetDistanceToWaypoint(wpd);
-
-                // Get the distance to the waypoint at the current speed
-                double speed = v.srfSpeed < MIN_SPEED ? MIN_SPEED : v.srfSpeed;
-                double time = distance / speed;
 
                 // Only change alpha if the waypoint isn't the nav point
-                if (!IsNavPoint(wpd.waypoint))
+                if (!Util.IsNavPoint(wpd.waypoint))
                 {
+                    // Get the distance to the waypoint at the current speed
+                    double speed = v.srfSpeed < MIN_SPEED ? MIN_SPEED : v.srfSpeed;
+                    double directTime = Util.GetStraightDistance(wpd) / speed;
+
                     // More than two minutes away
-                    if (time > MIN_TIME)
+                    if (directTime > MIN_TIME || Config.waypointDisplay != Config.WaypointDisplay.ALL)
                     {
                         return;
                     }
-                    else if (time >= MIN_TIME - FADE_TIME)
+                    else if (directTime >= MIN_TIME - FADE_TIME)
                     {
-                        alpha = (float)((MIN_TIME - time) / FADE_TIME);
+                        alpha = (float)((MIN_TIME - directTime) / FADE_TIME);
                     }
                 }
                 // Draw the distance information to the nav point
@@ -246,28 +206,42 @@ namespace InFlightWaypoints
 
                         float ybase = (referencePos - ScreenSafeUI.referenceCam.ViewportToScreenPoint(asb.transform.position).y + Screen.height / 11.67f) / ScreenSafeUI.VerticalRatio;
 
-                        string timeToWP = GetTimeToWaypoint(wpd, distance);
-                        int unit = 0;
-                        while (unit < 4 && distance >= 10000.0)
+                        string timeToWP = GetTimeToWaypoint(wpd);
+                        if (Config.hudDistance)
                         {
-                            distance /= 1000.0;
-                            unit++;
-                        }
-                        GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", NameStyle);
-                        GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f), distance.ToString("N1") + " " + UNITS[unit], ValueStyle);
-
-                        if (timeToWP != null)
-                        {
-                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase + 18f, 240f, 20f), "ETA to " + label + ":", NameStyle);
-                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase + 18f, 120f, 20f), timeToWP, ValueStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", nameStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                                v.state != Vessel.State.DEAD ? Util.PrintDistance(wpd) : "N/A", valueStyle);
+                            ybase += 18f;
                         }
 
+                        if (timeToWP != null && Config.hudTime)
+                        {
+                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "ETA to " + label + ":", nameStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                                v.state != Vessel.State.DEAD ? timeToWP : "N/A", valueStyle);
+                            ybase += 18f;
+                        }
+
+                        if (Config.hudHeading)
+                        {
+                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Heading to " + label + ":", nameStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                                v.state != Vessel.State.DEAD ? wpd.heading.ToString("N1") : "N/A", valueStyle);
+                            ybase += 18f;
+                        }
                     }
                 }
             }
 
+            // Don't draw the waypoint
+            if (Config.waypointDisplay == Config.WaypointDisplay.NONE)
+            {
+                return;
+            }
+
             // Translate to scaled space
-            Vector3d localSpacePoint = celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.height + wpd.waypoint.altitude);
+            Vector3d localSpacePoint = celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.waypoint.height + wpd.waypoint.altitude);
             Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
 
             // Don't draw if it's behind the camera
@@ -311,10 +285,13 @@ namespace InFlightWaypoints
                 Rect iconRect = new Rect(screenPos.x - 8f, (float)Screen.height - screenPos.y - 39.0f, 16f, 16f);
 
                 // Draw the marker
-                Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, alpha * 0.5f));
+                if (!wpd.isOccluded)
+                {
+                    Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, alpha * 0.5f));
+                }
 
                 // Draw the icon, but support blinking
-                if (!IsNavPoint(wpd.waypoint) || !WaypointManager.navWaypoint.blinking || (int)((Time.fixedTime - (int)Time.fixedTime) * 4) % 2 == 0)
+                if (!Util.IsNavPoint(wpd.waypoint) || !FinePrint.WaypointManager.navWaypoint.blinking || (int)((Time.fixedTime - (int)Time.fixedTime) * 4) % 2 == 0)
                 {
                     Graphics.DrawTexture(iconRect, ContractDefs.textures[wpd.waypoint.id], new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(wpd.waypoint.seed, alpha));
                 }
@@ -327,8 +304,10 @@ namespace InFlightWaypoints
                     {
                         label += "\n" + wpd.waypoint.contractReference.Agent.Name;
                     }
-                    float yoffset = label.Count(c => c == '\n') * 32.0f + 45.0f;
-                    GUI.Label(new Rect(screenPos.x - 40f, (float)Screen.height - screenPos.y - yoffset, 80f, 32f), label, MapView.OrbitIconsTextSkin.label);
+                    float width = 240f;
+                    float height = hintTextStyle.CalcHeight(new GUIContent(label), width);
+                    float yoffset = height + 48.0f;
+                    GUI.Box(new Rect(screenPos.x - width/2.0f, (float)Screen.height - screenPos.y - yoffset, width, height), label, hintTextStyle);
                 }
             }
         }
@@ -345,12 +324,12 @@ namespace InFlightWaypoints
         private void NavigationWindow(int windowID)
         {
             GUILayout.BeginVertical();
-            if (!IsNavPoint(selectedWaypoint))
+            if (!Util.IsNavPoint(selectedWaypoint))
             {
                 if (GUILayout.Button("Activate Navigation", HighLogic.Skin.button, GUILayout.ExpandWidth(true)))
                 {
-                    WaypointManager.setupNavPoint(selectedWaypoint);
-                    WaypointManager.activateNavPoint();
+                    FinePrint.WaypointManager.setupNavPoint(selectedWaypoint);
+                    FinePrint.WaypointManager.activateNavPoint();
                     selectedWaypoint = null;
                 }
             }
@@ -358,59 +337,25 @@ namespace InFlightWaypoints
             {
                 if (GUILayout.Button("Deactivate Navigation", HighLogic.Skin.button, GUILayout.ExpandWidth(true)))
                 {
-                    WaypointManager.clearNavPoint();
+                    FinePrint.WaypointManager.clearNavPoint();
                     selectedWaypoint = null;
                 }
 
             }
+            if (CustomWaypoints.Instance.IsCustom(selectedWaypoint))
+            {
+                if (GUILayout.Button("Edit Custom Waypoint", HighLogic.Skin.button, GUILayout.ExpandWidth(true)))
+                {
+                    CustomWaypointGUI.EditWaypoint(selectedWaypoint);
+                    selectedWaypoint = null;
+                }
+                if (GUILayout.Button("Delete Custom Waypoint", HighLogic.Skin.button, GUILayout.ExpandWidth(true)))
+                {
+                    CustomWaypointGUI.DeleteWaypoint(selectedWaypoint);
+                    selectedWaypoint = null;
+                }
+            }
             GUILayout.EndVertical();
-        }
-
-
-        protected bool IsNavPoint(Waypoint waypoint)
-        {
-            NavWaypoint navPoint = WaypointManager.navWaypoint;
-            if (navPoint == null || WaypointManager.Instance() == null || !WaypointManager.navIsActive())
-            {
-                return false;
-            }
-
-            return navPoint.latitude == waypoint.latitude && navPoint.longitude == waypoint.longitude;
-
-        }
-
-        /// <summary>
-        /// Gets the  distance in meters from the activeVessel to the given waypoint.
-        /// </summary>
-        /// <param name="wpd">Activated waypoint</param>
-        /// <returns>Distance in meters</returns>
-        protected double GetDistanceToWaypoint(WaypointData wpd)
-        {
-            Vessel v = FlightGlobals.ActiveVessel;
-            CelestialBody celestialBody = v.mainBody;
-
-            // Use the haversine formula to calculate great circle distance.
-            double sin1 = Math.Sin(Math.PI / 180.0 * (v.latitude - wpd.waypoint.latitude) / 2);
-            double sin2 = Math.Sin(Math.PI / 180.0 * (v.longitude - wpd.waypoint.longitude) / 2);
-            double cos1 = Math.Cos(Math.PI / 180.0 * wpd.waypoint.latitude);
-            double cos2 = Math.Cos(Math.PI / 180.0 * v.latitude);
-
-            double lateralDist = 2 * (celestialBody.Radius + wpd.height + wpd.waypoint.altitude) *
-                Math.Asin(Math.Sqrt(sin1*sin1 + cos1*cos2*sin2*sin2));
-            double heightDist = Math.Abs(wpd.waypoint.altitude + wpd.height - v.terrainAltitude);
-
-            if (heightDist <= lateralDist / 2.0)
-            {
-                return lateralDist;
-            }
-            else
-            {
-                // Get the ratio to use in our formula
-                double x = (heightDist - lateralDist / 2.0) / lateralDist;
-
-                // x / (x + 1) starts at 0 when x = 0, and increases to 1
-                return (x / (x + 1)) * heightDist + lateralDist;
-            }
         }
 
         /// <summary>
@@ -419,7 +364,7 @@ namespace InFlightWaypoints
         /// <param name="waypoint">The waypoint</param>
         /// <param name="distance">Distance in meters</param>
         /// <returns></returns>
-        protected string GetTimeToWaypoint(WaypointData wpd, double distance)
+        protected string GetTimeToWaypoint(WaypointData wpd)
         {
             Vessel v = FlightGlobals.ActiveVessel;
             if (v.srfSpeed < 0.1)
@@ -427,7 +372,7 @@ namespace InFlightWaypoints
                 return null;
             }
 
-            double time = (distance / v.horizontalSrfSpeed);
+            double time = (wpd.distanceToActive / v.horizontalSrfSpeed);
 
             // Earthtime
             uint SecondsPerYear = 31536000; // = 365d
