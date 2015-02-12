@@ -1,3 +1,6 @@
+Waypoint Manager 2.0.1
+- Fixed MAJOR bug that prevents waypoint markers from rendering correctly.
+
 Waypoint Manager 2.0.0
 - New GUI for displaying waypoints.
 - New settings menu to allow customization of what information is displayed and how it's displayed.
