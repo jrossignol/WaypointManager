@@ -238,7 +238,7 @@ namespace WaypointManager
             }
 
             // Translate to scaled space
-            Vector3d localSpacePoint = celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.height + wpd.waypoint.altitude);
+            Vector3d localSpacePoint = celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.waypoint.height + wpd.waypoint.altitude);
             Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
 
             // Don't draw if it's behind the camera
@@ -338,6 +338,19 @@ namespace WaypointManager
                     selectedWaypoint = null;
                 }
 
+            }
+            if (CustomWaypoints.Instance.IsCustom(selectedWaypoint))
+            {
+                if (GUILayout.Button("Edit Custom Waypoint", HighLogic.Skin.button, GUILayout.ExpandWidth(true)))
+                {
+                    CustomWaypointGUI.EditWaypoint(selectedWaypoint);
+                    selectedWaypoint = null;
+                }
+                if (GUILayout.Button("Delete Custom Waypoint", HighLogic.Skin.button, GUILayout.ExpandWidth(true)))
+                {
+                    CustomWaypointGUI.DeleteWaypoint(selectedWaypoint);
+                    selectedWaypoint = null;
+                }
             }
             GUILayout.EndVertical();
         }

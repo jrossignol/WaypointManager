@@ -17,6 +17,8 @@ namespace WaypointManager
     {
         private const float SETTINGS_WIDTH = 280;
 
+        public static WaypointManager Instance;
+
         private ApplicationLauncherButton launcherButton = null;
         private bool initialized = false;
         private bool showGUI = false;
@@ -33,16 +35,10 @@ namespace WaypointManager
         private Rect settingsPosition;
 
         private Rect tooltipPosition;
-        private string toolTip;
-        private double toolTipTime;
-
-        static Texture2D toolbarIcon;
-        static Texture2D settingsIcon;
-        static Texture2D closeIcon;
+        private List<string> toolTip = new List<string>();
+        private List<double> toolTipTime = new List<double>();
 
         static Dictionary<string, Texture2D> bodyIcons = new Dictionary<string, Texture2D>();
-        static Dictionary<string, Dictionary<Color, Texture2D>> contractIcons = new Dictionary<string, Dictionary<Color, Texture2D>>();
-        static Dictionary<Contract, bool> hiddenContracts = new Dictionary<Contract, bool>();
         static Dictionary<CelestialBody, bool> hiddenBodies = new Dictionary<CelestialBody, bool>();
 
         void Start()
@@ -62,6 +58,7 @@ namespace WaypointManager
 
                 Config.Load();
 
+                Instance = this;
                 initialized = true;
             }
         }
@@ -78,9 +75,12 @@ namespace WaypointManager
 
         private void LoadTextures()
         {
-            toolbarIcon = GameDatabase.Instance.GetTexture("WaypointManager/icons/toolbar", false);
-            settingsIcon = GameDatabase.Instance.GetTexture("WaypointManager/icons/settings", false);
-            closeIcon = GameDatabase.Instance.GetTexture("WaypointManager/icons/close", false);
+            Config.toolbarIcon = GameDatabase.Instance.GetTexture("WaypointManager/icons/toolbar", false);
+            Config.addWaypointIcon = GameDatabase.Instance.GetTexture("WaypointManager/icons/addWaypoint", false);
+            Config.editWaypointIcon = GameDatabase.Instance.GetTexture("WaypointManager/icons/editWaypoint", false);
+            Config.deleteWaypointIcon = GameDatabase.Instance.GetTexture("WaypointManager/icons/deleteWaypoint", false);
+            Config.settingsIcon = GameDatabase.Instance.GetTexture("WaypointManager/icons/settings", false);
+            Config.closeIcon = GameDatabase.Instance.GetTexture("WaypointManager/icons/close", false);
         }
 
         private void SetupToolbar()
@@ -91,7 +91,7 @@ namespace WaypointManager
                     ApplicationLauncher.AppScenes.MAPVIEW |
                     ApplicationLauncher.AppScenes.TRACKSTATION;
                 launcherButton = ApplicationLauncher.Instance.AddModApplication(ToggleWindow, ToggleWindow, null, null, null, null,
-                    visibleScenes, toolbarIcon);
+                    visibleScenes, Config.toolbarIcon);
             }
         }
 
@@ -121,7 +121,6 @@ namespace WaypointManager
         {
             // Load all the celestial body configuration
             ConfigNode[] bodyConfig = GameDatabase.Instance.GetConfigNodes("WAYPOINT_MANAGER_BODIES");
-
             foreach (ConfigNode configNode in bodyConfig)
             {
                 try
@@ -145,6 +144,20 @@ namespace WaypointManager
                 {
                     Debug.LogError("WaypointManager: Exception when attempting to load Celestial Body configuration:");
                     Debug.LogException(e);
+                }
+            }
+
+            // Get all the directories for icons
+            ConfigNode[] iconConfig = GameDatabase.Instance.GetConfigNodes("WAYPOINT_MANAGER_ICONS");
+            foreach (ConfigNode configNode in iconConfig)
+            {
+                string dir = configNode.GetValue("url");
+
+                // The FinePrint logic is such that it will only look in Squad/Contracts/Icons for icons.
+                // Cheat this by hacking the path in the game database.
+                foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture.Where(t => t.name.StartsWith(dir)))
+                {
+                    texInfo.name = "Squad/Contracts/Icons/" + texInfo.name;
                 }
             }
         }
@@ -171,71 +184,11 @@ namespace WaypointManager
 
         void OnGUI()
         {
-            if (showGUI && visible)
-            {
-                GUI.depth = 1;
-                var ainfoV = Attribute.GetCustomAttribute(GetType().Assembly, typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
-                Config.mainWindowPos = GUILayout.Window(
-                    GetType().FullName.GetHashCode(),
-                    Config.mainWindowPos,
-                    WindowGUI,
-                    "Waypoint Manager " + ainfoV.InformationalVersion);
-
-                // Add the close icon
-                GUI.depth = 0;
-                if (GUI.Button(new Rect(Config.mainWindowPos.xMax - 18, Config.mainWindowPos.yMin + 2, 16, 16), closeIcon, GUI.skin.label))
-                {
-                    showGUI = false;
-                    HideSettings();
-                }
-
-                if (showSettings)
-                {
-                    // Default settings position
-                    if (settingsPosition.xMin == settingsPosition.xMax)
-                    {
-                        settingsPosition = new Rect(Config.mainWindowPos.xMax + SETTINGS_WIDTH > Screen.width ?
-                            Config.mainWindowPos.xMin - SETTINGS_WIDTH : Config.mainWindowPos.xMax, Config.mainWindowPos.yMin, SETTINGS_WIDTH, 1);
-                    }
-
-                    GUI.depth = 1;
-                    settingsPosition = GUILayout.Window(
-                        GetType().FullName.GetHashCode() + 1,
-                        settingsPosition,
-                        SettingsGUI,
-                        "Waypoint Manager Settings");
-
-                    // Add the close icon
-                    GUI.depth = 0;
-                    if (GUI.Button(new Rect(settingsPosition.xMax - 18, settingsPosition.yMin + 2, 16, 16), closeIcon, GUI.skin.label))
-                    {
-                        HideSettings();
-                    }
-                }
-
-                // Reset the position of the settings window
-                if (!showSettings)
-                {
-                    settingsPosition.xMax = settingsPosition.xMin;
-                }
-            }
-        }
-
-        protected void HideSettings()
-        {
-            Config.Save();
-            showSettings = false;
-        }
-
-        protected void WindowGUI(int windowID)
-        {
             // Build the cache of waypoint data
             if (Event.current.type == EventType.Layout)
             {
                 WaypointData.CacheWaypointData();
             }
-
-            GUILayout.BeginVertical(GUILayout.Width(300));
 
             if (!stylesSetup)
             {
@@ -255,9 +208,74 @@ namespace WaypointManager
                 tipStyle = new GUIStyle(GUI.skin.box);
                 tipStyle.wordWrap = true;
                 tipStyle.stretchHeight = true;
+                tipStyle.normal.textColor = Color.white;
 
                 stylesSetup = true;
             }
+
+            GUI.depth = 0;
+
+            if (showGUI && visible)
+            {
+                var ainfoV = Attribute.GetCustomAttribute(GetType().Assembly, typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
+                Config.mainWindowPos = GUILayout.Window(
+                    GetType().FullName.GetHashCode(),
+                    Config.mainWindowPos,
+                    WindowGUI,
+                    "Waypoint Manager " + ainfoV.InformationalVersion);
+
+                // Add the close icon
+                if (GUI.Button(new Rect(Config.mainWindowPos.xMax - 18, Config.mainWindowPos.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
+                {
+                    showGUI = false;
+                    HideSettings();
+                }
+
+                if (showSettings)
+                {
+                    // Default settings position
+                    if (settingsPosition.xMin == settingsPosition.xMax)
+                    {
+                        settingsPosition = new Rect(Config.mainWindowPos.xMax + SETTINGS_WIDTH + 4 > Screen.width ?
+                            Config.mainWindowPos.xMin - SETTINGS_WIDTH - 4: Config.mainWindowPos.xMax, Config.mainWindowPos.yMin, SETTINGS_WIDTH + 4, 1);
+                    }
+
+                    settingsPosition = GUILayout.Window(
+                        GetType().FullName.GetHashCode() + 1,
+                        settingsPosition,
+                        SettingsGUI,
+                        "Waypoint Manager Settings");
+
+                    // Add the close icon
+                    if (GUI.Button(new Rect(settingsPosition.xMax - 18, settingsPosition.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
+                    {
+                        HideSettings();
+                    }
+                }
+
+                // Reset the position of the settings window
+                if (!showSettings)
+                {
+                    settingsPosition.xMax = settingsPosition.xMin;
+                }
+            }
+
+            // Display custom waypoint gui windows
+            CustomWaypointGUI.OnGUI();
+
+            // Draw any tooltips
+            DrawToolTip();
+        }
+
+        protected void HideSettings()
+        {
+            Config.Save();
+            showSettings = false;
+        }
+
+        protected void WindowGUI(int windowID)
+        {
+            GUILayout.BeginVertical(GUILayout.Width(300));
 
             // Output grouping selectors
             GUILayout.BeginHorizontal();
@@ -271,7 +289,12 @@ namespace WaypointManager
                 Config.displayMode = Config.DisplayMode.CELESTIAL_BODY;
             }
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button(settingsIcon, GUI.skin.label))
+            if (GUILayout.Button(new GUIContent(Config.addWaypointIcon, "Create Custom Waypoint"), GUI.skin.label))
+            {
+                CustomWaypointGUI.AddWaypoint();
+            }
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button(new GUIContent(Config.settingsIcon, "Settings"), GUI.skin.label))
             {
                 showSettings = !showSettings;
                 if (!showSettings)
@@ -285,19 +308,18 @@ namespace WaypointManager
 
             if (Config.displayMode == Config.DisplayMode.CONTRACT)
             {
-                foreach (KeyValuePair<Contract, List<WaypointData>> pair in WaypointData.WaypointByContracts)
+                foreach (WaypointData.ContractContainer cc in WaypointData.WaypointByContracts)
                 {
-                    Contract c = pair.Key;
-                    bool hidden = hiddenContracts.ContainsKey(c) && hiddenContracts[c];
-                    if (GUILayout.Button(c.Title, headerButtonStyle))
+                    Contract c = cc.contract;
+                    string title = (c != null ? c.Title : "No contract");
+                    if (GUILayout.Button(title, headerButtonStyle))
                     {
-                        hidden = !hidden;
-                        hiddenContracts[c] = hidden;
+                        cc.hidden = !cc.hidden;
                     }
 
-                    if (!hidden)
+                    if (!cc.hidden)
                     {
-                        foreach (WaypointData wpd in pair.Value)
+                        foreach (WaypointData wpd in cc.waypointByContract)
                         {
                             WaypointLineGUI(wpd);
                         }
@@ -330,7 +352,7 @@ namespace WaypointManager
 
             GUI.DragWindow();
 
-            DrawToolTip();
+            SetToolTip(0);
         }
 
         protected void WaypointLineGUI(WaypointData wpd)
@@ -354,12 +376,30 @@ namespace WaypointManager
             GUILayout.Label("Distance: " + Util.PrintDistance(wpd), labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
 
             GUILayout.EndVertical();
-
             GUILayout.FlexibleSpace();
+
+            if (CustomWaypoints.Instance.IsCustom(wpd.waypoint))
+            {
+                GUILayout.BeginVertical();
+                GUILayout.Space(8);
+                GUILayout.BeginHorizontal();
+
+                if (GUILayout.Button(new GUIContent(Config.editWaypointIcon, "Edit Waypoint"), GUI.skin.label))
+                {
+                    CustomWaypointGUI.EditWaypoint(wpd.waypoint);
+                }
+                if (GUILayout.Button(new GUIContent(Config.deleteWaypointIcon, "Delete Waypoint"), GUI.skin.label))
+                {
+                    CustomWaypointGUI.DeleteWaypoint(wpd.waypoint);
+                }
+
+                GUILayout.EndHorizontal();
+                GUILayout.EndVertical();
+            }
 
             // Active waypoint toggle
             GUILayout.BeginVertical();
-            GUILayout.FlexibleSpace();
+            GUILayout.Space(8);
             bool isNavPoint = Util.IsNavPoint(wpd.waypoint);
             if (GUILayout.Toggle(isNavPoint, (string)null) != isNavPoint)
             {
@@ -373,14 +413,11 @@ namespace WaypointManager
                     FinePrint.WaypointManager.activateNavPoint();
                 }
             }
-            GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
 
             GUILayout.EndHorizontal();
 
             GUILayout.Space(6);
-
-            DrawToolTip();
         }
 
         protected GUIContent CelestialBodyIcon(string celestialBodyName)
@@ -397,35 +434,8 @@ namespace WaypointManager
 
         protected GUIContent ContractIcon(WaypointData wpd)
         {
-            // Check cache for texture
-            Texture2D texture;
-            Color color = SystemUtilities.RandomColor(wpd.waypoint.seed, 1.0f, 1.0f, 1.0f);
-            if (!contractIcons.ContainsKey(wpd.waypoint.id))
-            {
-                contractIcons[wpd.waypoint.id] = new Dictionary<Color, Texture2D>();
-            }
-            if (!contractIcons[wpd.waypoint.id].ContainsKey(color))
-            {
-                Texture2D baseTexture = ContractDefs.textures[wpd.waypoint.id];
-                texture = new Texture2D(baseTexture.width, baseTexture.height, TextureFormat.RGBA32, false);
-                string path = (wpd.waypoint.id.Contains('/') ? "GameData/" : "GameData/Squad/Contracts/Icons/") + wpd.waypoint.id + ".png";
-                texture.LoadImage(File.ReadAllBytes(path.Replace('/', '\\')));
-
-                Color[] pixels = texture.GetPixels();
-                for (int i = 0; i < pixels.Length; i++)
-                {
-                    pixels[i] *= color;
-                }
-                texture.SetPixels(pixels);
-                texture.Compress(true);
-                contractIcons[wpd.waypoint.id][color] = texture;
-            }
-            else
-            {
-                texture = contractIcons[wpd.waypoint.id][color];
-            }
-
-            return new GUIContent(texture, wpd.waypoint.contractReference.Title);
+            Texture2D texture = Util.GetContractIcon(wpd.waypoint.id, wpd.waypoint.seed);
+            return new GUIContent(texture, wpd.waypoint.contractReference != null ? wpd.waypoint.contractReference.Title : "No contract");
         }
 
         protected void SettingsGUI(int windowID)
@@ -488,6 +498,26 @@ namespace WaypointManager
             GUILayout.EndVertical();
 
             GUI.DragWindow();
+
+            SetToolTip(1);
+        }
+
+        /// <summary>
+        /// Set the current tooltip
+        /// </summary>
+        public void SetToolTip(int windowID)
+        {
+            while (toolTipTime.Count < windowID + 1)
+            {
+                toolTipTime.Add(0.0);
+                toolTip.Add("");
+            }
+
+            if (Event.current.type == EventType.Repaint && GUI.tooltip != toolTip[windowID])
+            {
+                toolTipTime[windowID] = Time.fixedTime;
+                toolTip[windowID] = GUI.tooltip;
+            }
         }
 
         /// <summary>
@@ -495,33 +525,29 @@ namespace WaypointManager
         /// </summary>
         private void DrawToolTip()
         {
-            if (!string.IsNullOrEmpty(GUI.tooltip))
+            for (int i = 0; i < toolTipTime.Count; i++)
             {
-                if (Time.fixedTime > toolTipTime + 0.5)
+                if (!string.IsNullOrEmpty(toolTip[i]))
                 {
-                    GUIContent tip = new GUIContent(GUI.tooltip);
-                    GUI.depth = 0;
-
-                    Vector2 textDimensions = GUI.skin.box.CalcSize(tip);
-                    if (textDimensions.x > 180)
+                    if (Time.fixedTime > toolTipTime[i] + 0.5)
                     {
-                        textDimensions.x = 180;
-                        textDimensions.y = tipStyle.CalcHeight(tip, 180);
+                        GUIContent tip = new GUIContent(toolTip[i]);
+
+                        Vector2 textDimensions = GUI.skin.box.CalcSize(tip);
+                        if (textDimensions.x > 240)
+                        {
+                            textDimensions.x = 240;
+                            textDimensions.y = tipStyle.CalcHeight(tip, 240);
+                        }
+                        tooltipPosition.width = textDimensions.x;
+                        tooltipPosition.height = textDimensions.y;
+                        tooltipPosition.x = Event.current.mousePosition.x + tooltipPosition.width > Screen.width ?
+                            Screen.width - tooltipPosition.width : Event.current.mousePosition.x;
+                        tooltipPosition.y = Event.current.mousePosition.y + 20;
+
+                        GUI.Label(tooltipPosition, tip, tipStyle);
                     }
-                    tooltipPosition.width = textDimensions.x;
-                    tooltipPosition.height = textDimensions.y;
-                    tooltipPosition.x = Event.current.mousePosition.x + tooltipPosition.width > Screen.width ?
-                        Screen.width - tooltipPosition.width : Event.current.mousePosition.x;
-                    tooltipPosition.y = Event.current.mousePosition.y + 20;
-
-                    GUI.Label(tooltipPosition, tip, tipStyle);
                 }
-            }
-
-            if (Event.current.type == EventType.Repaint && GUI.tooltip != toolTip)
-            {
-                toolTipTime = Time.fixedTime;
-                toolTip = GUI.tooltip;
             }
         }
     }

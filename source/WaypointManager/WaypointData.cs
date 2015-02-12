@@ -13,8 +13,14 @@ namespace WaypointManager
     /// </summary>
     public class WaypointData
     {
+        public class ContractContainer
+        {
+            public Contract contract;
+            public bool hidden = false;
+            public List<WaypointData> waypointByContract = new List<WaypointData>();
+        }
+
         public Waypoint waypoint = null;
-        public double height = 0.0;
         public double distanceToActive = 0.0;
         public double lastChecked = 0.0;
         public CelestialBody celestialBody = null;
@@ -24,8 +30,9 @@ namespace WaypointManager
         private static double lastCacheUpdate = 0.0;
 
         private static Dictionary<Waypoint, WaypointData> waypointData = new Dictionary<Waypoint, WaypointData>();
-        private static Dictionary<Contract, List<WaypointData>> waypointByContract = new Dictionary<Contract, List<WaypointData>>();
+        private static Dictionary<Contract, ContractContainer> waypointByContract = new Dictionary<Contract, ContractContainer>();
         private static Dictionary<CelestialBody, List<WaypointData>> waypointByBody = new Dictionary<CelestialBody, List<WaypointData>>();
+        private static ContractContainer customWaypoints = new ContractContainer();
 
         /// <summary>
         /// Gets all waypoint data items as an enumeration.
@@ -35,7 +42,20 @@ namespace WaypointManager
         /// <summary>
         /// Gets all waypoint data keyed by contract.
         /// </summary>
-        public static IEnumerable<KeyValuePair<Contract, List<WaypointData>>> WaypointByContracts { get { return waypointByContract.AsEnumerable(); } }
+        public static IEnumerable<ContractContainer> WaypointByContracts
+        {
+            get
+            {
+                foreach (ContractContainer cc in waypointByContract.Values)
+                {
+                    yield return cc;
+                }
+                if (customWaypoints.waypointByContract.Count != 0)
+                {
+                    yield return customWaypoints;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets all waypoint data keyed by Celestial Body.
@@ -72,10 +92,7 @@ namespace WaypointManager
                             wpd.celestialBody = Util.GetBody(w.celestialName);
 
                             // Figure out the terrain height
-                            double latRads = Math.PI / 180.0 * w.latitude;
-                            double lonRads = Math.PI / 180.0 * w.longitude;
-                            Vector3d radialVector = new Vector3d(Math.Cos(latRads) * Math.Cos(lonRads), Math.Sin(latRads), Math.Cos(latRads) * Math.Sin(lonRads));
-                            wpd.height = Math.Max(wpd.celestialBody.pqsController.GetSurfaceHeight(radialVector) - wpd.celestialBody.pqsController.radius, 0.0);
+                            wpd.waypoint.height = Util.WaypointHeight(w, wpd.celestialBody);
 
                             // Add to waypoint data
                             waypointData[w] = wpd;
@@ -92,8 +109,8 @@ namespace WaypointManager
                         if (FlightGlobals.ActiveVessel != null && wpd.celestialBody == FlightGlobals.ActiveVessel.mainBody)
                         {
                             // Get information about whether the waypoint is occluded
-                            Vector3 pos = wpd.celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.height + wpd.waypoint.altitude);
-                            wpd.isOccluded = IsOccluded(wpd.celestialBody, FlightCamera.fetch.transform.position, pos);
+                            Vector3 pos = wpd.celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.waypoint.height + wpd.waypoint.altitude);
+                            wpd.isOccluded = IsOccluded(wpd.celestialBody, FlightCamera.fetch.transform.position, pos, wpd.waypoint.height + wpd.waypoint.altitude);
 
                             Vector3 vHeading = FlightGlobals.ActiveVessel.transform.up;
 
@@ -125,16 +142,39 @@ namespace WaypointManager
 
             if (changed)
             {
+                // Clear the by contract list
+                foreach (ContractContainer cc in waypointByContract.Values)
+                {
+                    cc.waypointByContract.Clear();
+                }
+
                 // Rebuild the by contract list
-                waypointByContract.Clear();
+                customWaypoints.waypointByContract.Clear();
                 foreach (WaypointData wpd in waypointData.Values)
                 {
-                    if (!waypointByContract.ContainsKey(wpd.waypoint.contractReference))
+                    if (wpd.waypoint.contractReference != null)
                     {
-                        waypointByContract[wpd.waypoint.contractReference] = new List<WaypointData>();
+                        if (!waypointByContract.ContainsKey(wpd.waypoint.contractReference))
+                        {
+                            waypointByContract[wpd.waypoint.contractReference] = new ContractContainer();
+                        }
+                        waypointByContract[wpd.waypoint.contractReference].waypointByContract.Add(wpd);
                     }
-                    waypointByContract[wpd.waypoint.contractReference].Add(wpd);
+                    else
+                    {
+                        customWaypoints.waypointByContract.Add(wpd);
+                    }
                 }
+
+                // Remove any unused contracts
+                foreach (ContractContainer cc in waypointByContract.Values.ToList())
+                {
+                    if (cc.waypointByContract.Count == 0)
+                    {
+                        waypointByContract.Remove(cc.contract);
+                    }
+                }
+
 
                 // Rebuild the by Celestial Body list
                 waypointByBody.Clear();
@@ -156,13 +196,16 @@ namespace WaypointManager
         /// <param name="camera">Camera position</param>
         /// <param name="point">Waypoint position</param>
         /// <returns>Whether the waypoint is considered occluded</returns>
-        private static bool IsOccluded(CelestialBody body, Vector3 camera, Vector3 point)
+        private static bool IsOccluded(CelestialBody body, Vector3 camera, Vector3 point, double altitude)
         {
             // Really quick and dirty calculation for occlusion - use the cosine law to get the angle formed by BPC.
-            // If the angle is < 90, then it is occluded
+            // If the angle is < 90, then it is occluded.
+            // Gets more complicated once we start taking altitude into effect
             Vector3 PC = (camera - point).normalized;
             Vector3 PB = (body.transform.position - point).normalized;
-            return Vector3.Dot(PC, PB) > 0.025; // Give a bit of grace for on the surface
+
+            double sinRefAngle = body.Radius / (body.Radius + altitude);
+            return Vector3.Dot(PC, PB) > Math.Sqrt(1 - sinRefAngle * sinRefAngle) + 0.05; // Give a little grace
         }
     }
 }

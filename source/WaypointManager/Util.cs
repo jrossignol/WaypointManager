@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using FinePrint;
+using FinePrint.Utilities;
 
 namespace WaypointManager
 {
@@ -13,6 +15,7 @@ namespace WaypointManager
     public static class Util
     {
         private static string[] UNITS = { "m", "km", "Mm", "Gm", "Tm" };
+        private static Dictionary<string, Dictionary<Color, Texture2D>> contractIcons = new Dictionary<string, Dictionary<Color, Texture2D>>();
 
         /// <summary>
         /// Gets the  distance in meters from the activeVessel to the given waypoint.
@@ -36,9 +39,9 @@ namespace WaypointManager
             double cos1 = Math.Cos(Math.PI / 180.0 * wpd.waypoint.latitude);
             double cos2 = Math.Cos(Math.PI / 180.0 * v.latitude);
 
-            double lateralDist = 2 * (celestialBody.Radius + wpd.height + wpd.waypoint.altitude) *
+            double lateralDist = 2 * (celestialBody.Radius + wpd.waypoint.height + wpd.waypoint.altitude) *
                 Math.Asin(Math.Sqrt(sin1 * sin1 + cos1 * cos2 * sin2 * sin2));
-            double heightDist = Math.Abs(wpd.waypoint.altitude + wpd.height - v.terrainAltitude);
+            double heightDist = Math.Abs(wpd.waypoint.altitude + wpd.waypoint.height - v.terrainAltitude);
 
             if (Config.distanceCalcMethod == Config.DistanceCalcMethod.LATERAL || heightDist <= lateralDist / 2.0)
             {
@@ -58,7 +61,7 @@ namespace WaypointManager
         {
             Vessel v = FlightGlobals.ActiveVessel;
 
-            Vector3 wpPosition = wpd.celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.height + wpd.waypoint.altitude);
+            Vector3 wpPosition = wpd.celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.waypoint.height + wpd.waypoint.altitude);
             return Vector3.Distance(wpPosition, v.transform.position);
         }
 
@@ -104,7 +107,69 @@ namespace WaypointManager
             }
 
             return navPoint.latitude == waypoint.latitude && navPoint.longitude == waypoint.longitude;
+        }
 
+        /// <summary>
+        /// Gets the contract icon for the given id and seed (color).
+        /// </summary>
+        /// <param name="url">URL of the icon</param>
+        /// <param name="seed">Seed to use for generating the color</param>
+        /// <returns>The texture</returns>
+        public static Texture2D GetContractIcon(string url, int seed)
+        {
+            // Check cache for texture
+            Texture2D texture;
+            Color color = SystemUtilities.RandomColor(seed, 1.0f, 1.0f, 1.0f);
+            if (!contractIcons.ContainsKey(url))
+            {
+                contractIcons[url] = new Dictionary<Color, Texture2D>();
+            }
+            if (!contractIcons[url].ContainsKey(color))
+            {
+                Texture2D baseTexture = ContractDefs.textures[url];
+
+                try
+                {
+                    texture = new Texture2D(baseTexture.width, baseTexture.height, TextureFormat.RGBA32, false);
+                    string path = (url.Contains('/') ? "GameData/" : "GameData/Squad/Contracts/Icons/") + url + ".png";
+                    texture.LoadImage(File.ReadAllBytes(path.Replace('/', '\\')));
+
+                    Color[] pixels = texture.GetPixels();
+                    for (int i = 0; i < pixels.Length; i++)
+                    {
+                        pixels[i] *= color;
+                    }
+                    texture.SetPixels(pixels);
+                    texture.Compress(true);
+                    contractIcons[url][color] = texture;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Couldn't create texture!");
+                    Debug.LogException(e);
+                    texture = contractIcons[url][color] = baseTexture;
+                }
+            }
+            else
+            {
+                texture = contractIcons[url][color];
+            }
+
+            return texture;
+        }
+
+        public static double WaypointHeight(Waypoint w, CelestialBody body)
+        {
+            return TerrainHeight(w.latitude, w.longitude, body);
+        }
+
+        public static double TerrainHeight(double latitude, double longitude, CelestialBody body)
+        {
+            // Figure out the terrain height
+            double latRads = Math.PI / 180.0 * latitude;
+            double lonRads = Math.PI / 180.0 * longitude;
+            Vector3d radialVector = new Vector3d(Math.Cos(latRads) * Math.Cos(lonRads), Math.Sin(latRads), Math.Cos(latRads) * Math.Sin(lonRads));
+            return Math.Max(body.pqsController.GetSurfaceHeight(radialVector) - body.pqsController.radius, 0.0);
         }
     }
 }

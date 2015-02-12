@@ -48,6 +48,13 @@ namespace WaypointManager
         public static bool hudTime = true;
         public static bool hudHeading = false;
 
+        public static Texture2D toolbarIcon;
+        public static Texture2D addWaypointIcon;
+        public static Texture2D editWaypointIcon;
+        public static Texture2D deleteWaypointIcon;
+        public static Texture2D settingsIcon;
+        public static Texture2D closeIcon;
+
         /// <summary>
         /// Saves the configuration to the default configuration file.
         /// </summary>
@@ -55,8 +62,8 @@ namespace WaypointManager
         {
             ConfigNode configNode = new ConfigNode("WAYPOINT_MANAGER_SETTINGS");
 
-            configNode.AddValue("windowPos.x", mainWindowPos.xMin);
-            configNode.AddValue("windowPos.y", mainWindowPos.yMin);
+            configNode.AddValue("mainWindowPos.x", mainWindowPos.xMin);
+            configNode.AddValue("mainWindowPos.y", mainWindowPos.yMin);
             configNode.AddValue("displayMode", displayMode);
             configNode.AddValue("distanceCalcMethod", distanceCalcMethod);
             configNode.AddValue("waypointDisplay", waypointDisplay);
@@ -85,8 +92,8 @@ namespace WaypointManager
                 return;
             }
 
-            float left = (float)Convert.ToDouble(configNode.GetValue("windowPos.x"));
-            float top = (float)Convert.ToDouble(configNode.GetValue("windowPos.y"));
+            float left = (float)Convert.ToDouble(configNode.GetValue("mainWindowPos.x"));
+            float top = (float)Convert.ToDouble(configNode.GetValue("mainWindowPos.y"));
             mainWindowPos = new Rect(left, top, 1, 1);
             displayMode = configNode.GetEnumValue<DisplayMode>("displayMode");
             distanceCalcMethod = configNode.GetEnumValue<DistanceCalcMethod>("distanceCalcMethod");
