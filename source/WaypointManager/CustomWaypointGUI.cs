@@ -42,6 +42,8 @@ namespace WaypointManager
         private static GUIContent[] icons = null;
         private static GUIContent[] colors = null;
 
+        private static bool mapLocationMode = false;
+
         private static int selectedIcon = 0;
         private static int selectedColor = 0;
 
@@ -331,6 +333,15 @@ namespace WaypointManager
                 }
             }
 
+/*            if (HighLogic.LoadedScene == GameScenes.FLIGHT && MapView.MapIsEnabled)
+            {
+                string label = mapLocationMode ? "Cancel Set Location" : "Set Location";
+                if (GUILayout.Button(new GUIContent(label, "Set the location by clicking on the map.")))
+                {
+                    mapLocationMode = !mapLocationMode;
+                }
+            }*/
+
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Save"))
             {
@@ -407,6 +418,39 @@ namespace WaypointManager
             GUI.DragWindow();
 
             WaypointManager.Instance.SetToolTip(windowID - typeof(WaypointManager).FullName.GetHashCode());
+        }
+
+        /// <summary>
+        /// Draw the marker for waypoint that is in the process of being added
+        /// </summary>
+        public static void DrawMarker()
+        {
+            // Only handle on repaint events
+            if (windowMode == WindowMode.Add && Event.current.type == EventType.Repaint)
+            {
+                // Translate to screen position
+                Vector3d localSpacePoint = FlightGlobals.currentMainBody.GetWorldSurfacePosition(Double.Parse(latitude), Double.Parse(longitude), double.Parse(altitude));
+                Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
+                Vector3 screenPos = MapView.MapCamera.camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
+
+                // Draw the marker at half-resolution (30 x 45) - that seems to match the one in the map view
+                Rect markerRect = new Rect(screenPos.x - 15f, (float)Screen.height - screenPos.y - 45.0f, 30f, 45f);
+
+                // Half-res for the icon too (16 x 16)
+                Rect iconRect = new Rect(screenPos.x - 8f, (float)Screen.height - screenPos.y - 39.0f, 16f, 16f);
+
+                // Draw the marker
+                Vector3 cameraPos = MapView.MapIsEnabled ? PlanetariumCamera.Camera.transform.position : FlightCamera.fetch.transform.position;
+                cameraPos = ScaledSpace.ScaledToLocalSpace(cameraPos);
+                bool occluded = WaypointData.IsOccluded(FlightGlobals.currentMainBody, cameraPos, localSpacePoint, double.Parse(altitude));
+                if (!occluded)
+                {
+                    Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, 0.5f));
+                }
+
+                // Draw the icon
+                Graphics.DrawTexture(iconRect, ContractDefs.textures[template.id], new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(template.seed, occluded ? 0.3f : 1.0f));
+            }
         }
     }
 }

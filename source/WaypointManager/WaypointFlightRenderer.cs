@@ -72,25 +72,31 @@ namespace WaypointManager
 
         public void OnGUI()
         {
-            if (HighLogic.LoadedSceneIsFlight && !MapView.MapIsEnabled && visible)
+            if (visible && HighLogic.LoadedSceneIsFlight)
             {
                 SetupStyles();
 
-                if (FinePrint.WaypointManager.Instance() != null)
+                // Draw the marker for custom waypoints that are currently being created
+                CustomWaypointGUI.DrawMarker();
+
+                if (!MapView.MapIsEnabled)
                 {
-                    if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
+                    if (FinePrint.WaypointManager.Instance() != null)
                     {
-                        newClick = true;
+                        if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
+                        {
+                            newClick = true;
+                        }
+
+                        WaypointData.CacheWaypointData();
+
+                        foreach (WaypointData wpd in WaypointData.Waypoints)
+                        {
+                            DrawWaypoint(wpd);
+                        }
+
+                        ShowNavigationWindow();
                     }
-
-                    WaypointData.CacheWaypointData();
-
-                    foreach (WaypointData wpd in WaypointData.Waypoints)
-                    {
-                        DrawWaypoint(wpd);
-                    }
-
-                    ShowNavigationWindow();
                 }
             }
         }

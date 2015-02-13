@@ -202,7 +202,7 @@ namespace WaypointManager
         /// <param name="camera">Camera position</param>
         /// <param name="point">Waypoint position</param>
         /// <returns>Whether the waypoint is considered occluded</returns>
-        private static bool IsOccluded(CelestialBody body, Vector3 camera, Vector3 point, double altitude)
+        public static bool IsOccluded(CelestialBody body, Vector3 camera, Vector3 point, double altitude)
         {
             // Really quick and dirty calculation for occlusion - use the cosine law to get the angle formed by BPC.
             // If the angle is < 90, then it is occluded.
