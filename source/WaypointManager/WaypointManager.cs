@@ -322,7 +322,7 @@ namespace WaypointManager
                     CustomWaypointGUI.AddWaypoint();
                 }
             }
-            GUILayout.FlexibleSpace();
+            GUILayout.Space(4);
             if (GUILayout.Button(new GUIContent(Config.settingsIcon, "Settings"), GUI.skin.label))
             {
                 showSettings = !showSettings;
