@@ -9,7 +9,7 @@ using FinePrint.Utilities;
 
 namespace WaypointManager
 {
-    [KSPAddon(KSPAddon.Startup.Flight, true)]
+    [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     class WaypointFlightRenderer : MonoBehaviour
     {
         private GUIStyle nameStyle = null;
@@ -72,15 +72,18 @@ namespace WaypointManager
 
         public void OnGUI()
         {
-            if (visible && HighLogic.LoadedSceneIsFlight)
+            if (visible)
             {
-                SetupStyles();
-
-                // Draw the marker for custom waypoints that are currently being created
-                CustomWaypointGUI.DrawMarker();
-
-                if (!MapView.MapIsEnabled)
+                if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
                 {
+                    // Draw the marker for custom waypoints that are currently being created
+                    CustomWaypointGUI.DrawMarker();
+                }
+
+                if (HighLogic.LoadedSceneIsFlight && !MapView.MapIsEnabled)
+                {
+                    SetupStyles();
+
                     if (FinePrint.WaypointManager.Instance() != null)
                     {
                         if (Event.current.type == EventType.MouseUp && Event.current.button == 0)

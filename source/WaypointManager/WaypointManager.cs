@@ -24,9 +24,9 @@ namespace WaypointManager
         private IButton toolbarButton;
 
         private bool initialized = false;
-        private bool showGUI = false;
+        public bool showGUI = false;
         private bool showSettings = false;
-        private bool visible = true;
+        public bool visible = true;
         private bool stylesSetup = false;
 
         private GUIStyle headerButtonStyle;
@@ -59,6 +59,7 @@ namespace WaypointManager
                 GameEvents.onGameSceneLoadRequested.Add(new EventData<GameScenes>.OnEvent(OnGameSceneLoad));
                 GameEvents.onHideUI.Add(new EventVoid.OnEvent(OnHideUI));
                 GameEvents.onShowUI.Add(new EventVoid.OnEvent(OnShowUI));
+                GameEvents.onPlanetariumTargetChanged.Add(new EventData<MapObject>.OnEvent(PlanetariumTargetChanged));
 
                 Config.Load();
 
@@ -73,6 +74,7 @@ namespace WaypointManager
             GameEvents.onGUIApplicationLauncherUnreadifying.Remove(new EventData<GameScenes>.OnEvent(TeardownToolbar));
             GameEvents.onHideUI.Remove(OnHideUI);
             GameEvents.onShowUI.Remove(OnShowUI);
+            GameEvents.onPlanetariumTargetChanged.Remove(new EventData<MapObject>.OnEvent(PlanetariumTargetChanged));
 
             UnloadToolbar();
 
@@ -139,6 +141,11 @@ namespace WaypointManager
                 showSettings = false;
                 Config.Save();
             }
+        }
+
+        private void PlanetariumTargetChanged(MapObject mapObject)
+        {
+            CustomWaypointGUI.MapObject = mapObject;
         }
 
         /// <summary>
@@ -225,6 +232,7 @@ namespace WaypointManager
                 // Header buttons
                 headerButtonStyle = new GUIStyle(GUI.skin.button);
                 headerButtonStyle.alignment = TextAnchor.MiddleLeft;
+                headerButtonStyle.clipping = TextClipping.Clip;
 
                 // Headings
                 headingStyle = new GUIStyle(GUI.skin.label);
@@ -315,12 +323,9 @@ namespace WaypointManager
                 Config.displayMode = Config.DisplayMode.CELESTIAL_BODY;
             }
             GUILayout.FlexibleSpace();
-            if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+            if (GUILayout.Button(new GUIContent(Config.addWaypointIcon, "Create Custom Waypoint"), GUI.skin.label))
             {
-                if (GUILayout.Button(new GUIContent(Config.addWaypointIcon, "Create Custom Waypoint"), GUI.skin.label))
-                {
-                    CustomWaypointGUI.AddWaypoint();
-                }
+                CustomWaypointGUI.AddWaypoint();
             }
             GUILayout.Space(4);
             if (GUILayout.Button(new GUIContent(Config.settingsIcon, "Settings"), GUI.skin.label))
@@ -341,7 +346,7 @@ namespace WaypointManager
                 {
                     Contract c = cc.contract;
                     string title = (c != null ? c.Title : "No contract");
-                    if (GUILayout.Button(title, headerButtonStyle, GUILayout.MaxWidth(GUI_WIDTH - 16.0f)))
+                    if (GUILayout.Button(title, headerButtonStyle, GUILayout.MaxWidth(GUI_WIDTH - 24.0f)))
                     {
                         cc.hidden = !cc.hidden;
                     }
@@ -361,7 +366,7 @@ namespace WaypointManager
                 {
                     CelestialBody b = pair.Key;
                     bool hidden = hiddenBodies.ContainsKey(b) && hiddenBodies[b];
-                    if (GUILayout.Button(b.name, headerButtonStyle, GUILayout.MaxWidth(GUI_WIDTH - 16.0f)))
+                    if (GUILayout.Button(b.name, headerButtonStyle, GUILayout.MaxWidth(GUI_WIDTH - 24.0f)))
                     {
                         hidden = !hidden;
                         hiddenBodies[b] = hidden;

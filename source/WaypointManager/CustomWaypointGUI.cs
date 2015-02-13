@@ -29,6 +29,37 @@ namespace WaypointManager
             384, 487, 77, 180, 1197, 330, 890, 23, 583, 173, 276, 1293, 426, 16, 119, 679,
         };
 
+        private static MapObject mapObject;
+        public static MapObject MapObject
+        {
+            get { return mapObject; }
+            set
+            {
+                mapObject = value;
+                if (mapObject.type == global::MapObject.MapObjectType.MANEUVERNODE)
+                {
+                    mapObject = mapObject.maneuverNode.scaledSpaceTarget;
+                }
+
+                if (mapObject.type == global::MapObject.MapObjectType.CELESTIALBODY)
+                {
+                    targetBody = mapObject.celestialBody;
+                    Debug.Log("set target body via body = " + targetBody);
+                }
+                else if (mapObject.type == global::MapObject.MapObjectType.VESSEL)
+                {
+                    targetBody = mapObject.vessel.mainBody;
+                    Debug.Log("set target body via vessel = " + targetBody);
+                }
+
+                if (template != null)
+                {
+                    template.celestialName = targetBody.name;
+                }
+            }
+        }
+        private static CelestialBody targetBody;
+
         private static Rect wpWindowPos = new Rect(116f, 131f, 264f, 152f);
         private static Rect rmWindowPos = new Rect(116f, 131f, 280f, 80f);
         private static WindowMode windowMode = WindowMode.None;
@@ -43,7 +74,7 @@ namespace WaypointManager
         private static bool recalcAltitude = false;
         private static GUIContent[] icons = null;
         private static GUIContent[] colors = null;
-
+        
         private static bool mapLocationMode = false;
 
         private static int selectedIcon = 0;
@@ -61,6 +92,7 @@ namespace WaypointManager
             Vessel v = FlightGlobals.ActiveVessel;
             if (v != null)
             {
+                targetBody = v.mainBody;
                 AddWaypoint(v.latitude, v.longitude, v.altitude);
             }
             else
@@ -74,7 +106,9 @@ namespace WaypointManager
         /// </summary>
         public static void AddWaypoint(double latitude, double longitude)
         {
-            AddWaypoint(latitude, longitude, Util.TerrainHeight(latitude, longitude, FlightGlobals.currentMainBody));
+            Vessel v = FlightGlobals.ActiveVessel;
+            targetBody = v.mainBody;
+            AddWaypoint(latitude, longitude, Util.TerrainHeight(latitude, longitude, targetBody));
         }
 
         /// <summary>
@@ -86,7 +120,7 @@ namespace WaypointManager
             windowMode = WindowMode.Add;
 
             template.name = "Waypoint Name";
-            template.celestialName = FlightGlobals.currentMainBody.name;
+            template.celestialName = targetBody.name;
             CustomWaypointGUI.latitude = latitude.ToString();
             CustomWaypointGUI.longitude = longitude.ToString();
             CustomWaypointGUI.altitude = altitude.ToString();
@@ -111,7 +145,7 @@ namespace WaypointManager
             template.celestialName = waypoint.celestialName;
             latitude = waypoint.latitude.ToString();
             longitude = waypoint.longitude.ToString();
-            altitude = (waypoint.altitude + Util.WaypointHeight(waypoint, Util.GetBody(waypoint.celestialName))).ToString();
+            altitude = (waypoint.altitude + Util.WaypointHeight(waypoint, targetBody)).ToString();
             template.id = waypoint.id;
             template.seed = waypoint.seed;
 
@@ -195,60 +229,74 @@ namespace WaypointManager
                 disabledText.normal.textColor = Color.gray;
             }
 
-            if (windowMode != WindowMode.None && windowMode != WindowMode.Delete)
+            if (WaypointManager.Instance.visible && WaypointManager.Instance.showGUI)
             {
-                wpWindowPos = GUILayout.Window(
-                    typeof(WaypointManager).FullName.GetHashCode() + 2,
-                    wpWindowPos,
-                    WindowGUI,
-                    windowMode.ToString() + " Waypoint",
-                    GUILayout.Height(1), GUILayout.ExpandHeight(true));
-
-                // Add the close icon
-                if (GUI.Button(new Rect(wpWindowPos.xMax - 18, wpWindowPos.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
+                if (windowMode != WindowMode.None && windowMode != WindowMode.Delete)
                 {
-                    windowMode = WindowMode.None;
-                }
-
-                if (showIconPicker)
-                {
-                    // Default iconPicker position
-                    if (iconPickerPosition.xMin == iconPickerPosition.xMax)
-                    {
-                        iconPickerPosition = new Rect((Screen.width - ICON_PICKER_WIDTH) / 2.0f, wpWindowPos.yMax, ICON_PICKER_WIDTH, 1);
-                    }
-
-                    iconPickerPosition = GUILayout.Window(
-                        typeof(WaypointManager).FullName.GetHashCode() + 3,
-                        iconPickerPosition,
-                        IconPickerGUI,
-                        "Icon Selector");
+                    wpWindowPos = GUILayout.Window(
+                        typeof(WaypointManager).FullName.GetHashCode() + 2,
+                        wpWindowPos,
+                        WindowGUI,
+                        windowMode.ToString() + " Waypoint",
+                        GUILayout.Height(1), GUILayout.ExpandHeight(true));
 
                     // Add the close icon
-                    if (GUI.Button(new Rect(iconPickerPosition.xMax - 18, iconPickerPosition.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
+                    if (GUI.Button(new Rect(wpWindowPos.xMax - 18, wpWindowPos.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
                     {
-                        showIconPicker = false;
+                        windowMode = WindowMode.None;
+                    }
+
+                    if (showIconPicker)
+                    {
+                        // Default iconPicker position
+                        if (iconPickerPosition.xMin == iconPickerPosition.xMax)
+                        {
+                            iconPickerPosition = new Rect((Screen.width - ICON_PICKER_WIDTH) / 2.0f, wpWindowPos.yMax, ICON_PICKER_WIDTH, 1);
+                        }
+
+                        iconPickerPosition = GUILayout.Window(
+                            typeof(WaypointManager).FullName.GetHashCode() + 3,
+                            iconPickerPosition,
+                            IconPickerGUI,
+                            "Icon Selector");
+
+                        // Add the close icon
+                        if (GUI.Button(new Rect(iconPickerPosition.xMax - 18, iconPickerPosition.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
+                        {
+                            showIconPicker = false;
+                        }
+                    }
+
+                    // Reset the position of the iconPicker window
+                    if (!showIconPicker)
+                    {
+                        iconPickerPosition.xMax = iconPickerPosition.xMin;
+                    }
+                }
+                else if (windowMode == WindowMode.Delete)
+                {
+                    rmWindowPos = GUILayout.Window(
+                        typeof(WaypointManager).FullName.GetHashCode() + 2,
+                        rmWindowPos,
+                        DeleteGUI,
+                        windowMode.ToString() + " Waypoint");
+
+                    // Add the close icon
+                    if (GUI.Button(new Rect(rmWindowPos.xMax - 18, rmWindowPos.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
+                    {
+                        windowMode = WindowMode.None;
                     }
                 }
 
-                // Reset the position of the iconPicker window
-                if (!showIconPicker)
+                if (mapLocationMode)
                 {
-                    iconPickerPosition.xMax = iconPickerPosition.xMin;
-                }
-            }
-            else if (windowMode == WindowMode.Delete)
-            {
-                rmWindowPos = GUILayout.Window(
-                    typeof(WaypointManager).FullName.GetHashCode() + 2,
-                    rmWindowPos,
-                    DeleteGUI,
-                    windowMode.ToString() + " Waypoint");
+                    PlaceWaypointAtCursor();
 
-                // Add the close icon
-                if (GUI.Button(new Rect(rmWindowPos.xMax - 18, rmWindowPos.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
-                {
-                    windowMode = WindowMode.None;
+                    // Lock the waypoint if the user clicks
+                    if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
+                    {
+                        mapLocationMode = false;
+                    }
                 }
             }
         }
@@ -357,21 +405,25 @@ namespace WaypointManager
                 }
             }
 
-/*            if (HighLogic.LoadedScene == GameScenes.FLIGHT && MapView.MapIsEnabled)
+            if (HighLogic.LoadedScene == GameScenes.FLIGHT && MapView.MapIsEnabled || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
             {
-                string label = mapLocationMode ? "Cancel Set Location" : "Set Location";
+                string label = mapLocationMode ? "Cancel Set Location" : "Set Location on Map";
                 if (GUILayout.Button(new GUIContent(label, "Set the location by clicking on the map.")))
                 {
                     mapLocationMode = !mapLocationMode;
                 }
-            }*/
+            }
+            else
+            {
+                mapLocationMode = false;
+            }
 
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Save"))
             {
                 template.latitude = double.Parse(latitude);
                 template.longitude = double.Parse(longitude);
-                template.height = Util.WaypointHeight(template, Util.GetBody(template.celestialName));
+                template.height = Util.WaypointHeight(template, targetBody);
                 template.altitude = double.Parse(altitude) - template.height;
                 if (windowMode == WindowMode.Add)
                 {
@@ -404,7 +456,7 @@ namespace WaypointManager
             if (useTerrainHeight && recalcAltitude)
             {
                 recalcAltitude = false;
-                altitude = Util.TerrainHeight(double.Parse(latitude), double.Parse(longitude), FlightGlobals.currentMainBody).ToString();
+                altitude = Util.TerrainHeight(double.Parse(latitude), double.Parse(longitude), targetBody).ToString();
             }
 
             WaypointManager.Instance.SetToolTip(windowID - typeof(WaypointManager).FullName.GetHashCode());
@@ -459,7 +511,7 @@ namespace WaypointManager
             if (windowMode == WindowMode.Add && Event.current.type == EventType.Repaint)
             {
                 // Translate to screen position
-                Vector3d localSpacePoint = FlightGlobals.currentMainBody.GetWorldSurfacePosition(Double.Parse(latitude), Double.Parse(longitude), double.Parse(altitude));
+                Vector3d localSpacePoint = targetBody.GetWorldSurfacePosition(Double.Parse(latitude), Double.Parse(longitude), double.Parse(altitude));
                 Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
                 Vector3 screenPos = MapView.MapCamera.camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
 
@@ -478,7 +530,7 @@ namespace WaypointManager
                 Rect iconRect = new Rect(screenPos.x - 8f, (float)Screen.height - screenPos.y - 39.0f, 16f, 16f);
 
                 // Draw the marker
-                bool occluded = WaypointData.IsOccluded(FlightGlobals.currentMainBody, cameraPos, localSpacePoint, double.Parse(altitude));
+                bool occluded = WaypointData.IsOccluded(targetBody, cameraPos, localSpacePoint, double.Parse(altitude));
                 if (!occluded)
                 {
                     Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, 0.5f));
@@ -486,6 +538,57 @@ namespace WaypointManager
 
                 // Draw the icon
                 Graphics.DrawTexture(iconRect, ContractDefs.textures[template.id], new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(template.seed, occluded ? 0.3f : 1.0f));
+            }
+        }
+
+        private static void PlaceWaypointAtCursor()
+        {
+            if (targetBody.pqsController == null)
+            {
+                return;
+            }
+
+            Ray mouseRay = PlanetariumCamera.Camera.ScreenPointToRay(Input.mousePosition);
+            mouseRay.origin = ScaledSpace.ScaledToLocalSpace(mouseRay.origin);
+            var bodyToOrigin = mouseRay.origin - targetBody.position;
+            double curRadius = targetBody.pqsController.radiusMax;
+            double lastRadius = 0;
+            int loops = 0;
+            while (loops < 50)
+            {
+                Vector3d relSurfacePosition;
+                if (PQS.LineSphereIntersection(bodyToOrigin, mouseRay.direction, curRadius, out relSurfacePosition))
+                {
+                    var surfacePoint = targetBody.position + relSurfacePosition;
+                    double alt = targetBody.pqsController.GetSurfaceHeight(
+                        QuaternionD.AngleAxis(targetBody.GetLongitude(surfacePoint), Vector3d.down) * QuaternionD.AngleAxis(targetBody.GetLatitude(surfacePoint), Vector3d.forward) * Vector3d.right);
+                    double error = Math.Abs(curRadius - alt);
+                    if (error < (targetBody.pqsController.radiusMax - targetBody.pqsController.radiusMin) / 100)
+                    {
+                        latitude = targetBody.GetLatitude(surfacePoint).ToString();
+                        longitude = targetBody.GetLongitude(surfacePoint).ToString();
+                        return;
+                    }
+                    else
+                    {
+                        lastRadius = curRadius;
+                        curRadius = alt;
+                        loops++;
+                    }
+                }
+                else
+                {
+                    if (loops == 0)
+                    {
+                        break;
+                    }
+                    // Went too low, needs to try higher
+                    else
+                    {
+                        curRadius = (lastRadius * 9 + curRadius) / 10;
+                        loops++;
+                    }
+                }
             }
         }
     }
