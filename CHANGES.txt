@@ -1,5 +1,6 @@
 Waypoint Manager 2.1.0
 - Display waypoint marker while it is being created (in flight and map view).
+- Toggle to automatically set the waypoint to ground level when creating a waypoint.
 - Minor bug fixes.
 
 Waypoint Manager 2.0.3

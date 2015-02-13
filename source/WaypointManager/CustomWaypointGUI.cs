@@ -39,6 +39,8 @@ namespace WaypointManager
         private static Waypoint selectedWaypoint = null;
         private static Rect iconPickerPosition;
         private static bool showIconPicker = false;
+        private static bool useTerrainHeight = false;
+        private static bool recalcAltitude = false;
         private static GUIContent[] icons = null;
         private static GUIContent[] colors = null;
 
@@ -49,6 +51,7 @@ namespace WaypointManager
 
         private static GUIStyle colorWheelStyle;
         private static GUIStyle colorLabelStyle;
+        private static GUIStyle disabledText;
 
         /// <summary>
         /// Interface for showing the add waypoint dialog.
@@ -187,6 +190,9 @@ namespace WaypointManager
                 colorLabelStyle.margin = new RectOffset(4, 4, 6, 6);
                 colorLabelStyle.stretchWidth = true;
                 colorLabelStyle.fixedHeight = 12;
+
+                disabledText = new GUIStyle(GUI.skin.textField);
+                disabledText.normal.textColor = Color.gray;
             }
 
             if (windowMode != WindowMode.None && windowMode != WindowMode.Delete)
@@ -195,7 +201,8 @@ namespace WaypointManager
                     typeof(WaypointManager).FullName.GetHashCode() + 2,
                     wpWindowPos,
                     WindowGUI,
-                    windowMode.ToString() + " Waypoint");
+                    windowMode.ToString() + " Waypoint",
+                    GUILayout.Height(1), GUILayout.ExpandHeight(true));
 
                 // Add the close icon
                 if (GUI.Button(new Rect(wpWindowPos.xMax - 18, wpWindowPos.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
@@ -270,13 +277,12 @@ namespace WaypointManager
         {
             GUILayout.BeginVertical();
 
-            template.name = GUILayout.TextArea(template.name);
+            template.name = GUILayout.TextField(template.name);
 
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
             GUILayout.Label("Longitude", GUILayout.Width(68));
             GUILayout.Label("Latitude", GUILayout.Width(68));
-            GUILayout.Label("Altitude", GUILayout.Width(68));
             GUILayout.EndVertical();
 
             GUILayout.Space(4);
@@ -284,21 +290,19 @@ namespace WaypointManager
             string val;
             float floatVal;
             GUILayout.BeginVertical();
-            val = GUILayout.TextArea(longitude, GUILayout.Width(140));
+            val = GUILayout.TextField(longitude, GUILayout.Width(140));
             if (float.TryParse(val, out floatVal))
             {
                 longitude = val;
+                recalcAltitude = true;
             }
-            val = GUILayout.TextArea(latitude, GUILayout.Width(140));
+            val = GUILayout.TextField(latitude, GUILayout.Width(140));
             if (float.TryParse(val, out floatVal))
             {
                 latitude = val;
+                recalcAltitude = true;
             }
-            val = GUILayout.TextArea(altitude, GUILayout.Width(140));
-            if (float.TryParse(val, out floatVal))
-            {
-                altitude = val;
-            }
+
             GUILayout.EndVertical();
 
             GUILayout.Space(4);
@@ -323,13 +327,33 @@ namespace WaypointManager
 
             GUILayout.EndHorizontal();
 
+            GUILayout.BeginHorizontal();
+            GUILayout.Space(80);
+            if (GUILayout.Toggle(useTerrainHeight, new GUIContent("Use terrain height for altitude", "Automatically set the altitude to ground level.")) != useTerrainHeight)
+            {
+                useTerrainHeight = !useTerrainHeight;
+                recalcAltitude = true;
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+
+            GUILayout.Label("Altitude", GUILayout.Width(72));
+            val = GUILayout.TextField(altitude, useTerrainHeight ? disabledText : GUI.skin.textField, GUILayout.Width(140));
+            if (!useTerrainHeight && float.TryParse(val, out floatVal))
+            {
+                altitude = val;
+            }
+            GUILayout.EndHorizontal();
+
             if (HighLogic.LoadedScene == GameScenes.FLIGHT)
             {
-                if (GUILayout.Button("Use Active Vessel Location"))
+                if (GUILayout.Button(new GUIContent("Use Active Vessel Location", "Set the location parameters to that of the currently active vessel.")))
                 {
                     latitude = FlightGlobals.ActiveVessel.latitude.ToString();
                     longitude = FlightGlobals.ActiveVessel.longitude.ToString();
                     altitude = FlightGlobals.ActiveVessel.altitude.ToString();
+                    recalcAltitude = true;
                 }
             }
 
@@ -376,6 +400,12 @@ namespace WaypointManager
             GUILayout.EndVertical();
 
             GUI.DragWindow();
+
+            if (useTerrainHeight && recalcAltitude)
+            {
+                recalcAltitude = false;
+                altitude = Util.TerrainHeight(double.Parse(latitude), double.Parse(longitude), FlightGlobals.currentMainBody).ToString();
+            }
 
             WaypointManager.Instance.SetToolTip(windowID - typeof(WaypointManager).FullName.GetHashCode());
         }
@@ -433,6 +463,14 @@ namespace WaypointManager
                 Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
                 Vector3 screenPos = MapView.MapCamera.camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
 
+                // Don't draw if it's behind the camera
+                Camera camera = MapView.MapIsEnabled ? PlanetariumCamera.Camera : FlightCamera.fetch.mainCamera;
+                Vector3 cameraPos = ScaledSpace.ScaledToLocalSpace(camera.transform.position);
+                if (Vector3d.Dot(camera.transform.forward, scaledSpacePoint.normalized) < 0.0)
+                {
+                    return;
+                }
+
                 // Draw the marker at half-resolution (30 x 45) - that seems to match the one in the map view
                 Rect markerRect = new Rect(screenPos.x - 15f, (float)Screen.height - screenPos.y - 45.0f, 30f, 45f);
 
@@ -440,8 +478,6 @@ namespace WaypointManager
                 Rect iconRect = new Rect(screenPos.x - 8f, (float)Screen.height - screenPos.y - 39.0f, 16f, 16f);
 
                 // Draw the marker
-                Vector3 cameraPos = MapView.MapIsEnabled ? PlanetariumCamera.Camera.transform.position : FlightCamera.fetch.transform.position;
-                cameraPos = ScaledSpace.ScaledToLocalSpace(cameraPos);
                 bool occluded = WaypointData.IsOccluded(FlightGlobals.currentMainBody, cameraPos, localSpacePoint, double.Parse(altitude));
                 if (!occluded)
                 {
