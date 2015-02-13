@@ -15,6 +15,7 @@ namespace WaypointManager
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     class WaypointManager : MonoBehaviour
     {
+        private const float GUI_WIDTH = 360;
         private const float SETTINGS_WIDTH = 280;
 
         public static WaypointManager Instance;
@@ -187,8 +188,7 @@ namespace WaypointManager
                 }
             }
         }
-
-
+        
         private void ToggleWindow()
         {
             showGUI = !showGUI;
@@ -301,7 +301,7 @@ namespace WaypointManager
 
         protected void WindowGUI(int windowID)
         {
-            GUILayout.BeginVertical(GUILayout.Width(300));
+            GUILayout.BeginVertical(GUILayout.Width(GUI_WIDTH));
 
             // Output grouping selectors
             GUILayout.BeginHorizontal();
@@ -315,9 +315,12 @@ namespace WaypointManager
                 Config.displayMode = Config.DisplayMode.CELESTIAL_BODY;
             }
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button(new GUIContent(Config.addWaypointIcon, "Create Custom Waypoint"), GUI.skin.label))
+            if (HighLogic.LoadedScene == GameScenes.FLIGHT)
             {
-                CustomWaypointGUI.AddWaypoint();
+                if (GUILayout.Button(new GUIContent(Config.addWaypointIcon, "Create Custom Waypoint"), GUI.skin.label))
+                {
+                    CustomWaypointGUI.AddWaypoint();
+                }
             }
             GUILayout.FlexibleSpace();
             if (GUILayout.Button(new GUIContent(Config.settingsIcon, "Settings"), GUI.skin.label))
@@ -330,7 +333,7 @@ namespace WaypointManager
             }
             GUILayout.EndHorizontal();
 
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Height(480));
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.ExpandWidth(true), GUILayout.Height(520));
 
             if (Config.displayMode == Config.DisplayMode.CONTRACT)
             {
@@ -338,7 +341,7 @@ namespace WaypointManager
                 {
                     Contract c = cc.contract;
                     string title = (c != null ? c.Title : "No contract");
-                    if (GUILayout.Button(title, headerButtonStyle))
+                    if (GUILayout.Button(title, headerButtonStyle, GUILayout.MaxWidth(GUI_WIDTH - 16.0f)))
                     {
                         cc.hidden = !cc.hidden;
                     }
@@ -358,7 +361,7 @@ namespace WaypointManager
                 {
                     CelestialBody b = pair.Key;
                     bool hidden = hiddenBodies.ContainsKey(b) && hiddenBodies[b];
-                    if (GUILayout.Button(b.name, headerButtonStyle))
+                    if (GUILayout.Button(b.name, headerButtonStyle, GUILayout.MaxWidth(GUI_WIDTH - 16.0f)))
                     {
                         hidden = !hidden;
                         hiddenBodies[b] = hidden;

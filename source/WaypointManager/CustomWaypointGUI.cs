@@ -54,7 +54,14 @@ namespace WaypointManager
         public static void AddWaypoint()
         {
             Vessel v = FlightGlobals.ActiveVessel;
-            AddWaypoint(v.latitude, v.longitude, v.altitude);
+            if (v != null)
+            {
+                AddWaypoint(v.latitude, v.longitude, v.altitude);
+            }
+            else
+            {
+                AddWaypoint(0.0, 0.0, 0.0);
+            }
         }
         
         /// <summary>
@@ -74,7 +81,7 @@ namespace WaypointManager
             windowMode = WindowMode.Add;
 
             template.name = "Waypoint Name";
-            template.celestialName = FlightGlobals.ActiveVessel.mainBody.name;
+            template.celestialName = FlightGlobals.currentMainBody.name;
             CustomWaypointGUI.latitude = latitude.ToString();
             CustomWaypointGUI.longitude = longitude.ToString();
             CustomWaypointGUI.altitude = altitude.ToString();
@@ -314,11 +321,14 @@ namespace WaypointManager
 
             GUILayout.EndHorizontal();
 
-            if (GUILayout.Button("Use Active Vessel Location"))
+            if (HighLogic.LoadedScene == GameScenes.FLIGHT)
             {
-                latitude = FlightGlobals.ActiveVessel.latitude.ToString();
-                longitude = FlightGlobals.ActiveVessel.longitude.ToString();
-                altitude = FlightGlobals.ActiveVessel.altitude.ToString();
+                if (GUILayout.Button("Use Active Vessel Location"))
+                {
+                    latitude = FlightGlobals.ActiveVessel.latitude.ToString();
+                    longitude = FlightGlobals.ActiveVessel.longitude.ToString();
+                    altitude = FlightGlobals.ActiveVessel.altitude.ToString();
+                }
             }
 
             GUILayout.BeginHorizontal();

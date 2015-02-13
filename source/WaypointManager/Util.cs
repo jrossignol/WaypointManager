@@ -18,7 +18,7 @@ namespace WaypointManager
         private static Dictionary<string, Dictionary<Color, Texture2D>> contractIcons = new Dictionary<string, Dictionary<Color, Texture2D>>();
 
         /// <summary>
-        /// Gets the  distance in meters from the activeVessel to the given waypoint.
+        /// Gets the  distance in meters from the active vessel to the given waypoint.
         /// </summary>
         /// <param name="wpd">Activated waypoint</param>
         /// <returns>Distance in meters</returns>

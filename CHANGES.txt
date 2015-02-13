@@ -1,3 +1,7 @@
+Waypoint Manager 2.0.3
+- Fixed Null Reference Exceptions in tracking station (thanks armegeddon).
+- Fixed width of main GUI window so that it can expand a little more.
+
 Waypoint Manager 2.0.1
 - Fixed MAJOR bug that prevents waypoint markers from rendering correctly.
 

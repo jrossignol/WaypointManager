@@ -110,9 +110,10 @@ namespace WaypointManager
 
                         // Update values that change every frame
                         wpd.lastChecked = UnityEngine.Time.fixedTime;
-                        wpd.distanceToActive = Util.GetDistanceToWaypoint(wpd);
                         if (FlightGlobals.ActiveVessel != null && wpd.celestialBody == FlightGlobals.ActiveVessel.mainBody)
                         {
+                            wpd.distanceToActive = Util.GetDistanceToWaypoint(wpd);
+
                             // Get information about whether the waypoint is occluded
                             Vector3 pos = wpd.celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.waypoint.height + wpd.waypoint.altitude);
                             wpd.isOccluded = IsOccluded(wpd.celestialBody, FlightCamera.fetch.transform.position, pos, wpd.waypoint.height + wpd.waypoint.altitude);
