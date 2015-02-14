@@ -314,14 +314,22 @@ namespace WaypointManager
             // Output grouping selectors
             GUILayout.BeginHorizontal();
             GUILayout.Label("Group by: ", GUILayout.ExpandWidth(false));
-            if (GUILayout.Toggle(Config.displayMode == Config.DisplayMode.CONTRACT, "Contract"))
+            if (ContractSystem.Instance != null)
             {
-                Config.displayMode = Config.DisplayMode.CONTRACT;
+                if (GUILayout.Toggle(Config.displayMode == Config.DisplayMode.CONTRACT, "Contract"))
+                {
+                    Config.displayMode = Config.DisplayMode.CONTRACT;
+                }
+            }
+            else
+            {
+                Config.displayMode = Config.DisplayMode.CELESTIAL_BODY;
             }
             if (GUILayout.Toggle(Config.displayMode == Config.DisplayMode.CELESTIAL_BODY, "Celestial Body"))
             {
                 Config.displayMode = Config.DisplayMode.CELESTIAL_BODY;
             }
+
             GUILayout.FlexibleSpace();
             if (GUILayout.Button(new GUIContent(Config.addWaypointIcon, "Create Custom Waypoint"), GUI.skin.label))
             {

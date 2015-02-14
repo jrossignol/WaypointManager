@@ -11,7 +11,7 @@ namespace WaypointManager
     /// <summary>
     /// Class for creating/maintaining/storing custom waypoints.
     /// </summary>
-    [KSPScenario(ScenarioCreationOptions.AddToExistingCareerGames | ScenarioCreationOptions.AddToNewCareerGames,
+    [KSPScenario(ScenarioCreationOptions.AddToAllGames,
         GameScenes.FLIGHT, GameScenes.TRACKSTATION)]
     public class CustomWaypoints : ScenarioModule
     {

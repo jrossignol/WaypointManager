@@ -1,5 +1,6 @@
 Waypoint Manager 2.1.1
 - Persist "Use stock toolbar" option across restarts (thanks dak180).
+- Now works in sandbox mode (for custom waypoints).
 
 Waypoint Manager 2.1.0
 - Display waypoint marker while it is being created (in flight and map view).
