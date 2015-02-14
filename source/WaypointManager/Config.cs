@@ -72,6 +72,7 @@ namespace WaypointManager
             configNode.AddValue("hudDistance", hudDistance);
             configNode.AddValue("hudTime", hudTime);
             configNode.AddValue("hudHeading", hudHeading);
+            configNode.AddValue("useStockToolbar", useStockToolbar);
 
             configNode.Save(ConfigFileName,
                 "Waypoint Manager Configuration File\r\n" +
@@ -103,6 +104,10 @@ namespace WaypointManager
             hudDistance = Convert.ToBoolean(configNode.GetValue("hudDistance"));
             hudTime = Convert.ToBoolean(configNode.GetValue("hudTime"));
             hudHeading = Convert.ToBoolean(configNode.GetValue("hudHeading"));
+            if (configNode.HasValue("useStockToolbar"))
+            {
+                useStockToolbar = Convert.ToBoolean(configNode.GetValue("useStockToolbar"));
+            }
         }
 
         private static T GetEnumValue<T>(this ConfigNode configNode, string name)
