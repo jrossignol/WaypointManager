@@ -132,7 +132,7 @@ namespace WaypointManager
                 {
                     texture = new Texture2D(baseTexture.width, baseTexture.height, TextureFormat.RGBA32, false);
                     string path = (url.Contains('/') ? "GameData/" : "GameData/Squad/Contracts/Icons/") + url + ".png";
-                    texture.LoadImage(File.ReadAllBytes(path.Replace('/', '\\')));
+                    texture.LoadImage(File.ReadAllBytes(path.Replace('/', Path.DirectorySeparatorChar)));
 
                     Color[] pixels = texture.GetPixels();
                     for (int i = 0; i < pixels.Length; i++)

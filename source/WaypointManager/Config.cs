@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -15,7 +16,8 @@ namespace WaypointManager
         {
             get
             {
-                return KSPUtil.ApplicationRootPath + "\\GameData\\WaypointManager\\WaypointManager.cfg";
+                return string.Join(Path.DirectorySeparatorChar.ToString(), new string[]
+                    { KSPUtil.ApplicationRootPath, "GameData", "WaypointManager", "WaypointManager.cfg"});
             }
         }
 

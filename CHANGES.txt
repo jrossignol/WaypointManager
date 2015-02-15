@@ -1,5 +1,6 @@
 Waypoint Manager 2.1.2
 - License change - now licensed under the MIT license.
+- Use platform independent method for file paths (thanks dak180 & ultrasquid).
 
 Waypoint Manager 2.1.1
 - Persist "Use stock toolbar" option across restarts (thanks dak180).
