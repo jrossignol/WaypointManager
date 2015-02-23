@@ -96,6 +96,12 @@ namespace WaypointManager
                             wpd.waypoint = w;
                             wpd.celestialBody = Util.GetBody(w.celestialName);
 
+                            // Shouldn't normally happens, but who knows (Util.GetBody will throw a warning)
+                            if (wpd.celestialBody == null)
+                            {
+                                continue;
+                            }
+
                             // Figure out the terrain height
                             wpd.waypoint.height = Util.WaypointHeight(w, wpd.celestialBody);
 

@@ -90,7 +90,12 @@ namespace WaypointManager
         /// <returns>The CelestialBody object</returns>
         public static CelestialBody GetBody(string name)
         {
-            return FlightGlobals.Bodies.Where(b => b.name == name).FirstOrDefault();
+            CelestialBody body = FlightGlobals.Bodies.Where(b => b.name == name).FirstOrDefault();
+            if (body == null)
+            {
+                Debug.LogWarning("Couldn't find celestial body with name '" + name + "'.");
+            }
+            return body;
         }
 
         /// <summary>
@@ -165,6 +170,12 @@ namespace WaypointManager
 
         public static double TerrainHeight(double latitude, double longitude, CelestialBody body)
         {
+            // Not sure when this happens - for Sun and Jool?
+            if (body.pqsController == null)
+            {
+                return body.Radius;
+            }
+
             // Figure out the terrain height
             double latRads = Math.PI / 180.0 * latitude;
             double lonRads = Math.PI / 180.0 * longitude;
