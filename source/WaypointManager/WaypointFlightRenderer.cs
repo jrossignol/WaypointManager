@@ -332,6 +332,11 @@ namespace WaypointManager
 
         private void NavigationWindow(int windowID)
         {
+            if (selectedWaypoint == null)
+            {
+                return;
+            }
+
             GUILayout.BeginVertical();
             if (!Util.IsNavPoint(selectedWaypoint))
             {

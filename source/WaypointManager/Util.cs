@@ -41,7 +41,7 @@ namespace WaypointManager
 
             double lateralDist = 2 * (celestialBody.Radius + wpd.waypoint.height + wpd.waypoint.altitude) *
                 Math.Asin(Math.Sqrt(sin1 * sin1 + cos1 * cos2 * sin2 * sin2));
-            double heightDist = Math.Abs(wpd.waypoint.altitude + wpd.waypoint.height - v.terrainAltitude);
+            double heightDist = Math.Abs(wpd.waypoint.altitude + wpd.waypoint.height - (v.terrainAltitude >= 0.0 ? v.terrainAltitude : v.altitude));
 
             if (Config.distanceCalcMethod == Config.DistanceCalcMethod.LATERAL || heightDist <= lateralDist / 2.0)
             {
@@ -173,7 +173,7 @@ namespace WaypointManager
             // Not sure when this happens - for Sun and Jool?
             if (body.pqsController == null)
             {
-                return body.Radius;
+                return 0;
             }
 
             // Figure out the terrain height

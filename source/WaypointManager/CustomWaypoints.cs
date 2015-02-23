@@ -74,6 +74,11 @@ namespace WaypointManager
         /// <returns>True if the waypoint is a custom waypoint.</returns>
         public bool IsCustom(Waypoint waypoint)
         {
+            if (waypoint == null)
+            {
+                return false;
+            }
+
             return waypoint.contractReference == null && waypoints.Contains(waypoint);
         }
         

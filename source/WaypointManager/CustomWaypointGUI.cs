@@ -229,7 +229,7 @@ namespace WaypointManager
                 disabledText.normal.textColor = Color.gray;
             }
 
-            if (WaypointManager.Instance.visible && WaypointManager.Instance.showGUI)
+            if (WaypointManager.Instance.visible)
             {
                 if (windowMode != WindowMode.None && windowMode != WindowMode.Delete)
                 {
