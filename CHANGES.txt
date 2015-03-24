@@ -1,3 +1,6 @@
+Waypoint Manager 2.1.5
+- Fix for NullReferenceException in some cases.
+
 Waypoint Manager 2.1.4
 - Additional fixes for Jool/Sun waypoints.
 

@@ -10,6 +10,11 @@ namespace WaypointManager
 {
     public static class CustomWaypointGUI
     {
+        // List of icons we don't want to look at in the Squad directory
+        public static string[] forbiddenIcons = new string[] {
+            "an", "ap", "default", "dn", "marker", "orbit", "pe"
+        };
+
         private const float ICON_PICKER_WIDTH = 302;
         private enum WindowMode
         {
@@ -172,15 +177,10 @@ namespace WaypointManager
             {
                 List<GUIContent> content = new List<GUIContent>();
 
-                // List of icons we don't want to look at in the Squad directory
-                string[] forbidden = new string[] {
-                    "an", "ap", "default", "dn", "marker", "orbit", "pe"
-                };
-
                 foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture.Where(t => t.name.StartsWith("Squad/Contracts/Icons/")))
                 {
                     string name = texInfo.name.Replace("Squad/Contracts/Icons/", "");
-                    if (forbidden.Contains(name))
+                    if (forbiddenIcons.Contains(name))
                     {
                         continue;
                     }
