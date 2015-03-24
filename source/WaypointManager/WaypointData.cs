@@ -210,10 +210,17 @@ namespace WaypointManager
         /// <returns>Whether the waypoint is considered occluded</returns>
         public static bool IsOccluded(CelestialBody body, Vector3 camera, Vector3 point, double altitude)
         {
-            // Really quick and dirty calculation for occlusion - use the cosine law to get the angle formed by BPC.
+            // If we're less than 5.0 km away, never do occlusion
+            Vector3 PC = camera - point;
+            if (PC.magnitude < 5000)
+            {
+                return false;
+            }
+
+            // Really quick and dirty calculation for occlusion - use the cosine law to get the angle formed by BPC (body-point-camera).
             // If the angle is < 90, then it is occluded.
             // Gets more complicated once we start taking altitude into effect
-            Vector3 PC = (camera - point).normalized;
+            PC.Normalize();
             Vector3 PB = (body.transform.position - point).normalized;
 
             double sinRefAngle = body.Radius / (body.Radius + altitude);
