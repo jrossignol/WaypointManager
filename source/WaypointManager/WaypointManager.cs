@@ -66,6 +66,10 @@ namespace WaypointManager
                 Instance = this;
                 initialized = true;
             }
+            else
+            {
+                DestroyImmediate(this);
+            }
         }
 
         void OnDestroy()
