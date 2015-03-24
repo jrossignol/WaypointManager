@@ -1,4 +1,4 @@
-Waypoint Manager 2.1.5
+Waypoint Manager 2.1.6
 - Fix for NullReferenceException in some cases.
 - Fix for Module Manager reload (and possibly other scenarios) causing the add-on to get started multiple times (causes possible performance/rendering issues).
 - Don't occlude waypoints when really close (fixes issues with waypoints at the top of hills disappearing).
