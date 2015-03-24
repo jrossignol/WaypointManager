@@ -201,7 +201,6 @@ namespace WaypointManager
             GameDatabase.TextureInfo nyan = GameDatabase.Instance.databaseTexture.Where(t => t.name.Contains("WaypointManager/icons/Special/nyan")).FirstOrDefault();
             if (nyan != null && DateTime.Now.Month == 4 && DateTime.Now.Day == 1)
             {
-                Debug.Log("doing stuff, nyan = " + nyan.name);
                 foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture.Where(t => t.name.StartsWith("Squad/Contracts/Icons/")))
                 {
                     string name = texInfo.name.Replace("Squad/Contracts/Icons/", "");
