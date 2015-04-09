@@ -133,8 +133,11 @@ namespace WaypointManager
 
         private void UnloadToolbar()
         {
-            toolbarButton.Destroy();
-            toolbarButton = null;
+            if (toolbarButton != null)
+            {
+                toolbarButton.Destroy();
+                toolbarButton = null;
+            }
         }
 
         private void OnGameSceneLoad(GameScenes scene)
