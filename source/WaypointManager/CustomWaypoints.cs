@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -15,10 +16,19 @@ namespace WaypointManager
         GameScenes.FLIGHT, GameScenes.TRACKSTATION)]
     public class CustomWaypoints : ScenarioModule
     {
+        public static string CustomWaypointsFileName
+        {
+            get
+            {
+                return string.Join(Path.DirectorySeparatorChar.ToString(), new string[] { KSPUtil.ApplicationRootPath, "GameData", "WaypointManager", "CustomWaypoints.cfg" });
+            }
+        }
+
         static public CustomWaypoints Instance { get; private set; }
 
         private List<Waypoint> waypoints = new List<Waypoint>();
         private int nextIndex = 0;
+        private static bool customLoad = false;
 
         public CustomWaypoints()
         {
@@ -84,7 +94,10 @@ namespace WaypointManager
         
         public override void OnLoad(ConfigNode node)
         {
-            base.OnLoad(node);
+            if (!customLoad)
+            {
+                base.OnLoad(node);
+            }
 
             foreach (ConfigNode child in node.GetNodes("WAYPOINT"))
             {
@@ -99,6 +112,22 @@ namespace WaypointManager
                 waypoint.seed = Convert.ToInt32(child.GetValue("seed"));
                 waypoint.isOnSurface = true;
                 waypoint.isNavigatable = true;
+
+                // For a custom load, check for duplicates
+                if (customLoad)
+                {
+                    foreach (Waypoint wp in waypoints.ToList())
+                    {
+                        if (wp.celestialName == waypoint.celestialName &&
+                            Math.Abs(wp.latitude - waypoint.latitude) < 0.000001 &&
+                            Math.Abs(wp.longitude - waypoint.longitude) < 0.000001 &&
+                            Math.Abs(wp.altitude - waypoint.altitude) < 0.1)
+                        {
+                            waypoints.Remove(wp);
+                            WaypointManager.RemoveWaypoint(wp);
+                        }
+                    }
+                }
 
                 waypoints.Add(waypoint);
                 WaypointManager.AddWaypoint(waypoint);
@@ -131,6 +160,48 @@ namespace WaypointManager
         {
             Color32 c = color;
             return "#" + c.r.ToString("X2") + c.g.ToString("X2") + c.b.ToString("X2");
+        }
+
+        public static void Import()
+        {
+            ConfigNode configNode = ConfigNode.Load(CustomWaypointsFileName);
+            customLoad = true;
+            Instance.Load(configNode);
+            customLoad = false;
+
+            int count = configNode.nodes.Count;
+            ScreenMessages.PostScreenMessage("Imported " + count + " waypoint" + (count != 1 ? "s" : "") + " from " + CustomWaypointsFileName,
+                6.0f, ScreenMessageStyle.UPPER_CENTER);
+        }
+
+        public static void Export()
+        {
+            if (File.Exists(CustomWaypointsFileName))
+            {
+                CustomWaypointGUI.ShowExportDialog();
+            }
+            else
+            {
+                DoExport();
+            }
+        }
+
+        public static void DoExport()
+        {
+            ConfigNode configNode = new ConfigNode("CUSTOM_WAYPOINTS");
+            Instance.Save(configNode);
+
+            configNode.RemoveValue("name");
+            configNode.RemoveValue("scene");
+
+            configNode.Save(CustomWaypointsFileName,
+                "Waypoint Manager Custom Waypoints File\r\n" +
+                "//\r\n" +
+                "// This file contains an extract of Waypoint Manager custom waypoints.");
+
+            int count = Instance.waypoints.Count;
+            ScreenMessages.PostScreenMessage("Exported " + count + " waypoint" + (count != 1 ? "s" : "") + " to " + CustomWaypointsFileName,
+                6.0f, ScreenMessageStyle.UPPER_CENTER);
         }
     }
 }

@@ -1,5 +1,6 @@
 Waypoint Manager 2.2.0
 - Now correctly supports sandbox/science modes.
+- Added import/export to file for custom waypoints (in settings menu).
 - Fix possible NullReferenceException on quit.
 
 Waypoint Manager 2.1.6

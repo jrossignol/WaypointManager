@@ -579,6 +579,15 @@ namespace WaypointManager
                 }
             }
 
+            if (GUILayout.Button(new GUIContent("Export Custom Waypoints", "Exports the custom waypoints to GameData/WaypointManager/CustomWaypoints.cfg")))
+            {
+                CustomWaypoints.Export();
+            }
+            if (GUILayout.Button(new GUIContent("Import Custom Waypoints", "Imports the custom waypoints from GameData/WaypointManager/CustomWaypoints.cfg")))
+            {
+                CustomWaypoints.Import();
+            }
+
             GUILayout.EndVertical();
 
             GUI.DragWindow();

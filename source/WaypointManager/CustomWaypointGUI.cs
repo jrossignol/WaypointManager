@@ -67,6 +67,7 @@ namespace WaypointManager
 
         private static Rect wpWindowPos = new Rect(116f, 131f, 264f, 152f);
         private static Rect rmWindowPos = new Rect(116f, 131f, 280f, 80f);
+        private static Rect expWindowPos = new Rect(116f, 131f, 280f, 80f);
         private static WindowMode windowMode = WindowMode.None;
         private static Waypoint template = new Waypoint();
         private static string latitude;
@@ -79,6 +80,8 @@ namespace WaypointManager
         private static bool recalcAltitude = false;
         private static GUIContent[] icons = null;
         private static GUIContent[] colors = null;
+
+        private static bool showExportDialog = false;
         
         private static bool mapLocationMode = false;
 
@@ -168,6 +171,14 @@ namespace WaypointManager
 
             // Default values
             rmWindowPos = new Rect((Screen.width - rmWindowPos.width) / 2.0f, (Screen.height - rmWindowPos.height) / 2.0f, rmWindowPos.width, rmWindowPos.height);
+        }
+
+        public static void ShowExportDialog()
+        {
+            showExportDialog = true;
+
+            // Default values
+            expWindowPos = new Rect((Screen.width - expWindowPos.width) / 2.0f, (Screen.height - expWindowPos.height) / 2.0f, expWindowPos.width, expWindowPos.height);
         }
 
         public static void OnGUI()
@@ -288,6 +299,21 @@ namespace WaypointManager
                     }
                 }
 
+                if (showExportDialog)
+                {
+                    expWindowPos = GUILayout.Window(
+                        typeof(WaypointManager).FullName.GetHashCode() + 3,
+                        expWindowPos,
+                        ExportGUI,
+                        "Overwrite export file?");
+
+                    // Add the close icon
+                    if (GUI.Button(new Rect(expWindowPos.xMax - 18, expWindowPos.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
+                    {
+                        showExportDialog = false;
+                    }
+                }
+
                 if (mapLocationMode)
                 {
                     PlaceWaypointAtCursor();
@@ -314,6 +340,26 @@ namespace WaypointManager
             if (GUILayout.Button("No"))
             {
                 windowMode = WindowMode.None;
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
+
+            GUI.DragWindow();
+        }
+
+        private static void ExportGUI(int windowID)
+        {
+            GUILayout.BeginVertical();
+            GUILayout.Label("Overwrite custom waypoint file '" + CustomWaypoints.CustomWaypointsFileName + "'?");
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Yes"))
+            {
+                CustomWaypoints.DoExport();
+                showExportDialog = false;
+            }
+            if (GUILayout.Button("No"))
+            {
+                showExportDialog = false;
             }
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();

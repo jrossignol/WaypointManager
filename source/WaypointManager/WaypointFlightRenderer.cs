@@ -75,6 +75,11 @@ namespace WaypointManager
         {
             if (visible)
             {
+                if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
+                {
+                    newClick = true;
+                }
+
                 if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
                 {
                     // Draw the marker for custom waypoints that are currently being created
@@ -87,13 +92,22 @@ namespace WaypointManager
                         {
                             if (wpd.celestialBody != null && wpd.waypoint.celestialName == wpd.celestialBody.name)
                             {
-                                Util.DrawWaypoint(wpd.celestialBody, wpd.waypoint.latitude, wpd.waypoint.longitude,
-                                    wpd.waypoint.altitude, wpd.waypoint.id, wpd.waypoint.seed);
+                                if (Event.current.type == EventType.Repaint)
+                                {
+                                    Util.DrawWaypoint(wpd.celestialBody, wpd.waypoint.latitude, wpd.waypoint.longitude,
+                                        wpd.waypoint.altitude, wpd.waypoint.id, wpd.waypoint.seed);
+                                }
 
                                 // Handling clicking on the waypoint
                                 if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
                                 {
                                     HandleClick(wpd);
+                                }
+
+                                // Draw hint text
+                                if (Event.current.type == EventType.Repaint)
+                                {
+                                    HintText(wpd);
                                 }
                             }
                         }
@@ -103,11 +117,6 @@ namespace WaypointManager
                 if (HighLogic.LoadedSceneIsFlight && !MapView.MapIsEnabled)
                 {
                     SetupStyles();
-
-                    if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
-                    {
-                        newClick = true;
-                    }
 
                     WaypointData.CacheWaypointData();
 
@@ -474,6 +483,26 @@ namespace WaypointManager
             else if (newClick)
             {
                 selectedWaypoint = null;
+            }
+        }
+
+        public void HintText(WaypointData wpd)
+        {
+            // Translate to screen position
+            Vector3d localSpacePoint = wpd.celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.waypoint.altitude);
+            Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
+            Vector3 screenPos = MapView.MapCamera.camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
+
+            Rect iconRect = new Rect(screenPos.x - 8f, (float)Screen.height - screenPos.y - 39.0f, 16f, 16f);
+
+            // Hint text!
+            if (iconRect.Contains(Event.current.mousePosition))
+            {
+                string label = wpd.waypoint.name + (wpd.waypoint.isClustered ? (" " + StringUtilities.IntegerToGreek(wpd.waypoint.index)) : "");
+                float width = 240f;
+                float height = hintTextStyle.CalcHeight(new GUIContent(label), width);
+                float yoffset = height + 48.0f;
+                GUI.Box(new Rect(screenPos.x - width / 2.0f, (float)Screen.height - screenPos.y - yoffset, width, height), label, hintTextStyle);
             }
         }
     }
