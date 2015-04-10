@@ -23,7 +23,7 @@ namespace WaypointManager
         private ApplicationLauncherButton launcherButton = null;
         private IButton toolbarButton;
 
-        private bool initialized = false;
+        private static bool initialized = false;
         public bool showGUI = false;
         private bool showSettings = false;
         public bool visible = true;
@@ -50,6 +50,10 @@ namespace WaypointManager
 
             if (!initialized)
             {
+                // Log version info
+                var ainfoV = Attribute.GetCustomAttribute(typeof(WaypointManager).Assembly, typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
+                Debug.Log("WaypointManager " + ainfoV.InformationalVersion + " loading...");
+
                 LoadTextures();
                 LoadConfiguration();
                 LoadToolbar();
@@ -62,6 +66,8 @@ namespace WaypointManager
                 GameEvents.onPlanetariumTargetChanged.Add(new EventData<MapObject>.OnEvent(PlanetariumTargetChanged));
 
                 Config.Load();
+
+                Debug.Log("WaypointManager " + ainfoV.InformationalVersion + " loaded.");
 
                 Instance = this;
                 initialized = true;
