@@ -29,7 +29,7 @@ namespace WaypointManager
         {
             foreach (Waypoint wp in waypoints)
             {
-                FinePrint.WaypointManager.RemoveWaypoint(wp);
+                WaypointManager.RemoveWaypoint(wp);
             }
         }
 
@@ -44,7 +44,7 @@ namespace WaypointManager
             waypoint.index = Instance.nextIndex++;
 
             Instance.waypoints.Add(waypoint);
-            FinePrint.WaypointManager.AddWaypoint(waypoint);
+            WaypointManager.AddWaypoint(waypoint);
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace WaypointManager
         /// <param name="waypoint">The waypoint to remove</param>
         public static void RemoveWaypoint(Waypoint waypoint)
         {
-            FinePrint.WaypointManager.RemoveWaypoint(waypoint);
+            WaypointManager.RemoveWaypoint(waypoint);
             if (!Instance.waypoints.Remove(waypoint))
             {
                 Debug.LogWarning("Couldn't remove custom waypoint '" + waypoint.name + "' - No such waypoint!");
@@ -101,7 +101,7 @@ namespace WaypointManager
                 waypoint.isNavigatable = true;
 
                 waypoints.Add(waypoint);
-                FinePrint.WaypointManager.AddWaypoint(waypoint);
+                WaypointManager.AddWaypoint(waypoint);
 
                 nextIndex = Math.Max(nextIndex, waypoint.index + 1);
             }

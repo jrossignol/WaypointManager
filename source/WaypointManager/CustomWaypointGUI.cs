@@ -510,34 +510,7 @@ namespace WaypointManager
             // Only handle on repaint events
             if (windowMode == WindowMode.Add && Event.current.type == EventType.Repaint)
             {
-                // Translate to screen position
-                Vector3d localSpacePoint = targetBody.GetWorldSurfacePosition(Double.Parse(latitude), Double.Parse(longitude), double.Parse(altitude));
-                Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
-                Vector3 screenPos = MapView.MapCamera.camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
-
-                // Don't draw if it's behind the camera
-                Camera camera = MapView.MapIsEnabled ? PlanetariumCamera.Camera : FlightCamera.fetch.mainCamera;
-                Vector3 cameraPos = ScaledSpace.ScaledToLocalSpace(camera.transform.position);
-                if (Vector3d.Dot(camera.transform.forward, scaledSpacePoint.normalized) < 0.0)
-                {
-                    return;
-                }
-
-                // Draw the marker at half-resolution (30 x 45) - that seems to match the one in the map view
-                Rect markerRect = new Rect(screenPos.x - 15f, (float)Screen.height - screenPos.y - 45.0f, 30f, 45f);
-
-                // Half-res for the icon too (16 x 16)
-                Rect iconRect = new Rect(screenPos.x - 8f, (float)Screen.height - screenPos.y - 39.0f, 16f, 16f);
-
-                // Draw the marker
-                bool occluded = WaypointData.IsOccluded(targetBody, cameraPos, localSpacePoint, double.Parse(altitude));
-                if (!occluded)
-                {
-                    Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, 0.5f));
-                }
-
-                // Draw the icon
-                Graphics.DrawTexture(iconRect, ContractDefs.textures[template.id], new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(template.seed, occluded ? 0.3f : 1.0f));
+                Util.DrawWaypoint(targetBody, double.Parse(latitude), double.Parse(longitude), double.Parse(altitude), template.id, template.seed);
             }
         }
 

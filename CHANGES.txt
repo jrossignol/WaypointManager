@@ -1,4 +1,5 @@
-Waypoint Manager 2.1.7
+Waypoint Manager 2.2.0
+- Now correctly supports sandbox/science modes.
 - Fix possible NullReferenceException on quit.
 
 Waypoint Manager 2.1.6

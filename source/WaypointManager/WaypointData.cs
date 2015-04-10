@@ -80,76 +80,68 @@ namespace WaypointManager
 
             bool changed = false;
 
-            if (FinePrint.WaypointManager.Instance() != null)
+            // Add new waypoints
+            foreach (Waypoint w in WaypointManager.AllWaypoints())
             {
-                // Add new waypoints
-                foreach (Waypoint w in FinePrint.WaypointManager.Instance().AllWaypoints())
+                if (w != null && w.isNavigatable)
                 {
-                    if (w != null && w.isNavigatable)
+                    WaypointData wpd;
+
+                    // Update values that are only cached once
+                    if (!waypointData.ContainsKey(w))
                     {
-                        WaypointData wpd;
+                        wpd = new WaypointData();
+                        wpd.waypoint = w;
+                        wpd.celestialBody = Util.GetBody(w.celestialName);
 
-                        // Update values that are only cached once
-                        if (!waypointData.ContainsKey(w))
+                        // Shouldn't normally happens, but who knows (Util.GetBody will throw a warning)
+                        if (wpd.celestialBody == null)
                         {
-                            wpd = new WaypointData();
-                            wpd.waypoint = w;
-                            wpd.celestialBody = Util.GetBody(w.celestialName);
-
-                            // Shouldn't normally happens, but who knows (Util.GetBody will throw a warning)
-                            if (wpd.celestialBody == null)
-                            {
-                                continue;
-                            }
-
-                            // Figure out the terrain height
-                            wpd.waypoint.height = Util.WaypointHeight(w, wpd.celestialBody);
-
-                            // Add to waypoint data
-                            waypointData[w] = wpd;
-                            changed = true;
-                        }
-                        else
-                        {
-                            wpd = waypointData[w];
+                            continue;
                         }
 
-                        // Update values that change every frame
-                        wpd.lastChecked = UnityEngine.Time.fixedTime;
-                        if (FlightGlobals.ActiveVessel != null && wpd.celestialBody == FlightGlobals.ActiveVessel.mainBody)
-                        {
-                            wpd.distanceToActive = Util.GetDistanceToWaypoint(wpd);
+                        // Figure out the terrain height
+                        wpd.waypoint.height = Util.WaypointHeight(w, wpd.celestialBody);
 
-                            // Get information about whether the waypoint is occluded
-                            Vector3 pos = wpd.celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.waypoint.height + wpd.waypoint.altitude);
-                            wpd.isOccluded = IsOccluded(wpd.celestialBody, FlightCamera.fetch.transform.position, pos, wpd.waypoint.height + wpd.waypoint.altitude);
+                        // Add to waypoint data
+                        waypointData[w] = wpd;
+                        changed = true;
+                    }
+                    else
+                    {
+                        wpd = waypointData[w];
+                    }
 
-                            Vector3 vHeading = FlightGlobals.ActiveVessel.transform.up;
+                    // Update values that change every frame
+                    wpd.lastChecked = UnityEngine.Time.fixedTime;
+                    if (FlightGlobals.ActiveVessel != null && wpd.celestialBody == FlightGlobals.ActiveVessel.mainBody)
+                    {
+                        wpd.distanceToActive = Util.GetDistanceToWaypoint(wpd);
 
-                            double vesselLat = FlightGlobals.ActiveVessel.latitude / 180.0 * Math.PI;
-                            double vesselLon = FlightGlobals.ActiveVessel.longitude / 180.0 * Math.PI;
-                            double wpLat = wpd.waypoint.latitude / 180.0 * Math.PI;
-                            double wpLon = wpd.waypoint.longitude / 180.0 * Math.PI;
+                        // Get information about whether the waypoint is occluded
+                        Vector3 pos = wpd.celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.waypoint.height + wpd.waypoint.altitude);
+                        wpd.isOccluded = IsOccluded(wpd.celestialBody, FlightCamera.fetch.transform.position, pos, wpd.waypoint.height + wpd.waypoint.altitude);
 
-                            double y = Math.Sin(wpLon - vesselLon) * Math.Cos(wpLat);
-                            double x = (Math.Cos(vesselLat) * Math.Sin(wpLat)) - (Math.Sin(vesselLat) * Math.Cos(wpLat) * Math.Cos(wpLon - vesselLon));
-                            double requiredHeading = Math.Atan2(y, x) * 180.0 / Math.PI;
-                            wpd.heading = (requiredHeading + 360.0) % 360.0;
-                        }
+                        Vector3 vHeading = FlightGlobals.ActiveVessel.transform.up;
+
+                        double vesselLat = FlightGlobals.ActiveVessel.latitude / 180.0 * Math.PI;
+                        double vesselLon = FlightGlobals.ActiveVessel.longitude / 180.0 * Math.PI;
+                        double wpLat = wpd.waypoint.latitude / 180.0 * Math.PI;
+                        double wpLon = wpd.waypoint.longitude / 180.0 * Math.PI;
+
+                        double y = Math.Sin(wpLon - vesselLon) * Math.Cos(wpLat);
+                        double x = (Math.Cos(vesselLat) * Math.Sin(wpLat)) - (Math.Sin(vesselLat) * Math.Cos(wpLat) * Math.Cos(wpLon - vesselLon));
+                        double requiredHeading = Math.Atan2(y, x) * 180.0 / Math.PI;
+                        wpd.heading = (requiredHeading + 360.0) % 360.0;
                     }
                 }
-
-                // Remove unused waypoints
-                foreach (KeyValuePair<Waypoint, WaypointData> p in waypointData.Where(p => p.Value.lastChecked != UnityEngine.Time.fixedTime).ToArray())
-                {
-                    changed = true;
-                    waypointData.Remove(p.Key);
-                }
             }
-            else
+
+            // Remove unused waypoints
+            foreach (KeyValuePair<Waypoint, WaypointData> p in waypointData.Where(p => p.Value.lastChecked != UnityEngine.Time.fixedTime).ToArray())
             {
                 changed = true;
-                waypointData.Clear();
+                waypointData.Remove(p.Key);
             }
 
             if (changed)

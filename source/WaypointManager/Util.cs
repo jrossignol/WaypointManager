@@ -106,7 +106,7 @@ namespace WaypointManager
         public static bool IsNavPoint(Waypoint waypoint)
         {
             NavWaypoint navPoint = FinePrint.WaypointManager.navWaypoint;
-            if (navPoint == null || FinePrint.WaypointManager.Instance() == null || !FinePrint.WaypointManager.navIsActive())
+            if (navPoint == null || !FinePrint.WaypointManager.navIsActive())
             {
                 return false;
             }
@@ -182,5 +182,38 @@ namespace WaypointManager
             Vector3d radialVector = new Vector3d(Math.Cos(latRads) * Math.Cos(lonRads), Math.Sin(latRads), Math.Cos(latRads) * Math.Sin(lonRads));
             return Math.Max(body.pqsController.GetSurfaceHeight(radialVector) - body.pqsController.radius, 0.0);
         }
+
+        public static void DrawWaypoint(CelestialBody targetBody, double latitude, double longitude, double altitude, string id, int seed)
+        {
+            // Translate to screen position
+            Vector3d localSpacePoint = targetBody.GetWorldSurfacePosition(latitude, longitude, altitude);
+            Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
+            Vector3 screenPos = MapView.MapCamera.camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
+
+            // Don't draw if it's behind the camera
+            Camera camera = MapView.MapIsEnabled ? PlanetariumCamera.Camera : FlightCamera.fetch.mainCamera;
+            Vector3 cameraPos = ScaledSpace.ScaledToLocalSpace(camera.transform.position);
+            if (Vector3d.Dot(camera.transform.forward, scaledSpacePoint.normalized) < 0.0)
+            {
+                return;
+            }
+
+            // Draw the marker at half-resolution (30 x 45) - that seems to match the one in the map view
+            Rect markerRect = new Rect(screenPos.x - 15f, (float)Screen.height - screenPos.y - 45.0f, 30f, 45f);
+
+            // Half-res for the icon too (16 x 16)
+            Rect iconRect = new Rect(screenPos.x - 8f, (float)Screen.height - screenPos.y - 39.0f, 16f, 16f);
+
+            // Draw the marker
+            bool occluded = WaypointData.IsOccluded(targetBody, cameraPos, localSpacePoint, altitude);
+            if (!occluded)
+            {
+                Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, 0.5f));
+            }
+
+            // Draw the icon
+            Graphics.DrawTexture(iconRect, ContractDefs.textures[id], new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(seed, occluded ? 0.3f : 1.0f));
+        }
+
     }
 }

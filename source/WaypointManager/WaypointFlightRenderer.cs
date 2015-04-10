@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using KSP;
+using Contracts;
 using FinePrint;
 using FinePrint.Utilities;
 
@@ -78,28 +79,47 @@ namespace WaypointManager
                 {
                     // Draw the marker for custom waypoints that are currently being created
                     CustomWaypointGUI.DrawMarker();
+
+                    // Draw waypoints if not in career mode
+                    if (ContractSystem.Instance == null && MapView.MapIsEnabled)
+                    {
+                        foreach (WaypointData wpd in WaypointData.Waypoints)
+                        {
+                            if (wpd.celestialBody != null && wpd.waypoint.celestialName == wpd.celestialBody.name)
+                            {
+                                Util.DrawWaypoint(wpd.celestialBody, wpd.waypoint.latitude, wpd.waypoint.longitude,
+                                    wpd.waypoint.altitude, wpd.waypoint.id, wpd.waypoint.seed);
+
+                                // Handling clicking on the waypoint
+                                if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
+                                {
+                                    HandleClick(wpd);
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if (HighLogic.LoadedSceneIsFlight && !MapView.MapIsEnabled)
                 {
                     SetupStyles();
 
-                    if (FinePrint.WaypointManager.Instance() != null)
+                    if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
                     {
-                        if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
-                        {
-                            newClick = true;
-                        }
-
-                        WaypointData.CacheWaypointData();
-
-                        foreach (WaypointData wpd in WaypointData.Waypoints)
-                        {
-                            DrawWaypoint(wpd);
-                        }
-
-                        ShowNavigationWindow();
+                        newClick = true;
                     }
+
+                    WaypointData.CacheWaypointData();
+
+                    foreach (WaypointData wpd in WaypointData.Waypoints)
+                    {
+                        DrawWaypoint(wpd);
+                    }
+                }
+
+                if (HighLogic.LoadedSceneIsFlight && (!MapView.MapIsEnabled || ContractSystem.Instance == null))
+                {
+                    ShowNavigationWindow();
                 }
             }
         }
@@ -433,6 +453,28 @@ namespace WaypointManager
             }
 
             return output;
+        }
+
+        public void HandleClick(WaypointData wpd)
+        {
+            // Translate to screen position
+            Vector3d localSpacePoint = wpd.celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.waypoint.altitude);
+            Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
+            Vector3 screenPos = MapView.MapCamera.camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
+
+            Rect markerRect = new Rect(screenPos.x - 15f, (float)Screen.height - screenPos.y - 45.0f, 30f, 45f);
+
+            if (markerRect.Contains(Event.current.mousePosition))
+            {
+                selectedWaypoint = wpd.waypoint;
+                windowPos = new Rect(markerRect.xMin - 97, markerRect.yMax + 12, 224, 60);
+                waypointName = wpd.waypoint.name + (wpd.waypoint.isClustered ? (" " + StringUtilities.IntegerToGreek(wpd.waypoint.index)) : "");
+                newClick = false;
+            }
+            else if (newClick)
+            {
+                selectedWaypoint = null;
+            }
         }
     }
 }
