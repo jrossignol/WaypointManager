@@ -41,25 +41,26 @@ namespace WaypointManager
             set
             {
                 mapObject = value;
-                if (mapObject.type == global::MapObject.MapObjectType.MANEUVERNODE)
+                if (mapObject != null)
                 {
-                    mapObject = mapObject.maneuverNode.scaledSpaceTarget;
-                }
+                    if (mapObject.type == global::MapObject.MapObjectType.MANEUVERNODE)
+                    {
+                        mapObject = mapObject.maneuverNode.scaledSpaceTarget;
+                    }
 
-                if (mapObject.type == global::MapObject.MapObjectType.CELESTIALBODY)
-                {
-                    targetBody = mapObject.celestialBody;
-                    Debug.Log("set target body via body = " + targetBody);
-                }
-                else if (mapObject.type == global::MapObject.MapObjectType.VESSEL)
-                {
-                    targetBody = mapObject.vessel.mainBody;
-                    Debug.Log("set target body via vessel = " + targetBody);
-                }
+                    if (mapObject.type == global::MapObject.MapObjectType.CELESTIALBODY)
+                    {
+                        targetBody = mapObject.celestialBody;
+                    }
+                    else if (mapObject.type == global::MapObject.MapObjectType.VESSEL)
+                    {
+                        targetBody = mapObject.vessel.mainBody;
+                    }
 
-                if (template != null)
-                {
-                    template.celestialName = targetBody.name;
+                    if (template != null)
+                    {
+                        template.celestialName = targetBody.name;
+                    }
                 }
             }
         }

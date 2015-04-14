@@ -1,3 +1,6 @@
+Waypoint Manager 2.2.1
+- Fix for NRE error in tracking station.
+
 Waypoint Manager 2.2.0
 - Now correctly supports sandbox/science modes.
 - Added import/export to file for custom waypoints (in settings menu).
