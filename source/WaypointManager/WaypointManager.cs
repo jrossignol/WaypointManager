@@ -665,6 +665,7 @@ namespace WaypointManager
             }
             else
             {
+                // First remove it to prevent duplicates
                 FinePrint.WaypointManager.AddWaypoint(waypoint);
             }
         }
@@ -675,7 +676,7 @@ namespace WaypointManager
         /// <param name="waypoint">The waypoint to remove</param>
         public static void RemoveWaypoint(Waypoint waypoint)
         {
-            if (ContractSystem.Instance == null)
+            if (FinePrint.WaypointManager.Instance() == null)
             {
                 waypoints.Remove(waypoint);
             }
