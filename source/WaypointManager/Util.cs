@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine;
 using FinePrint;
 using FinePrint.Utilities;
+using DDSHeaders;
 
 namespace WaypointManager
 {
@@ -135,22 +136,71 @@ namespace WaypointManager
 
                 try
                 {
-                    texture = new Texture2D(baseTexture.width, baseTexture.height, TextureFormat.RGBA32, false);
-                    string path = (url.Contains('/') ? "GameData/" : "GameData/Squad/Contracts/Icons/") + url + ".png";
-                    texture.LoadImage(File.ReadAllBytes(path.Replace('/', Path.DirectorySeparatorChar)));
+                    Texture2D loadedTexture = null;
+                    string path = (url.Contains('/') ? "GameData/" : "GameData/Squad/Contracts/Icons/") + url;
+                    // PNG loading
+                    if (File.Exists(path + ".png"))
+                    {
+                        path += ".png";
+                        loadedTexture = new Texture2D(baseTexture.width, baseTexture.height, TextureFormat.RGBA32, false);
+                        loadedTexture.LoadImage(File.ReadAllBytes(path.Replace('/', Path.DirectorySeparatorChar)));
+                    }
+                    // DDS loading
+                    else if (File.Exists(path + ".dds"))
+                    {
+                        path += ".dds";
+                        BinaryReader br = new BinaryReader(new MemoryStream(File.ReadAllBytes(path)));
 
-                    Color[] pixels = texture.GetPixels();
+                        if (br.ReadUInt32() != DDSValues.uintMagic)
+                        {
+                            throw new Exception("Format issue with DDS texture '" + path + "'!");
+                        }
+                        DDSHeader ddsHeader = new DDSHeader(br);
+                        if (ddsHeader.ddspf.dwFourCC == DDSValues.uintDX10)
+                        {
+                            DDSHeaderDX10 ddsHeaderDx10 = new DDSHeaderDX10(br);
+                        }
+
+                        TextureFormat texFormat;
+                        if (ddsHeader.ddspf.dwFourCC == DDSValues.uintDXT1)
+                        {
+                            texFormat = UnityEngine.TextureFormat.DXT1;
+                        }
+                        else if (ddsHeader.ddspf.dwFourCC == DDSValues.uintDXT3)
+                        {
+                            texFormat = UnityEngine.TextureFormat.DXT1 | UnityEngine.TextureFormat.Alpha8;
+                        }
+                        else if (ddsHeader.ddspf.dwFourCC == DDSValues.uintDXT5)
+                        {
+                            texFormat = UnityEngine.TextureFormat.DXT5;
+                        }
+                        else
+                        {
+                            throw new Exception("Unhandled DDS format!");
+                        }
+
+                        loadedTexture = new Texture2D((int)ddsHeader.dwWidth, (int)ddsHeader.dwHeight, texFormat, false);
+                        loadedTexture.LoadRawTextureData(br.ReadBytes((int)(br.BaseStream.Length - br.BaseStream.Position)));
+                    }
+                    else
+                    {
+                        throw new Exception("Couldn't find file for icon  '" + url + "'");
+                    }
+
+                    Color[] pixels = loadedTexture.GetPixels();
                     for (int i = 0; i < pixels.Length; i++)
                     {
                         pixels[i] *= color;
                     }
+                    texture = new Texture2D(baseTexture.width, baseTexture.height, TextureFormat.RGBA32, false);
                     texture.SetPixels(pixels);
-                    texture.Compress(true);
+                    texture.Apply(false, false);
                     contractIcons[url][color] = texture;
+                    UnityEngine.Object.Destroy(loadedTexture);
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Couldn't create texture!");
+                    Debug.LogError("WaypointManager: Couldn't create texture for '" + url + "'!");
                     Debug.LogException(e);
                     texture = contractIcons[url][color] = baseTexture;
                 }

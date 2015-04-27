@@ -1,3 +1,7 @@
+Waypoint Manager 2.3.0
+- KSP 1.0 compatibility.
+- Support DDS textures for waypoint icons.
+
 Waypoint Manager 2.2.1
 - Fix for NRE error in tracking station.
 - Fix issue where custom waypoint keep getting duplicated (thanks Luskhen).
