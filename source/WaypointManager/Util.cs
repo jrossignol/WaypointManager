@@ -42,7 +42,7 @@ namespace WaypointManager
 
             double lateralDist = 2 * (celestialBody.Radius + wpd.waypoint.height + wpd.waypoint.altitude) *
                 Math.Asin(Math.Sqrt(sin1 * sin1 + cos1 * cos2 * sin2 * sin2));
-            double heightDist = Math.Abs(wpd.waypoint.altitude + wpd.waypoint.height - (v.terrainAltitude >= 0.0 ? v.terrainAltitude : v.altitude));
+            double heightDist = Math.Abs(wpd.waypoint.altitude + wpd.waypoint.height - v.altitude);
 
             if (Config.distanceCalcMethod == Config.DistanceCalcMethod.LATERAL || heightDist <= lateralDist / 2.0)
             {

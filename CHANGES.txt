@@ -1,3 +1,7 @@
+Waypoint Manager 2.3.1
+- KSP 1.0.2 compatibility.
+- Fix problem with incorrect waypoint distances for mid-air/orbital waypoints.
+
 Waypoint Manager 2.3.0
 - KSP 1.0 compatibility.
 - Support DDS textures for waypoint icons.
