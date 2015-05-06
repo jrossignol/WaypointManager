@@ -188,6 +188,12 @@ namespace WaypointManager
                 return;
             }
 
+            // Check if the waypoint should be visible
+            if (!wpd.waypoint.visible)
+            {
+                return;
+            }
+
             // Figure out waypoint label
             string label = wpd.waypoint.name + (wpd.waypoint.isClustered ? (" " + StringUtilities.IntegerToGreek(wpd.waypoint.index)) : "");
 
