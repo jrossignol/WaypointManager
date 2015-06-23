@@ -1,5 +1,6 @@
 Waypoint Manager 2.3.3
 - Hide waypoints when they are disabled.
+- Update version file to support KSP 1.0.3
 
 Waypoint Manager 2.3.2
 - Re-release due to screwed up version file in last release.
