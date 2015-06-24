@@ -1,3 +1,6 @@
+Waypoint Manager 2.3.4
+- Stop fighting with CKAN and just realease update to support KSP 1.0.4
+
 Waypoint Manager 2.3.3
 - Hide waypoints when they are disabled.
 - Update version file to support KSP 1.0.3
