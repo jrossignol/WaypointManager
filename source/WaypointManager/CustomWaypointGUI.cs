@@ -376,8 +376,8 @@ namespace WaypointManager
 
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
-            GUILayout.Label("Longitude", GUILayout.Width(68));
             GUILayout.Label("Latitude", GUILayout.Width(68));
+            GUILayout.Label("Longitude", GUILayout.Width(68));
             GUILayout.EndVertical();
 
             GUILayout.Space(4);
@@ -385,16 +385,16 @@ namespace WaypointManager
             string val;
             float floatVal;
             GUILayout.BeginVertical();
-            val = GUILayout.TextField(longitude, GUILayout.Width(140));
-            if (float.TryParse(val, out floatVal))
-            {
-                longitude = val;
-                recalcAltitude = true;
-            }
             val = GUILayout.TextField(latitude, GUILayout.Width(140));
             if (float.TryParse(val, out floatVal))
             {
                 latitude = val;
+                recalcAltitude = true;
+            }
+            val = GUILayout.TextField(longitude, GUILayout.Width(140));
+            if (float.TryParse(val, out floatVal))
+            {
+                longitude = val;
                 recalcAltitude = true;
             }
 

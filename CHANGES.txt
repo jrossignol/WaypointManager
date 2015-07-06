@@ -1,3 +1,6 @@
+Waypoint Manager 2.4.0
+- Corrected order of latitude/longitude boxes in custom waypoint editor.
+
 Waypoint Manager 2.3.4
 - Stop fighting with CKAN and just realease update to support KSP 1.0.4
 
