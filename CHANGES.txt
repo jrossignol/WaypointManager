@@ -1,4 +1,5 @@
 Waypoint Manager 2.4.0
+- Added glide slope angle to assist with landing planes.
 - Corrected order of latitude/longitude boxes in custom waypoint editor.
 
 Waypoint Manager 2.3.4

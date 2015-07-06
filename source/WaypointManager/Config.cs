@@ -49,6 +49,7 @@ namespace WaypointManager
         public static bool hudDistance = true;
         public static bool hudTime = true;
         public static bool hudHeading = false;
+        public static bool hudAngle = false;
 
         public static bool useStockToolbar = true;
 
@@ -74,6 +75,7 @@ namespace WaypointManager
             configNode.AddValue("hudDistance", hudDistance);
             configNode.AddValue("hudTime", hudTime);
             configNode.AddValue("hudHeading", hudHeading);
+            configNode.AddValue("hudAngle", hudAngle);
             configNode.AddValue("useStockToolbar", useStockToolbar);
 
             configNode.Save(ConfigFileName,
@@ -106,6 +108,7 @@ namespace WaypointManager
             hudDistance = Convert.ToBoolean(configNode.GetValue("hudDistance"));
             hudTime = Convert.ToBoolean(configNode.GetValue("hudTime"));
             hudHeading = Convert.ToBoolean(configNode.GetValue("hudHeading"));
+            hudAngle = configNode.HasValue("hudAngle") ? Convert.ToBoolean(configNode.GetValue("hudAngle")) : false;
             if (configNode.HasValue("useStockToolbar"))
             {
                 useStockToolbar = Convert.ToBoolean(configNode.GetValue("useStockToolbar"));

@@ -19,7 +19,27 @@ namespace WaypointManager
         private static Dictionary<string, Dictionary<Color, Texture2D>> contractIcons = new Dictionary<string, Dictionary<Color, Texture2D>>();
 
         /// <summary>
-        /// Gets the  distance in meters from the active vessel to the given waypoint.
+        /// Gets the lateral distance in meters from the active vessel to the given waypoint.
+        /// </summary>
+        /// <param name="wpd">Activated waypoint</param>
+        /// <returns>Distance in meters</returns>
+        public static double GetLateralDistance(WaypointData wpd)
+        {
+            Vessel v = FlightGlobals.ActiveVessel;
+            CelestialBody celestialBody = v.mainBody;
+
+            // Use the haversine formula to calculate great circle distance.
+            double sin1 = Math.Sin(Math.PI / 180.0 * (v.latitude - wpd.waypoint.latitude) / 2);
+            double sin2 = Math.Sin(Math.PI / 180.0 * (v.longitude - wpd.waypoint.longitude) / 2);
+            double cos1 = Math.Cos(Math.PI / 180.0 * wpd.waypoint.latitude);
+            double cos2 = Math.Cos(Math.PI / 180.0 * v.latitude);
+
+            return 2 * (celestialBody.Radius + wpd.waypoint.height + wpd.waypoint.altitude) *
+                Math.Asin(Math.Sqrt(sin1 * sin1 + cos1 * cos2 * sin2 * sin2));
+        }
+        
+        /// <summary>
+        /// Gets the distance in meters from the active vessel to the given waypoint.
         /// </summary>
         /// <param name="wpd">Activated waypoint</param>
         /// <returns>Distance in meters</returns>

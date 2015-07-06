@@ -274,6 +274,28 @@ namespace WaypointManager
                                 v.state != Vessel.State.DEAD ? wpd.heading.ToString("N1") : "N/A", valueStyle);
                             ybase += 18f;
                         }
+
+                        if (Config.hudAngle && v.mainBody == wpd.celestialBody)
+                        {
+                            double distance = Util.GetLateralDistance(wpd);
+                            double heightDist = wpd.waypoint.altitude + wpd.waypoint.height - v.altitude;
+                            double angle = Math.Atan2(heightDist, distance) * 180.0 / Math.PI;
+
+                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Angle to " + label + ":", nameStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                                v.state != Vessel.State.DEAD ? angle.ToString("N2") : "N/A", valueStyle);
+                            ybase += 18f;
+
+                            if (v.srfSpeed >= 0.1)
+                            {
+                                double velAngle = 90 - Math.Acos(Vector3d.Dot(v.srf_velocity.normalized, v.upAxis)) * 180.0 / Math.PI;
+
+                                GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Velocity pitch angle:", nameStyle);
+                                GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                                    v.state != Vessel.State.DEAD ? velAngle.ToString("N2") : "N/A", valueStyle);
+                                ybase += 18f;
+                            }
+                        }
                     }
                 }
             }

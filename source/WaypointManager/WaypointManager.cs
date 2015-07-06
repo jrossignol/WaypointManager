@@ -563,6 +563,10 @@ namespace WaypointManager
             {
                 Config.hudHeading = !Config.hudHeading;
             }
+            if (GUILayout.Toggle(Config.hudAngle, "Glide slope angles") != Config.hudAngle)
+            {
+                Config.hudAngle = !Config.hudAngle;
+            }
 
             // Toolbar
             GUILayout.Label("Toolbar Display", headingStyle);
