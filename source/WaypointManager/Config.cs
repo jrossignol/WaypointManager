@@ -53,6 +53,8 @@ namespace WaypointManager
 
         public static bool useStockToolbar = true;
 
+        public static float opacity = 1.0f;
+
         public static Texture2D toolbarIcon;
         public static Texture2D addWaypointIcon;
         public static Texture2D editWaypointIcon;
@@ -77,6 +79,7 @@ namespace WaypointManager
             configNode.AddValue("hudHeading", hudHeading);
             configNode.AddValue("hudAngle", hudAngle);
             configNode.AddValue("useStockToolbar", useStockToolbar);
+            configNode.AddValue("opacity", opacity);
 
             configNode.Save(ConfigFileName,
                 "Waypoint Manager Configuration File\r\n" +
@@ -109,6 +112,7 @@ namespace WaypointManager
             hudTime = Convert.ToBoolean(configNode.GetValue("hudTime"));
             hudHeading = Convert.ToBoolean(configNode.GetValue("hudHeading"));
             hudAngle = configNode.HasValue("hudAngle") ? Convert.ToBoolean(configNode.GetValue("hudAngle")) : false;
+            opacity = configNode.HasValue("opacity") ? (float)Convert.ToDouble(configNode.GetValue("opacity")) : 1.0f;
             if (configNode.HasValue("useStockToolbar"))
             {
                 useStockToolbar = Convert.ToBoolean(configNode.GetValue("useStockToolbar"));

@@ -583,6 +583,10 @@ namespace WaypointManager
                 }
             }
 
+            // Opacity
+            GUILayout.Label("Waypoint Opacity", headingStyle);
+            Config.opacity = GUILayout.HorizontalSlider(Config.opacity, 0.3f, 1.0f);
+
             if (GUILayout.Button(new GUIContent("Export Custom Waypoints", "Exports the custom waypoints to GameData/WaypointManager/CustomWaypoints.cfg")))
             {
                 CustomWaypoints.Export();

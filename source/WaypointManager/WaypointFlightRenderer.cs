@@ -198,7 +198,7 @@ namespace WaypointManager
             string label = wpd.waypoint.name + (wpd.waypoint.isClustered ? (" " + StringUtilities.IntegerToGreek(wpd.waypoint.index)) : "");
 
             // Decide whether to actually draw the waypoint
-            float alpha = wpd.isOccluded ? 0.3f : 1.0f;
+            float alpha = wpd.isOccluded ? 0.3f : 1.0f * Config.opacity;
             if (FlightGlobals.ActiveVessel != null)
             {
                 // Figure out the distance to the waypoint
@@ -218,7 +218,7 @@ namespace WaypointManager
                     }
                     else if (directTime >= MIN_TIME - FADE_TIME)
                     {
-                        alpha = (float)((MIN_TIME - directTime) / FADE_TIME);
+                        alpha = (float)((MIN_TIME - directTime) / FADE_TIME) * Config.opacity;
                     }
                 }
                 // Draw the distance information to the nav point
