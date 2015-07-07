@@ -3,6 +3,7 @@ Waypoint Manager 2.4.0
 - Added option to change waypoint opacity.
 - Made waypoints fade when they get occluded instead of just instantly becoming invisible.
 - Corrected order of latitude/longitude boxes in custom waypoint editor.
+- Allow custom waypoints to be placed in the map view on bodies other than the one the active vessel is on.
 
 Waypoint Manager 2.3.4
 - Stop fighting with CKAN and just realease update to support KSP 1.0.4

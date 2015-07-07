@@ -101,7 +101,10 @@ namespace WaypointManager
             Vessel v = FlightGlobals.ActiveVessel;
             if (v != null)
             {
-                targetBody = v.mainBody;
+                if (!MapView.MapIsEnabled)
+                {
+                    targetBody = v.mainBody;
+                }
                 AddWaypoint(v.latitude, v.longitude, v.altitude);
             }
             else
@@ -115,8 +118,11 @@ namespace WaypointManager
         /// </summary>
         public static void AddWaypoint(double latitude, double longitude)
         {
-            Vessel v = FlightGlobals.ActiveVessel;
-            targetBody = v.mainBody;
+            if (!MapView.MapIsEnabled)
+            {
+                Vessel v = FlightGlobals.ActiveVessel;
+                targetBody = v.mainBody;
+            }
             AddWaypoint(latitude, longitude, Util.TerrainHeight(latitude, longitude, targetBody));
         }
 
