@@ -31,6 +31,7 @@ namespace WaypointManager
         public CelestialBody celestialBody = null;
         public bool isOccluded = false;
         public double heading;
+        public float currentAlpha = -1.0f;
 
         private static double lastCacheUpdate = 0.0;
 
@@ -217,6 +218,23 @@ namespace WaypointManager
 
             double sinRefAngle = body.Radius / (body.Radius + altitude);
             return Vector3.Dot(PC, PB) > Math.Sqrt(1 - sinRefAngle * sinRefAngle) + 0.05; // Give a little grace
+        }
+
+        public void SetAlpha()
+        {
+            float desiredAlpha = isOccluded ? 0.3f : 1.0f * Config.opacity;
+            if (currentAlpha < 0.0f)
+            {
+                currentAlpha = desiredAlpha;
+            }
+            else if (currentAlpha < desiredAlpha)
+            {
+                currentAlpha = Mathf.Clamp(currentAlpha + Time.deltaTime * 4f, currentAlpha, desiredAlpha);
+            }
+            else
+            {
+                currentAlpha = Mathf.Clamp(currentAlpha - Time.deltaTime * 4f, desiredAlpha, currentAlpha);
+            }
         }
     }
 }

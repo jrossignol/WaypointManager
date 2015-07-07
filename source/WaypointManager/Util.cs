@@ -17,6 +17,7 @@ namespace WaypointManager
     {
         private static string[] UNITS = { "m", "km", "Mm", "Gm", "Tm" };
         private static Dictionary<string, Dictionary<Color, Texture2D>> contractIcons = new Dictionary<string, Dictionary<Color, Texture2D>>();
+        private static float lastAlpha;
 
         /// <summary>
         /// Gets the lateral distance in meters from the active vessel to the given waypoint.
@@ -253,7 +254,7 @@ namespace WaypointManager
             return Math.Max(body.pqsController.GetSurfaceHeight(radialVector) - body.pqsController.radius, 0.0);
         }
 
-        public static void DrawWaypoint(CelestialBody targetBody, double latitude, double longitude, double altitude, string id, int seed)
+        public static void DrawWaypoint(CelestialBody targetBody, double latitude, double longitude, double altitude, string id, int seed, float alpha = -1.0f)
         {
             // Translate to screen position
             Vector3d localSpacePoint = targetBody.GetWorldSurfacePosition(latitude, longitude, altitude);
@@ -274,15 +275,30 @@ namespace WaypointManager
             // Half-res for the icon too (16 x 16)
             Rect iconRect = new Rect(screenPos.x - 8f, (float)Screen.height - screenPos.y - 39.0f, 16f, 16f);
 
-            // Draw the marker
-            bool occluded = WaypointData.IsOccluded(targetBody, cameraPos, localSpacePoint, altitude);
-            if (!occluded)
+            if (alpha < 0.0f)
             {
-                Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, 0.5f));
+                bool occluded = WaypointData.IsOccluded(targetBody, cameraPos, localSpacePoint, altitude);
+                float desiredAlpha = occluded ? 0.3f : 1.0f * Config.opacity;
+                if (lastAlpha < 0.0f)
+                {
+                    lastAlpha = desiredAlpha;
+                }
+                else if (lastAlpha < desiredAlpha)
+                {
+                    lastAlpha = Mathf.Clamp(lastAlpha + Time.deltaTime * 4f, lastAlpha, desiredAlpha);
+                }
+                else
+                {
+                    lastAlpha = Mathf.Clamp(lastAlpha - Time.deltaTime * 4f, desiredAlpha, lastAlpha);
+                }
+                alpha = lastAlpha;
             }
 
+            // Draw the marker
+            Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, 0.5f * (alpha - 0.3f) / 0.7f));
+
             // Draw the icon
-            Graphics.DrawTexture(iconRect, ContractDefs.textures[id], new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(seed, occluded ? 0.3f : 1.0f));
+            Graphics.DrawTexture(iconRect, ContractDefs.textures[id], new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(seed, alpha));
         }
 
     }

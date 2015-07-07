@@ -1,6 +1,7 @@
 Waypoint Manager 2.4.0
 - Added glide slope angle to assist with landing planes.
 - Added option to change waypoint opacity.
+- Made waypoints fade when they get occluded instead of just instantly becoming invisible.
 - Corrected order of latitude/longitude boxes in custom waypoint editor.
 
 Waypoint Manager 2.3.4

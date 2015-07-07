@@ -94,8 +94,9 @@ namespace WaypointManager
                             {
                                 if (Event.current.type == EventType.Repaint)
                                 {
+                                    wpd.SetAlpha();
                                     Util.DrawWaypoint(wpd.celestialBody, wpd.waypoint.latitude, wpd.waypoint.longitude,
-                                        wpd.waypoint.altitude, wpd.waypoint.id, wpd.waypoint.seed);
+                                        wpd.waypoint.altitude, wpd.waypoint.id, wpd.waypoint.seed, wpd.currentAlpha);
                                 }
 
                                 // Handling clicking on the waypoint
@@ -197,8 +198,10 @@ namespace WaypointManager
             // Figure out waypoint label
             string label = wpd.waypoint.name + (wpd.waypoint.isClustered ? (" " + StringUtilities.IntegerToGreek(wpd.waypoint.index)) : "");
 
+            // Set the alpha and do a nice fade
+            wpd.SetAlpha();
+
             // Decide whether to actually draw the waypoint
-            float alpha = wpd.isOccluded ? 0.3f : 1.0f * Config.opacity;
             if (FlightGlobals.ActiveVessel != null)
             {
                 // Figure out the distance to the waypoint
@@ -218,7 +221,7 @@ namespace WaypointManager
                     }
                     else if (directTime >= MIN_TIME - FADE_TIME)
                     {
-                        alpha = (float)((MIN_TIME - directTime) / FADE_TIME) * Config.opacity;
+                        wpd.currentAlpha = (float)((MIN_TIME - directTime) / FADE_TIME) * Config.opacity;
                     }
                 }
                 // Draw the distance information to the nav point
@@ -351,15 +354,12 @@ namespace WaypointManager
                 Rect iconRect = new Rect(screenPos.x - 8f, (float)Screen.height - screenPos.y - 39.0f, 16f, 16f);
 
                 // Draw the marker
-                if (!wpd.isOccluded)
-                {
-                    Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, alpha * 0.5f));
-                }
+                Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, 0.5f * (wpd.currentAlpha - 0.3f) / 0.7f));
 
                 // Draw the icon, but support blinking
                 if (!Util.IsNavPoint(wpd.waypoint) || !FinePrint.WaypointManager.navWaypoint.blinking || (int)((Time.fixedTime - (int)Time.fixedTime) * 4) % 2 == 0)
                 {
-                    Graphics.DrawTexture(iconRect, ContractDefs.textures[wpd.waypoint.id], new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(wpd.waypoint.seed, alpha));
+                    Graphics.DrawTexture(iconRect, ContractDefs.textures[wpd.waypoint.id], new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(wpd.waypoint.seed, wpd.currentAlpha));
                 }
 
                 // Hint text!
