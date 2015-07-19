@@ -148,6 +148,7 @@ namespace WaypointManager
 
         private void OnGameSceneLoad(GameScenes scene)
         {
+            WaypointData.CacheWaypointData();
             if (scene != GameScenes.FLIGHT && scene != GameScenes.TRACKSTATION)
             {
                 showGUI = false;

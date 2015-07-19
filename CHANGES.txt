@@ -1,5 +1,6 @@
 Waypoint Manager 2.4.1
 - Correctly display name for "clustered" waypoints (Alpha, Beta, Gamma).
+- Fix for duplicated waypoints (thanks Dr. Jet).
 
 Waypoint Manager 2.4.0
 - Added glide slope angle to assist with landing planes.
