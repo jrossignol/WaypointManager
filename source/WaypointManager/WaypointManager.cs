@@ -659,6 +659,13 @@ namespace WaypointManager
         }
 
         protected static List<Waypoint> waypoints = new List<Waypoint>();
+        public static IEnumerable<Waypoint> customWaypoints
+        {
+            get
+            {
+                return waypoints;
+            }
+        }
 
         /// <summary>
         /// Adds the given waypoint to the list of waypoints

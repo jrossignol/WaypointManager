@@ -145,16 +145,16 @@ namespace WaypointManager
                 waypointData.Remove(p.Key);
             }
 
-            if (changed)
+            if (changed || customWaypoints.waypointByContract.Count != WaypointManager.customWaypoints.Count())
             {
                 // Clear the by contract list
                 foreach (ContractContainer cc in waypointByContract.Values)
                 {
                     cc.waypointByContract.Clear();
                 }
+                customWaypoints.waypointByContract.Clear();
 
                 // Rebuild the by contract list
-                customWaypoints.waypointByContract.Clear();
                 foreach (WaypointData wpd in waypointData.Values)
                 {
                     if (wpd.waypoint.contractReference != null)
