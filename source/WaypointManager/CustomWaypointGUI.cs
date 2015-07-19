@@ -472,7 +472,10 @@ namespace WaypointManager
             }
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Save"))
+            bool save = GUILayout.Button("Save");
+            bool apply = GUILayout.Button("Apply");
+            bool cancel = GUILayout.Button("Cancel");
+            if (save || apply)
             {
                 template.latitude = double.Parse(latitude);
                 template.longitude = double.Parse(longitude);
@@ -493,10 +496,8 @@ namespace WaypointManager
                     selectedWaypoint.height = template.height;
                     selectedWaypoint.seed = template.seed;
                 }
-
-                windowMode = WindowMode.None;
             }
-            if (GUILayout.Button("Cancel"))
+            if (save || cancel)
             {
                 windowMode = WindowMode.None;
             }
