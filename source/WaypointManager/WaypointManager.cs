@@ -441,7 +441,12 @@ namespace WaypointManager
             GUILayout.BeginVertical();
 
             // Waypoint name
-            GUILayout.Label(wpd.waypoint.name, labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
+            string name = wpd.waypoint.name;
+            if (wpd.waypoint.isClustered)
+            {
+                name += " " + StringUtilities.IntegerToGreek(wpd.waypoint.index);
+            }
+            GUILayout.Label(name, labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
 
             // Waypoint distance
             GUILayout.Label("Distance: " + Util.PrintDistance(wpd), labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
