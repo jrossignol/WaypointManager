@@ -1,3 +1,6 @@
+Waypoint Manager 2.4.2
+- Fixed issues with apply button in add mode (thanks Bizz Keryear).
+
 Waypoint Manager 2.4.1
 - Correctly display name for "clustered" waypoints (Alpha, Beta, Gamma).
 - Fix for duplicated waypoints (thanks Dr. Jet).

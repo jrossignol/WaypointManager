@@ -131,6 +131,11 @@ namespace WaypointManager
         /// </summary>
         public static void AddWaypoint(double latitude, double longitude, double altitude)
         {
+            if (windowMode == WindowMode.None)
+            {
+                wpWindowPos = new Rect((Screen.width - wpWindowPos.width) / 2.0f, (Screen.height - wpWindowPos.height) / 2.0f - 100f, wpWindowPos.width, wpWindowPos.height);
+            }
+
             System.Random r = new System.Random();
             windowMode = WindowMode.Add;
 
@@ -141,7 +146,6 @@ namespace WaypointManager
             CustomWaypointGUI.altitude = altitude.ToString();
 
             // Default values
-            wpWindowPos = new Rect((Screen.width - wpWindowPos.width) / 2.0f, (Screen.height - wpWindowPos.height) / 2.0f - 100f, wpWindowPos.width, wpWindowPos.height);
             selectedIcon = (int)(r.NextDouble() * icons.Count());
             selectedColor = (int)(r.NextDouble() * seeds.Count());
             template.id = icons[selectedIcon].tooltip;
@@ -153,6 +157,11 @@ namespace WaypointManager
         /// </summary>
         public static void EditWaypoint(Waypoint waypoint)
         {
+            if (windowMode == WindowMode.None)
+            {
+                wpWindowPos = new Rect((Screen.width - wpWindowPos.width) / 2.0f, (Screen.height - wpWindowPos.height) / 2.0f - 100f, wpWindowPos.width, wpWindowPos.height);
+            }
+
             windowMode = WindowMode.Edit;
             selectedWaypoint = waypoint;
 
@@ -163,9 +172,6 @@ namespace WaypointManager
             altitude = (waypoint.altitude + Util.WaypointHeight(waypoint, targetBody)).ToString();
             template.id = waypoint.id;
             template.seed = waypoint.seed;
-
-            // Default values
-            wpWindowPos = new Rect((Screen.width - wpWindowPos.width) / 2.0f, (Screen.height - wpWindowPos.height) / 2.0f - 100f, wpWindowPos.width, wpWindowPos.height);
         }
 
         /// <summary>
@@ -484,6 +490,7 @@ namespace WaypointManager
                 if (windowMode == WindowMode.Add)
                 {
                     CustomWaypoints.AddWaypoint(template);
+                    selectedWaypoint = template;
                     template = new Waypoint();
                 }
                 else
@@ -500,6 +507,10 @@ namespace WaypointManager
             if (save || cancel)
             {
                 windowMode = WindowMode.None;
+            }
+            else if (apply)
+            {
+                EditWaypoint(selectedWaypoint);
             }
             GUILayout.EndHorizontal();
 
