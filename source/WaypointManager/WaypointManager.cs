@@ -432,7 +432,7 @@ namespace WaypointManager
             GUILayout.BeginHorizontal(GUILayout.Height(32));
 
             // Contract icon
-            GUILayout.Label(ContractIcon(wpd), GUILayout.ExpandWidth(false));
+            GUILayout.Label(ContractIcon(wpd), GUILayout.ExpandWidth(false), GUILayout.Height(38));
             GUILayout.Space(2);
             
             // Celestial body icon
