@@ -38,7 +38,7 @@ namespace WaypointManager
             return 2 * (celestialBody.Radius + wpd.waypoint.height + wpd.waypoint.altitude) *
                 Math.Asin(Math.Sqrt(sin1 * sin1 + cos1 * cos2 * sin2 * sin2));
         }
-        
+
         /// <summary>
         /// Gets the distance in meters from the active vessel to the given waypoint.
         /// </summary>
@@ -299,6 +299,26 @@ namespace WaypointManager
 
             // Draw the icon
             Graphics.DrawTexture(iconRect, ContractDefs.textures[id], new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(seed, alpha));
+        }
+
+        /// <summary>
+        /// Converts decimal degrees to a string of DMS formatted degrees with N/S, E/W prefix
+        /// </summary>
+        /// <param name="decimalDegrees"></param>
+        /// <param name="latitude">boolean to determin latitude or longitude for compass prefix</param>
+        /// <returns></returns>
+        public static string DecimalDegreesToDMS(double decimalDegrees, bool latitude)
+        {
+            string dms = string.Empty;
+            string direction = string.Empty;
+            int d = Math.Abs((int)(decimalDegrees));
+            double decimalpart = Math.Abs(decimalDegrees - d);
+            int m = (int)(decimalpart * 60);
+            double s = (decimalpart - m / 60f) * 3600;
+            if (latitude) direction = decimalDegrees >= 0 ? "N" : "S";
+            else direction = decimalDegrees >= 0 ? "E" : "W";
+            dms = string.Format("{3} {0}\x00B0{1}\'{2:F1}\"", d, m, s, direction);
+            return dms;
         }
 
     }
