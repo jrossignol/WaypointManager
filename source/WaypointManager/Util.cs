@@ -38,7 +38,7 @@ namespace WaypointManager
             return 2 * (celestialBody.Radius + wpd.waypoint.height + wpd.waypoint.altitude) *
                 Math.Asin(Math.Sqrt(sin1 * sin1 + cos1 * cos2 * sin2 * sin2));
         }
-
+        
         /// <summary>
         /// Gets the distance in meters from the active vessel to the given waypoint.
         /// </summary>
@@ -320,6 +320,5 @@ namespace WaypointManager
             dms = string.Format("{3} {0}\x00B0{1}\'{2:F1}\"", d, m, s, direction);
             return dms;
         }
-
     }
 }
