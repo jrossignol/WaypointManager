@@ -310,14 +310,13 @@ namespace WaypointManager
         public static string DecimalDegreesToDMS(double decimalDegrees, bool latitude)
         {
             string dms = string.Empty;
-            string direction = string.Empty;
-            int d = Math.Abs((int)(decimalDegrees));
-            double decimalpart = Math.Abs(decimalDegrees - d);
+            string direction = latitude ? (decimalDegrees >= 0 ? "N" : "S") : (decimalDegrees >= 0 ? "E" : "W");
+            decimalDegrees = Math.Abs(decimalDegrees);
+            int d =(int)(decimalDegrees);
+            double decimalpart = decimalDegrees - d;
             int m = (int)(decimalpart * 60);
             double s = (decimalpart - m / 60f) * 3600;
-            if (latitude) direction = decimalDegrees >= 0 ? "N" : "S";
-            else direction = decimalDegrees >= 0 ? "E" : "W";
-            dms = string.Format("{3} {0}\x00B0{1}\'{2:F1}\"", d, m, s, direction);
+            dms = string.Format("{3} {0}\x00B0 {1}\' {2:F1}\"", d, m, s, direction);
             return dms;
         }
     }
