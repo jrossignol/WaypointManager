@@ -1,3 +1,6 @@
+Waypoint Manager 2.4.3
+- Recompile for KSP 1.0.5
+
 Waypoint Manager 2.4.2
 - Fixed issues with apply button in add mode (thanks Bizz Keryear).
 - Fixed issue with waypoint icon scaling when large icons used (thanks amorymeltzer).
