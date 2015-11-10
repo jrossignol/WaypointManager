@@ -299,6 +299,14 @@ namespace WaypointManager
                                 ybase += 18f;
                             }
                         }
+                        if(Config.hudCoordinates&&v.mainBody==wpd.celestialBody)
+                        {
+                            ybase += 9;
+                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 38f), "Coordinates of " + label + ":", nameStyle);
+                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 38f),
+                                v.state != Vessel.State.DEAD ? string.Format("{0}\r\n{1}", Util.DecimalDegreesToDMS(wpd.waypoint.latitude,true), Util.DecimalDegreesToDMS(wpd.waypoint.longitude,false)) : "N/A", valueStyle);
+                            ybase += 18f;
+                        }
                     }
                 }
             }
