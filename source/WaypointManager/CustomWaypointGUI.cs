@@ -12,7 +12,7 @@ namespace WaypointManager
     {
         // List of icons we don't want to look at in the Squad directory
         public static string[] forbiddenIcons = new string[] {
-            "an", "ap", "default", "dn", "marker", "orbit", "pe"
+            "an", "ap", "default", "dn", "marker", "orbit", "pe", "vessel"
         };
 
         private const float ICON_PICKER_WIDTH = 302;

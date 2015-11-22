@@ -1,3 +1,6 @@
+Waypoint Manager 2.4.4
+- Add vessel marker to forbidden icons.
+
 Waypoint Manager 2.4.3
 - Recompile for KSP 1.0.5
 
