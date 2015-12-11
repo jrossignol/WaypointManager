@@ -15,7 +15,7 @@ namespace WaypointManager
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     class WaypointManager : MonoBehaviour
     {
-        private const float GUI_WIDTH = 360;
+        private const float GUI_WIDTH = 380;
         private const float SETTINGS_WIDTH = 280;
 
         public static WaypointManager Instance;
@@ -441,16 +441,25 @@ namespace WaypointManager
 
             GUILayout.BeginVertical();
 
-            // Waypoint name
+            // Waypoint name, distance
+            GUILayout.BeginHorizontal();
             string name = wpd.waypoint.name;
             if (wpd.waypoint.isClustered)
             {
                 name += " " + StringUtilities.IntegerToGreek(wpd.waypoint.index);
             }
-            GUILayout.Label(name, labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
+            GUILayout.Label(name, labelStyle, GUILayout.Height(16), GUILayout.Width(GUI_WIDTH - 240), GUILayout.ExpandWidth(false));
+            if (FlightGlobals.currentMainBody == wpd.celestialBody)
+            {
+                GUILayout.Label("Dist: " + Util.PrintDistance(wpd), labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
+            }
+            GUILayout.EndHorizontal();
 
-            // Waypoint distance
-            GUILayout.Label("Distance: " + Util.PrintDistance(wpd), labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
+            // Waypoint location
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Lat: " + Util.FormatCoordinate(wpd.waypoint.latitude, true), labelStyle, GUILayout.Height(16), GUILayout.Width(GUI_WIDTH / 2.0f - 72.0f), GUILayout.ExpandWidth(false));
+            GUILayout.Label("Lon: " + Util.FormatCoordinate(wpd.waypoint.longitude, false), labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
+            GUILayout.EndHorizontal();
 
             GUILayout.EndVertical();
             GUILayout.FlexibleSpace();

@@ -106,6 +106,23 @@ namespace WaypointManager
         }
 
         /// <summary>
+        /// Formats the coordinate.
+        /// </summary>
+        /// <param name="coord">The coordinate</param>
+        /// <returns>The location for screen output</returns>
+        public static string FormatCoordinate(double coord, bool islatitude)
+        {
+            double acoord = Math.Abs(coord);
+            int d = (int)acoord;
+            int m = (int)Math.Abs((acoord - d) * 60.0);
+            int s = (int)Math.Abs(((acoord - d) * 60.0 - m) * 60.0);
+
+            string direction = coord > 0.0 ? (islatitude ? "N" : "E") : (islatitude ? "S" : "W");
+
+            return string.Format("{0}° {1}' {2}\" {3}", d, m, s, direction);
+        }
+
+        /// <summary>
         /// Gets the celestial body for the given name.
         /// </summary>
         /// <param name="name">Name of the celestial body</param>

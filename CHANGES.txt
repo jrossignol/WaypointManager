@@ -1,4 +1,5 @@
 Waypoint Manager 2.4.4
+- Show waypoint location in degrees/minutes/seconds in main window.
 - Add vessel marker to forbidden icons.
 
 Waypoint Manager 2.4.3
