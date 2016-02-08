@@ -432,7 +432,7 @@ namespace WaypointManager
             GUILayout.BeginHorizontal(GUILayout.Height(32));
 
             // Contract icon
-            GUILayout.Label(ContractIcon(wpd), GUILayout.ExpandWidth(false), GUILayout.Height(38));
+            GUILayout.Label(ContractIcon(wpd), GUILayout.ExpandWidth(false), GUILayout.Height(38), GUILayout.Width(38));
             GUILayout.Space(2);
             
             // Celestial body icon
@@ -582,6 +582,18 @@ namespace WaypointManager
             {
                 Config.hudAngle = !Config.hudAngle;
             }
+
+            // Display style
+            GUILayout.Label("Location display style", headingStyle);
+            if (GUILayout.Toggle(!Config.displayDecimal, "Degrees/Minutes/Seconds") == Config.displayDecimal)
+            {
+                Config.displayDecimal = false;
+            }
+            if (GUILayout.Toggle(Config.displayDecimal, "Decimal") != Config.displayDecimal)
+            {
+                Config.displayDecimal = true;
+            }
+
 
             // Toolbar
             GUILayout.Label("Toolbar Display", headingStyle);

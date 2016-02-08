@@ -45,6 +45,7 @@ namespace WaypointManager
         public static DisplayMode displayMode = DisplayMode.CONTRACT;
         public static DistanceCalcMethod distanceCalcMethod = DistanceCalcMethod.COMPROMISE;
         public static WaypointDisplay waypointDisplay = WaypointDisplay.ALL;
+        public static bool displayDecimal = false;
 
         public static bool hudDistance = true;
         public static bool hudTime = true;
@@ -78,6 +79,7 @@ namespace WaypointManager
             configNode.AddValue("hudTime", hudTime);
             configNode.AddValue("hudHeading", hudHeading);
             configNode.AddValue("hudAngle", hudAngle);
+            configNode.AddValue("displayDecimal", displayDecimal);
             configNode.AddValue("useStockToolbar", useStockToolbar);
             configNode.AddValue("opacity", opacity);
 
@@ -113,6 +115,7 @@ namespace WaypointManager
             hudHeading = Convert.ToBoolean(configNode.GetValue("hudHeading"));
             hudAngle = configNode.HasValue("hudAngle") ? Convert.ToBoolean(configNode.GetValue("hudAngle")) : false;
             opacity = configNode.HasValue("opacity") ? (float)Convert.ToDouble(configNode.GetValue("opacity")) : 1.0f;
+            displayDecimal = configNode.HasValue("displayDecimal") ? Convert.ToBoolean(configNode.GetValue("displayDecimal")) : false;
             if (configNode.HasValue("useStockToolbar"))
             {
                 useStockToolbar = Convert.ToBoolean(configNode.GetValue("useStockToolbar"));

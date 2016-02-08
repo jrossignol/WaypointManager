@@ -112,14 +112,21 @@ namespace WaypointManager
         /// <returns>The location for screen output</returns>
         public static string FormatCoordinate(double coord, bool islatitude)
         {
-            double acoord = Math.Abs(coord);
-            int d = (int)acoord;
-            int m = (int)Math.Abs((acoord - d) * 60.0);
-            int s = (int)Math.Abs(((acoord - d) * 60.0 - m) * 60.0);
+            if (Config.displayDecimal)
+            {
+                return coord.ToString("F3") + " °";
+            }
+            else
+            {
+                double acoord = Math.Abs(coord);
+                int d = (int)acoord;
+                int m = (int)Math.Abs((acoord - d) * 60.0);
+                int s = (int)Math.Abs(((acoord - d) * 60.0 - m) * 60.0);
 
-            string direction = coord > 0.0 ? (islatitude ? "N" : "E") : (islatitude ? "S" : "W");
+                string direction = coord > 0.0 ? (islatitude ? "N" : "E") : (islatitude ? "S" : "W");
 
-            return string.Format("{0}° {1}' {2}\" {3}", d, m, s, direction);
+                return string.Format("{0}° {1}' {2}\" {3}", d, m, s, direction);
+            }
         }
 
         /// <summary>
