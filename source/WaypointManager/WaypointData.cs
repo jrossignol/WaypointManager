@@ -36,7 +36,7 @@ namespace WaypointManager
         private static double lastCacheUpdate = 0.0;
 
         private static Dictionary<Waypoint, WaypointData> waypointData = new Dictionary<Waypoint, WaypointData>();
-        private static Dictionary<Contract, ContractContainer> waypointByContract = new Dictionary<Contract, ContractContainer>();
+        private static Dictionary<long, ContractContainer> contractMap = new Dictionary<long, ContractContainer>();
         private static Dictionary<CelestialBody, List<WaypointData>> waypointByBody = new Dictionary<CelestialBody, List<WaypointData>>();
         private static ContractContainer customWaypoints = new ContractContainer(null);
 
@@ -48,11 +48,11 @@ namespace WaypointManager
         /// <summary>
         /// Gets all waypoint data keyed by contract.
         /// </summary>
-        public static IEnumerable<ContractContainer> WaypointByContracts
+        public static IEnumerable<ContractContainer> ContractContainers
         {
             get
             {
-                foreach (ContractContainer cc in waypointByContract.Values)
+                foreach (ContractContainer cc in contractMap.Values)
                 {
                     yield return cc;
                 }
@@ -148,22 +148,23 @@ namespace WaypointManager
             if (changed || customWaypoints.waypointByContract.Count != WaypointManager.customWaypoints.Count())
             {
                 // Clear the by contract list
-                foreach (ContractContainer cc in waypointByContract.Values)
+                foreach (ContractContainer cc in contractMap.Values)
                 {
                     cc.waypointByContract.Clear();
                 }
                 customWaypoints.waypointByContract.Clear();
 
                 // Rebuild the by contract list
+                contractMap.Clear();
                 foreach (WaypointData wpd in waypointData.Values)
                 {
                     if (wpd.waypoint.contractReference != null)
                     {
-                        if (!waypointByContract.ContainsKey(wpd.waypoint.contractReference))
+                        if (!contractMap.ContainsKey(wpd.waypoint.contractReference.ContractID))
                         {
-                            waypointByContract[wpd.waypoint.contractReference] = new ContractContainer(wpd.waypoint.contractReference);
+                            contractMap[wpd.waypoint.contractReference.ContractID] = new ContractContainer(wpd.waypoint.contractReference);
                         }
-                        waypointByContract[wpd.waypoint.contractReference].waypointByContract.Add(wpd);
+                        contractMap[wpd.waypoint.contractReference.ContractID].waypointByContract.Add(wpd);
                     }
                     else
                     {
@@ -172,11 +173,11 @@ namespace WaypointManager
                 }
 
                 // Remove any unused contracts
-                foreach (ContractContainer cc in waypointByContract.Values.ToList())
+                foreach (ContractContainer cc in contractMap.Values.ToList())
                 {
                     if (cc.waypointByContract.Count == 0)
                     {
-                        waypointByContract.Remove(cc.contract);
+                        contractMap.Remove(cc.contract.ContractID);
                     }
                 }
 

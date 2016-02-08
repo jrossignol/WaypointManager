@@ -380,7 +380,7 @@ namespace WaypointManager
 
             if (Config.displayMode == Config.DisplayMode.CONTRACT)
             {
-                foreach (WaypointData.ContractContainer cc in WaypointData.WaypointByContracts)
+                foreach (WaypointData.ContractContainer cc in WaypointData.ContractContainers)
                 {
                     Contract c = cc.contract;
                     string title = (c != null ? c.Title : "No contract");
