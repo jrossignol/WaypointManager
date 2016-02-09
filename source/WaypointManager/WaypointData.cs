@@ -155,7 +155,6 @@ namespace WaypointManager
                 customWaypoints.waypointByContract.Clear();
 
                 // Rebuild the by contract list
-                contractMap.Clear();
                 foreach (WaypointData wpd in waypointData.Values)
                 {
                     if (wpd.waypoint.contractReference != null)

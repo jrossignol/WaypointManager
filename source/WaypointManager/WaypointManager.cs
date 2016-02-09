@@ -391,7 +391,7 @@ namespace WaypointManager
 
                     if (!cc.hidden)
                     {
-                        foreach (WaypointData wpd in cc.waypointByContract)
+                        foreach (WaypointData wpd in cc.waypointByContract.OrderBy(wp => wp.waypoint.name + wp.waypoint.index))
                         {
                             WaypointLineGUI(wpd);
                         }
@@ -412,7 +412,7 @@ namespace WaypointManager
 
                     if (!hidden)
                     {
-                        foreach (WaypointData wpd in pair.Value)
+                        foreach (WaypointData wpd in pair.Value.OrderBy(wp => wp.waypoint.name + wp.waypoint.index))
                         {
                             WaypointLineGUI(wpd);
                         }

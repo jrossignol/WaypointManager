@@ -1,7 +1,11 @@
+Waypoint Manager 2.4.5
+- Add option to show waypoint location in decimal.
+- Fixed issue with contract info getting duplicated (thanks smjjames).
+- Fixed waypoint sort order.
+
 Waypoint Manager 2.4.4
 - Show waypoint location in degrees/minutes/seconds in main window.
 - Add vessel marker to forbidden icons.
-- Fixed issue with contract info getting duplicated (thanks smjjames).
 
 Waypoint Manager 2.4.3
 - Recompile for KSP 1.0.5
