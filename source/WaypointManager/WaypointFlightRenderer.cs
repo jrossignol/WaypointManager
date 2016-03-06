@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using KSP;
+using KSP.UI.Screens;
 using Contracts;
 using FinePrint;
 using FinePrint.Utilities;
@@ -314,13 +315,13 @@ namespace WaypointManager
             Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
 
             // Don't draw if it's behind the camera
-            if (Vector3d.Dot(MapView.MapCamera.camera.transform.forward, scaledSpacePoint.normalized) < 0.0)
+            if (Vector3d.Dot(PlanetariumCamera.Camera.transform.forward, scaledSpacePoint.normalized) < 0.0)
             {
                 return;
             }
 
             // Translate to screen position
-            Vector3 screenPos = MapView.MapCamera.camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
+            Vector3 screenPos = PlanetariumCamera.Camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
 
             // Draw the marker at half-resolution (30 x 45) - that seems to match the one in the map view
             Rect markerRect = new Rect(screenPos.x - 15f, (float)Screen.height - screenPos.y - 45.0f, 30f, 45f);
@@ -359,7 +360,7 @@ namespace WaypointManager
                 // Draw the icon, but support blinking
                 if (!Util.IsNavPoint(wpd.waypoint) || !FinePrint.WaypointManager.navWaypoint.blinking || (int)((Time.fixedTime - (int)Time.fixedTime) * 4) % 2 == 0)
                 {
-                    Graphics.DrawTexture(iconRect, ContractDefs.textures[wpd.waypoint.id], new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(wpd.waypoint.seed, wpd.currentAlpha));
+                    Graphics.DrawTexture(iconRect, ContractDefs.sprites[wpd.waypoint.id].texture, new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(wpd.waypoint.seed, wpd.currentAlpha));
                 }
 
                 // Hint text!
@@ -497,7 +498,7 @@ namespace WaypointManager
             // Translate to screen position
             Vector3d localSpacePoint = wpd.celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.waypoint.altitude);
             Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
-            Vector3 screenPos = MapView.MapCamera.camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
+            Vector3 screenPos = PlanetariumCamera.Camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
 
             Rect markerRect = new Rect(screenPos.x - 15f, (float)Screen.height - screenPos.y - 45.0f, 30f, 45f);
 
@@ -519,7 +520,7 @@ namespace WaypointManager
             // Translate to screen position
             Vector3d localSpacePoint = wpd.celestialBody.GetWorldSurfacePosition(wpd.waypoint.latitude, wpd.waypoint.longitude, wpd.waypoint.altitude);
             Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
-            Vector3 screenPos = MapView.MapCamera.camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
+            Vector3 screenPos = PlanetariumCamera.Camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
 
             Rect iconRect = new Rect(screenPos.x - 8f, (float)Screen.height - screenPos.y - 39.0f, 16f, 16f);
 

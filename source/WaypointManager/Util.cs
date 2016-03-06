@@ -177,7 +177,7 @@ namespace WaypointManager
             }
             if (!contractIcons[url].ContainsKey(color))
             {
-                Texture2D baseTexture = ContractDefs.textures[url];
+                Texture2D baseTexture = ContractDefs.sprites[url].texture;
 
                 try
                 {
@@ -283,7 +283,7 @@ namespace WaypointManager
             // Translate to screen position
             Vector3d localSpacePoint = targetBody.GetWorldSurfacePosition(latitude, longitude, altitude);
             Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
-            Vector3 screenPos = MapView.MapCamera.camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
+            Vector3 screenPos = PlanetariumCamera.Camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
 
             // Don't draw if it's behind the camera
             Camera camera = MapView.MapIsEnabled ? PlanetariumCamera.Camera : FlightCamera.fetch.mainCamera;
@@ -322,7 +322,7 @@ namespace WaypointManager
             Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, 0.5f * (alpha - 0.3f) / 0.7f));
 
             // Draw the icon
-            Graphics.DrawTexture(iconRect, ContractDefs.textures[id], new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(seed, alpha));
+            Graphics.DrawTexture(iconRect, ContractDefs.sprites[id].texture, new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(seed, alpha));
         }
 
     }
