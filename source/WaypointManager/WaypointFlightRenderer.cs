@@ -24,11 +24,7 @@ namespace WaypointManager
         private Rect windowPos;
         private bool newClick = false;
         private AltimeterSliderButtons asb = null;
-
-        private float referencePos = 0.0f;
-        private float referenceUISize = 0.0f;
-        private float lastPos = 0.0f;
-        private bool referenceSet = false;
+        private RectTransform asbRectTransform = null;
 
         private const double MIN_TIME = 300;
         private const double MIN_DISTANCE = 25000;
@@ -234,25 +230,10 @@ namespace WaypointManager
                         if (asb == null)
                         {
                             asb = UnityEngine.Object.FindObjectOfType<AltimeterSliderButtons>();
+                            asbRectTransform = asb.GetComponent<RectTransform>();
                         }
 
-                        if (referenceUISize != ScreenSafeUI.VerticalRatio || !referenceSet)
-                        {
-                            referencePos = ScreenSafeUI.referenceCam.ViewportToScreenPoint(asb.transform.position).y;
-                            referenceUISize = ScreenSafeUI.VerticalRatio;
-
-                            // Need two consistent numbers in a row to set the reference
-                            if (lastPos == referencePos)
-                            {
-                                referenceSet = true;
-                            }
-                            else
-                            {
-                                lastPos = referencePos;
-                            }
-                        }
-
-                        float ybase = (referencePos - ScreenSafeUI.referenceCam.ViewportToScreenPoint(asb.transform.position).y + Screen.height / 11.67f) / ScreenSafeUI.VerticalRatio;
+                        float ybase = (Screen.height / 2.0f) - asbRectTransform.position.y + asbRectTransform.sizeDelta.y * GameSettings.UI_SCALE * 0.5f + 4;
 
                         string timeToWP = GetTimeToWaypoint(wpd);
                         if (Config.hudDistance)
