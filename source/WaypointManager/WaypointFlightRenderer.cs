@@ -77,7 +77,7 @@ namespace WaypointManager
                     newClick = true;
                 }
 
-                if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+                if (HighLogic.LoadedScene == GameScenes.FLIGHT || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
                 {
                     // Draw the marker for custom waypoints that are currently being created
                     CustomWaypointGUI.DrawMarker();

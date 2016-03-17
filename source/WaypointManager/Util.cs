@@ -280,10 +280,9 @@ namespace WaypointManager
 
         public static void DrawWaypoint(CelestialBody targetBody, double latitude, double longitude, double altitude, string id, int seed, float alpha = -1.0f)
         {
-            // Translate to screen position
+            // Translate to scaled space
             Vector3d localSpacePoint = targetBody.GetWorldSurfacePosition(latitude, longitude, altitude);
             Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
-            Vector3 screenPos = PlanetariumCamera.Camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
 
             // Don't draw if it's behind the camera
             Camera camera = MapView.MapIsEnabled ? PlanetariumCamera.Camera : FlightCamera.fetch.mainCamera;
@@ -292,6 +291,9 @@ namespace WaypointManager
             {
                 return;
             }
+
+            // Translate to screen position
+            Vector3 screenPos = camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
 
             // Draw the marker at half-resolution (30 x 45) - that seems to match the one in the map view
             Rect markerRect = new Rect(screenPos.x - 15f, (float)Screen.height - screenPos.y - 45.0f, 30f, 45f);
