@@ -43,16 +43,16 @@ namespace WaypointManager
                 mapObject = value;
                 if (mapObject != null)
                 {
-                    if (mapObject.type == global::MapObject.MapObjectType.MANEUVERNODE)
+                    if (mapObject.type == global::MapObject.ObjectType.ManeuverNode)
                     {
                         mapObject = mapObject.maneuverNode.scaledSpaceTarget;
                     }
 
-                    if (mapObject.type == global::MapObject.MapObjectType.CELESTIALBODY)
+                    if (mapObject.type == global::MapObject.ObjectType.CelestialBody)
                     {
                         targetBody = mapObject.celestialBody;
                     }
-                    else if (mapObject.type == global::MapObject.MapObjectType.VESSEL)
+                    else if (mapObject.type == global::MapObject.ObjectType.Vessel)
                     {
                         targetBody = mapObject.vessel.mainBody;
                     }
@@ -209,7 +209,7 @@ namespace WaypointManager
                         continue;
                     }
 
-                    content.Add(new GUIContent(ContractDefs.textures[name], name));
+                    content.Add(new GUIContent(ContractDefs.sprites[name].texture, name));
                 }
 
                 icons = content.ToArray();

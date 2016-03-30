@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using KSP;
+using KSP.UI.Screens;
 using Contracts;
 using FinePrint;
 using FinePrint.Utilities;
@@ -739,7 +740,7 @@ namespace WaypointManager
             }
             else if (FinePrint.WaypointManager.Instance() != null)
             {
-                foreach (Waypoint wp in FinePrint.WaypointManager.Instance().AllWaypoints())
+                foreach (Waypoint wp in FinePrint.WaypointManager.Instance().Waypoints)
                 {
                     yield return wp;
                 }
