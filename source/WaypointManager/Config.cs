@@ -17,6 +17,14 @@ namespace WaypointManager
             get
             {
                 return string.Join(Path.DirectorySeparatorChar.ToString(), new string[]
+                    { KSPUtil.ApplicationRootPath, "GameData", "WaypointManager", "PluginData", "WaypointManager.cfg"});
+            }
+        }
+        private static string OldConfigFileName
+        {
+            get
+            {
+                return string.Join(Path.DirectorySeparatorChar.ToString(), new string[]
                     { KSPUtil.ApplicationRootPath, "GameData", "WaypointManager", "WaypointManager.cfg"});
             }
         }
@@ -98,10 +106,14 @@ namespace WaypointManager
         {
             ConfigNode configNode = ConfigNode.Load(ConfigFileName);
 
-            // No config file, use defaults
+            // No config file, try old one
             if (configNode == null)
             {
-                return;
+                configNode = ConfigNode.Load(OldConfigFileName);
+                if (configNode == null)
+                {
+                    return;
+                }
             }
 
             float left = (float)Convert.ToDouble(configNode.GetValue("mainWindowPos.x"));
