@@ -2,7 +2,7 @@
      "NAME":"Waypoint Manager",
 	 "URL":"https://raw.githubusercontent.com/jrossignol/WaypointManager/master/GameData/WaypointManager/WaypointManager.version",
 	 "DOWNLOAD":"https://github.com/jrossignol/WaypointManager/releases",
-     "CHANGE_LOG_URL":"https://raw.githubusercontent.com/jrossignol/WaypointManager/2.5.1/CHANGES.txt",
+     "CHANGE_LOG_URL":"https://raw.githubusercontent.com/jrossignol/WaypointManager/2.5.2/CHANGES.txt",
      "GITHUB":{
          "USERNAME":"jrossignol",
          "REPOSITORY":"WaypointManager",
@@ -11,13 +11,13 @@
      "VERSION":{
          "MAJOR":2,
          "MINOR":5,
-         "PATCH":1,
+         "PATCH":2,
          "BUILD":0
      },
      "KSP_VERSION":{
          "MAJOR":1,
          "MINOR":1,
-         "PATCH":0
+         "PATCH":2
      },
      "KSP_VERSION_MIN":{
          "MAJOR":1,

@@ -430,6 +430,11 @@ namespace WaypointManager
 
         protected void WaypointLineGUI(WaypointData wpd)
         {
+            if (!wpd.waypoint.visible)
+            {
+                return;
+            }
+
             GUILayout.BeginHorizontal(GUILayout.Height(32));
 
             // Contract icon

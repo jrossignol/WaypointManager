@@ -1,3 +1,6 @@
+Waypoint Manager 2.5.2
+- Remove waypoints from the waypoint list when they no longer active (thanks severedsolo).
+
 Waypoint Manager 2.5.1
 - KSP 1.1.1 update (for CKAN).
 
