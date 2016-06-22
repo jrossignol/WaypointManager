@@ -497,12 +497,13 @@ namespace WaypointManager
             {
                 if (isNavPoint)
                 {
-                    FinePrint.WaypointManager.clearNavPoint();
+                    NavWaypoint.fetch.Clear();
+                    NavWaypoint.fetch.Deactivate();
                 }
                 else
                 {
-                    FinePrint.WaypointManager.setupNavPoint(wpd.waypoint);
-                    FinePrint.WaypointManager.activateNavPoint();
+                    NavWaypoint.fetch.Setup(wpd.waypoint);
+                    NavWaypoint.fetch.Activate();
                 }
             }
             GUILayout.EndVertical();

@@ -1,3 +1,6 @@
+Waypoint Manager 2.5.3
+- KSP 1.1.3 compatibility.
+
 Waypoint Manager 2.5.2
 - Remove waypoints from the waypoint list when they no longer active (thanks severedsolo).
 - Move config file to PluginData to prevent unneccessesary Module Manager cache rebuilds (thanks galenmacil).

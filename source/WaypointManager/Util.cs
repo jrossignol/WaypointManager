@@ -151,13 +151,13 @@ namespace WaypointManager
         /// <returns></returns>
         public static bool IsNavPoint(Waypoint waypoint)
         {
-            NavWaypoint navPoint = FinePrint.WaypointManager.navWaypoint;
-            if (navPoint == null || !FinePrint.WaypointManager.navIsActive())
+            NavWaypoint navPoint = NavWaypoint.fetch;
+            if (navPoint == null || !NavWaypoint.fetch.IsActive)
             {
                 return false;
             }
 
-            return navPoint.latitude == waypoint.latitude && navPoint.longitude == waypoint.longitude;
+            return navPoint.Latitude == waypoint.latitude && navPoint.Longitude == waypoint.longitude;
         }
 
         /// <summary>
