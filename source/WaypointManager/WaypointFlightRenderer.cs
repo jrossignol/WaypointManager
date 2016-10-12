@@ -168,7 +168,7 @@ namespace WaypointManager
             {
                 padding = new RectOffset(4, 4, 7, 4),
                 font = HighLogic.Skin.box.font,
-                fontSize = 12,
+                fontSize = 13,
                 fontStyle = FontStyle.Normal,
                 fixedWidth = 0,
                 fixedHeight = 0,

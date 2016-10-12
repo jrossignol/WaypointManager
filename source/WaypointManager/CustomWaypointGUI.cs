@@ -139,7 +139,7 @@ namespace WaypointManager
             System.Random r = new System.Random();
             windowMode = WindowMode.Add;
 
-            template.name = "Waypoint Name";
+            template.name = StringUtilities.GenerateSiteName(r.Next(), targetBody, false);
             template.celestialName = targetBody.name;
             CustomWaypointGUI.latitude = latitude.ToString();
             CustomWaypointGUI.longitude = longitude.ToString();

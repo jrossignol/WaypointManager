@@ -32,19 +32,11 @@ namespace WaypointManager
             Instance = this;
         }
 
-        void OnAwake()
+        void Awake()
         {
             DontDestroyOnLoad(this);
             GameEvents.onCustomWaypointLoad.Add(OnCustomWaypointLoad);
             GameEvents.onCustomWaypointSave.Add(OnCustomWaypointSave);
-        }
-
-        void OnDestroy()
-        {
-            /*foreach (Waypoint wp in waypoints)
-            {
-                //FinePrint.WaypointManager.RemoveWaypoint(wp);
-            }*/
         }
 
         /// <summary>
@@ -53,11 +45,17 @@ namespace WaypointManager
         /// <param name="waypoint">The waypoint to add</param>
         public static void AddWaypoint(Waypoint waypoint)
         {
-            waypoint.isOnSurface = true;
-            waypoint.isNavigatable = true;
-            waypoint.index = Instance.nextIndex++;
+            int seed = waypoint.seed;
+            string id = waypoint.id;
+            double altitude = waypoint.altitude;
 
             ScenarioCustomWaypoints.AddWaypoint(waypoint);
+
+            waypoint.seed = seed;
+            waypoint.id = id;
+            waypoint.altitude = altitude;
+
+            waypoint.index = Instance.nextIndex++;
         }
 
         /// <summary>
@@ -89,10 +87,22 @@ namespace WaypointManager
             Waypoint waypoint = fta.from;
             ConfigNode node = fta.to;
 
-            waypoint.id = node.GetValue("icon");
-            waypoint.altitude = Convert.ToDouble(node.GetValue("altitude"));
-            waypoint.index = Convert.ToInt32(node.GetValue("index"));
-            waypoint.seed = Convert.ToInt32(node.GetValue("seed"));
+            if (node.HasValue("icon"))
+            {
+                waypoint.id = node.GetValue("icon");
+            }
+            if (node.HasValue("altitude"))
+            {
+                waypoint.altitude = Convert.ToDouble(node.GetValue("altitude"));
+            }
+            if (node.HasValue("index"))
+            {
+                waypoint.index = Convert.ToInt32(node.GetValue("index"));
+            }
+            if (node.HasValue("seed"))
+            {
+                waypoint.seed = Convert.ToInt32(node.GetValue("seed"));
+            }
 
             nextIndex = Math.Max(nextIndex, waypoint.index + 1);
         }
