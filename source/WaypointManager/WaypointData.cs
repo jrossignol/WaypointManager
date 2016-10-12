@@ -73,7 +73,7 @@ namespace WaypointManager
         /// </summary>
         public static void CacheWaypointData()
         {
-            if (lastCacheUpdate == UnityEngine.Time.fixedTime)
+            if (lastCacheUpdate == UnityEngine.Time.fixedTime || FinePrint.WaypointManager.Instance() == null)
             {
                 return;
             }
@@ -82,7 +82,7 @@ namespace WaypointManager
             bool changed = false;
 
             // Add new waypoints
-            foreach (Waypoint w in WaypointManager.AllWaypoints())
+            foreach (Waypoint w in FinePrint.WaypointManager.Instance().Waypoints)
             {
                 if (w != null && w.isNavigatable)
                 {
@@ -145,7 +145,7 @@ namespace WaypointManager
                 waypointData.Remove(p.Key);
             }
 
-            if (changed || customWaypoints.waypointByContract.Count != WaypointManager.customWaypoints.Count())
+            if (changed || customWaypoints.waypointByContract.Count != FinePrint.WaypointManager.Instance().Waypoints.Count())
             {
                 // Clear the by contract list
                 foreach (ContractContainer cc in contractMap.Values)

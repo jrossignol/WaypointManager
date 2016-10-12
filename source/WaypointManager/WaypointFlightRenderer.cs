@@ -167,9 +167,9 @@ namespace WaypointManager
             hintTextStyle = new GUIStyle(HighLogic.Skin.box)
             {
                 padding = new RectOffset(4, 4, 7, 4),
-                font = MapView.OrbitIconsTextSkin.label.font,
-                fontSize = MapView.OrbitIconsTextSkin.label.fontSize,
-                fontStyle = MapView.OrbitIconsTextSkin.label.fontStyle,
+                font = HighLogic.Skin.box.font,
+                fontSize = 12,
+                fontStyle = FontStyle.Normal,
                 fixedWidth = 0,
                 fixedHeight = 0,
                 stretchHeight = true,
