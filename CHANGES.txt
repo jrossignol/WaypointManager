@@ -1,3 +1,6 @@
+Waypoint Manager 2.6.1
+- Remove hack for custom waypoint icons (no longer needed in KSP 1.2).
+
 Waypoint Manager 2.6.0
 - KSP 1.2 compatibility.
 

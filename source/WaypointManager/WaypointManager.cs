@@ -196,22 +196,6 @@ namespace WaypointManager
                 }
             }
 
-            // Get all the directories for icons
-            ConfigNode[] iconConfig = GameDatabase.Instance.GetConfigNodes("WAYPOINT_MANAGER_ICONS");
-            foreach (ConfigNode configNode in iconConfig)
-            {
-                string dir = configNode.GetValue("url");
-                Debug.Log("handling dir = " + dir);
-
-                // The FinePrint logic is such that it will only look in Squad/Contracts/Icons for icons.
-                // Cheat this by hacking the path in the game database.
-                foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture.Where(t => t.name.StartsWith(dir)))
-                {
-                    Debug.Log("handling text = " + texInfo.name);
-                    texInfo.name = "Squad/Contracts/Icons/" + texInfo.name;
-                }
-            }
-
             // Extra stuff!
             GameDatabase.TextureInfo nyan = GameDatabase.Instance.databaseTexture.Where(t => t.name.Contains("WaypointManager/icons/Special/nyan")).FirstOrDefault();
             if (nyan != null && DateTime.Now.Month == 4 && DateTime.Now.Day == 1)
