@@ -19,7 +19,7 @@ namespace WaypointManager
         {
             get
             {
-                return string.Join(Path.DirectorySeparatorChar.ToString(), new string[] { KSPUtil.ApplicationRootPath, "GameData", "WaypointManager", "CustomWaypoints.cfg" });
+                return string.Join(Path.DirectorySeparatorChar.ToString(), new string[] { KSPUtil.ApplicationRootPath, "GameData", "WaypointManager", "PluginData", "CustomWaypoints.cfg" });
             }
         }
 
@@ -127,9 +127,45 @@ namespace WaypointManager
         public static void Import()
         {
             ConfigNode configNode = ConfigNode.Load(CustomWaypointsFileName);
-            ScenarioCustomWaypoints.Instance.OnLoad(configNode);
+            if (configNode == null)
+            {
+                ScreenMessages.PostScreenMessage(string.Format("Couldn't load customer waypoint file {0}!", CustomWaypointsFileName),
+                    6.0f, ScreenMessageStyle.UPPER_CENTER);
+                return;
+            }
 
-            int count = configNode.nodes.Count;
+            ConfigNode master = new ConfigNode("CUSTOM_WAYPOINTS");
+
+            // Add the non-dupes into a new list
+            foreach (ConfigNode child in configNode.GetNodes("WAYPOINT"))
+            {
+                bool isDuplicate = false;
+                string celestialName = child.GetValue("celestialName");
+                double latitude = double.Parse(child.GetValue("latitude"));
+                double longitude = double.Parse(child.GetValue("longitude"));
+                double altitude = double.Parse(child.GetValue("altitude"));
+
+                foreach (Waypoint wp in FinePrint.WaypointManager.Instance().Waypoints)
+                {
+                    if (wp.celestialName == celestialName &&
+                        Math.Abs(wp.latitude - latitude) < 0.00001 &&
+                        Math.Abs(wp.longitude - longitude) < 0.00001 &&
+                        Math.Abs(wp.altitude - altitude) < 0.1)
+                    {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+
+                if (!isDuplicate)
+                {
+                    master.AddNode(child);
+                }
+            }
+
+            ScenarioCustomWaypoints.Instance.OnLoad(master);
+
+            int count = master.nodes.Count;
             ScreenMessages.PostScreenMessage("Imported " + count + " waypoint" + (count != 1 ? "s" : "") + " from " + CustomWaypointsFileName,
                 6.0f, ScreenMessageStyle.UPPER_CENTER);
         }
