@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="CustomWaypointGUI.cs" />
     <Compile Include="CustomWaypoints.cs" />
+    <Compile Include="GameEvents.cs" />
     <Compile Include="Toolbar\ToolbarWrapper.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="Config.cs" />

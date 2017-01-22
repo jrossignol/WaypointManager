@@ -15,6 +15,8 @@ namespace WaypointManager
             "an", "ap", "default", "dn", "marker", "orbit", "pe", "vessel"
         };
 
+        public static List<string> customIcons = new List<string>();
+
         private const float ICON_PICKER_WIDTH = 302;
         private enum WindowMode
         {
@@ -201,6 +203,7 @@ namespace WaypointManager
             {
                 List<GUIContent> content = new List<GUIContent>();
 
+                // Get all the stock icons
                 foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture.Where(t => t.name.StartsWith("Squad/Contracts/Icons/")))
                 {
                     string name = texInfo.name.Replace("Squad/Contracts/Icons/", "");
@@ -210,6 +213,30 @@ namespace WaypointManager
                     }
 
                     content.Add(new GUIContent(ContractDefs.sprites[name].texture, name));
+                }
+
+                // Get all the directories for custom icons
+                ConfigNode[] iconConfig = GameDatabase.Instance.GetConfigNodes("WAYPOINT_MANAGER_ICONS");
+                foreach (ConfigNode configNode in iconConfig)
+                {
+                    string dir = configNode.GetValue("url");
+                    foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture.Where(t => t.name.StartsWith(dir)))
+                    {
+                        content.Add(new GUIContent(texInfo.texture, texInfo.name));
+                    }
+                }
+
+                // Add custom icons
+                foreach (string icon in customIcons)
+                {
+                    foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
+                    {
+                        if (texInfo.name == icon)
+                        {
+                            content.Add(new GUIContent(texInfo.texture, texInfo.name));
+                            break;
+                        }
+                    }
                 }
 
                 icons = content.ToArray();

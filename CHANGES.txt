@@ -2,6 +2,7 @@ Waypoint Manager 2.6.1
 - Remove hack for custom waypoint icons (no longer needed in KSP 1.2).
 - Move custom waypoints into PluginData directory.
 - Added back duplicate checking for custom waypoints (thanks Syntax).
+- Fixed custom waypoint icons not showing up (thanks Syntax).
 
 Waypoint Manager 2.6.0
 - KSP 1.2 compatibility.
