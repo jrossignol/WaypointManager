@@ -81,35 +81,6 @@ namespace WaypointManager
                 {
                     // Draw the marker for custom waypoints that are currently being created
                     CustomWaypointGUI.DrawMarker();
-
-                    // Draw waypoints if not in career mode
-                    if (ContractSystem.Instance == null && MapView.MapIsEnabled)
-                    {
-                        foreach (WaypointData wpd in WaypointData.Waypoints)
-                        {
-                            if (wpd.celestialBody != null && wpd.waypoint.celestialName == wpd.celestialBody.name)
-                            {
-                                if (Event.current.type == EventType.Repaint)
-                                {
-                                    wpd.SetAlpha();
-                                    Util.DrawWaypoint(wpd.celestialBody, wpd.waypoint.latitude, wpd.waypoint.longitude,
-                                        wpd.waypoint.altitude, wpd.waypoint.id, wpd.waypoint.seed, wpd.currentAlpha);
-                                }
-
-                                // Handling clicking on the waypoint
-                                if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
-                                {
-                                    HandleClick(wpd);
-                                }
-
-                                // Draw hint text
-                                if (Event.current.type == EventType.Repaint)
-                                {
-                                    HintText(wpd);
-                                }
-                            }
-                        }
-                    }
                 }
 
                 if (HighLogic.LoadedSceneIsFlight && !MapView.MapIsEnabled)

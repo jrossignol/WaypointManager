@@ -1,3 +1,6 @@
+Waypoint Manager 2.6.2
+- Removed code for drawing waypoint markers when not in career mode - as of KSP 1.2 stock draws those markers (thanks Syntax).
+
 Waypoint Manager 2.6.1
 - Remove hack for custom waypoint icons (no longer needed in KSP 1.2).
 - Move custom waypoints into PluginData directory.
