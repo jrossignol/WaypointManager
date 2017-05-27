@@ -1,3 +1,7 @@
+Waypoint Manager 2.7.0
+- Recompile for KSP 1.3.0.
+- Don't allow stock toolbar icon to be disabled if Blizzy's toolbar isn't installed.
+
 Waypoint Manager 2.6.2
 - Removed code for drawing waypoint markers when not in career mode - as of KSP 1.2 stock draws those markers (thanks Syntax).
 

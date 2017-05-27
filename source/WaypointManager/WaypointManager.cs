@@ -587,17 +587,20 @@ namespace WaypointManager
 
 
             // Toolbar
-            GUILayout.Label("Toolbar Display", headingStyle);
-            if (GUILayout.Toggle(Config.useStockToolbar, "Show icon in stock toolbar") != Config.useStockToolbar)
+            if (ToolbarManager.ToolbarAvailable)
             {
-                Config.useStockToolbar = !Config.useStockToolbar;
-                if (Config.useStockToolbar)
+                GUILayout.Label("Toolbar Display", headingStyle);
+                if (GUILayout.Toggle(Config.useStockToolbar, "Show icon in stock toolbar") != Config.useStockToolbar)
                 {
-                    SetupToolbar();
-                }
-                else
-                {
-                    TeardownToolbar(GameScenes.FLIGHT);
+                    Config.useStockToolbar = !Config.useStockToolbar;
+                    if (Config.useStockToolbar)
+                    {
+                        SetupToolbar();
+                    }
+                    else
+                    {
+                        TeardownToolbar(GameScenes.FLIGHT);
+                    }
                 }
             }
 

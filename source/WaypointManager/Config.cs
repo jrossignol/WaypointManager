@@ -132,6 +132,12 @@ namespace WaypointManager
             {
                 useStockToolbar = Convert.ToBoolean(configNode.GetValue("useStockToolbar"));
             }
+
+            // If toolbar isn't installed, always use stock toolbar
+            if (!ToolbarManager.ToolbarAvailable)
+            {
+                useStockToolbar = true;
+            }
         }
 
         private static T GetEnumValue<T>(this ConfigNode configNode, string name)
