@@ -1,3 +1,7 @@
+Waypoint Manager 2.7.1
+- Recompile for KSP 1.4.0
+- Fixed NRE when importing custom waypoints before stock waypoint manager is loaded (thanks linuxgurugamer).
+
 Waypoint Manager 2.7.0
 - Recompile for KSP 1.3.0.
 - Don't allow stock toolbar icon to be disabled if Blizzy's toolbar isn't installed.

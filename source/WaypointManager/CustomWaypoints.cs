@@ -129,7 +129,7 @@ namespace WaypointManager
             ConfigNode configNode = ConfigNode.Load(CustomWaypointsFileName);
             if (configNode == null)
             {
-                ScreenMessages.PostScreenMessage(string.Format("Couldn't load customer waypoint file {0}!", CustomWaypointsFileName),
+                ScreenMessages.PostScreenMessage(string.Format("Couldn't load custom waypoint file {0}!", CustomWaypointsFileName),
                     6.0f, ScreenMessageStyle.UPPER_CENTER);
                 return;
             }
@@ -145,15 +145,18 @@ namespace WaypointManager
                 double longitude = double.Parse(child.GetValue("longitude"));
                 double altitude = double.Parse(child.GetValue("altitude"));
 
-                foreach (Waypoint wp in FinePrint.WaypointManager.Instance().Waypoints)
+                if (FinePrint.WaypointManager.Instance() != null)
                 {
-                    if (wp.celestialName == celestialName &&
-                        Math.Abs(wp.latitude - latitude) < 0.00001 &&
-                        Math.Abs(wp.longitude - longitude) < 0.00001 &&
-                        Math.Abs(wp.altitude - altitude) < 0.1)
+                    foreach (Waypoint wp in FinePrint.WaypointManager.Instance().Waypoints)
                     {
-                        isDuplicate = true;
-                        break;
+                        if (wp.celestialName == celestialName &&
+                            Math.Abs(wp.latitude - latitude) < 0.00001 &&
+                            Math.Abs(wp.longitude - longitude) < 0.00001 &&
+                            Math.Abs(wp.altitude - altitude) < 0.1)
+                        {
+                            isDuplicate = true;
+                            break;
+                        }
                     }
                 }
 
