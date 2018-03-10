@@ -1,3 +1,6 @@
+Waypoint Manager 2.7.2
+- Re-release properly for CKAN.
+
 Waypoint Manager 2.7.1
 - Recompile for KSP 1.4.0
 - Fixed NRE when importing custom waypoints before stock waypoint manager is loaded (thanks linuxgurugamer).
