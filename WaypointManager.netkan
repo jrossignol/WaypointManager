@@ -1,7 +1,7 @@
 {
     "spec_version": "v1.16",
     "identifier": "WaypointManager",
-    "$kref": "#/ckan/github/jrossignol/Strategia",
+    "$kref": "#/ckan/github/jrossignol/WaypointManager",
     "name": "Waypoint Manager",
     "abstract": "Display waypoints while in flight, create custom waypoints.",
     "license": "MIT",
