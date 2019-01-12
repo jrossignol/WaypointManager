@@ -16,6 +16,8 @@ namespace WaypointManager
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     class WaypointManager : MonoBehaviour
     {
+        static List<Waypoint> uniqueWaypoints = new List<Waypoint>();
+
         private const float GUI_WIDTH = 380;
         private const float SETTINGS_WIDTH = 280;
 
@@ -156,6 +158,49 @@ namespace WaypointManager
                 showSettings = false;
                 Config.Save();
             }
+
+            // Workaround for https://bugs.kerbalspaceprogram.com/issues/20769
+            StartCoroutine(RemoveDuplicateWaypoints());
+        }
+
+        private IEnumerator<YieldInstruction> RemoveDuplicateWaypoints()
+        {
+            yield return new WaitForEndOfFrame();
+
+            float time = Time.fixedTime;
+            while (FinePrint.WaypointManager.Instance() == null && Time.fixedTime < time + 5)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+
+            // Wait another quarter second
+            yield return new WaitForSeconds(0.25f);
+
+            List<Waypoint> waypoints = FinePrint.WaypointManager.Instance().Waypoints;
+            uniqueWaypoints.Clear();
+
+            // Check each waypoint to see if it has a duplicate
+            for (int i = 0; i < waypoints.Count; i++)
+            {
+                Waypoint waypoint = waypoints[i];
+
+                // Check for duplicates, ignore anything that is tied to a contract, since that's how we identify the launch sites
+                if (waypoint.contractReference == null)
+                {
+                    if (uniqueWaypoints.Exists(w => w.name == waypoint.name && w.index == waypoint.index && w.id == waypoint.id && Math.Abs(w.latitude - waypoint.latitude) < 1e-5 && Math.Abs(w.longitude - waypoint.longitude) < 1e-5))
+                    {
+                        // Don't do the proper removal, since then the sitenodes still try to draw
+                        waypoints.RemoveAt(i);
+                        i--;
+                    }
+                    else
+                    {
+                        uniqueWaypoints.Add(waypoint);
+                    }
+                }
+            }
+
+            yield return null;
         }
 
         private void PlanetariumTargetChanged(MapObject mapObject)

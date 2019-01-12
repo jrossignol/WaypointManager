@@ -1,3 +1,7 @@
+Waypoint Manager 2.7.5
+- Recompile for KSP 1.6.1
+- Workaround stock bug that causes the launch site waypoints to be added in duplicate on each scene change (thanks catonthekbd).
+
 Waypoint Manager 2.7.4
 - Fix version file.
 
