@@ -205,6 +205,10 @@ namespace WaypointManager
                         }
 
                         float ybase = (Screen.height / 2.0f) - asbRectTransform.position.y + asbRectTransform.sizeDelta.y * GameSettings.UI_SCALE * 0.5f + 4;
+                        if (ybase < 0)
+                        {
+                            ybase = 0;
+                        }
 
                         string timeToWP = GetTimeToWaypoint(wpd);
                         if (Config.hudDistance)
