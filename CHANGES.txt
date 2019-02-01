@@ -1,5 +1,6 @@
 Waypoint Manager 2.7.5
 - Recompile for KSP 1.6.1
+- Group auto-generated site waypoints separately from custom waypoints.
 - Make waypoint data visible in IVA (thanks taniwha).
 - Workaround stock bug that causes the launch site waypoints to be added in duplicate on each scene change (thanks catonthekbd).
 

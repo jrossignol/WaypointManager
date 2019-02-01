@@ -18,10 +18,12 @@ namespace WaypointManager
             public Contract contract;
             public bool hidden = false;
             public List<WaypointData> waypointByContract = new List<WaypointData>();
+            public string title;
 
-            public ContractContainer(Contract c)
+            public ContractContainer(Contract c, string title = "No contract")
             {
                 contract = c;
+                this.title = c != null ? c.Title : title;
             }
         }
 
@@ -39,6 +41,7 @@ namespace WaypointManager
         private static Dictionary<long, ContractContainer> contractMap = new Dictionary<long, ContractContainer>();
         private static Dictionary<CelestialBody, List<WaypointData>> waypointByBody = new Dictionary<CelestialBody, List<WaypointData>>();
         private static ContractContainer customWaypoints = new ContractContainer(null);
+        private static ContractContainer siteWaypoints = new ContractContainer(null, "Launch Sites");
 
         /// <summary>
         /// Gets all waypoint data items as an enumeration.
@@ -59,6 +62,10 @@ namespace WaypointManager
                 if (customWaypoints.waypointByContract.Count != 0)
                 {
                     yield return customWaypoints;
+                }
+                if (siteWaypoints.waypointByContract.Count != 0)
+                {
+                    yield return siteWaypoints;
                 }
             }
         }
@@ -145,7 +152,7 @@ namespace WaypointManager
                 waypointData.Remove(p.Key);
             }
 
-            if (changed || customWaypoints.waypointByContract.Count != FinePrint.WaypointManager.Instance().Waypoints.Count())
+            if (changed || customWaypoints.waypointByContract.Count + siteWaypoints.waypointByContract.Count != FinePrint.WaypointManager.Instance().Waypoints.Count())
             {
                 // Clear the by contract list
                 foreach (ContractContainer cc in contractMap.Values)
@@ -153,6 +160,7 @@ namespace WaypointManager
                     cc.waypointByContract.Clear();
                 }
                 customWaypoints.waypointByContract.Clear();
+                siteWaypoints.waypointByContract.Clear();
 
                 // Rebuild the by contract list
                 foreach (WaypointData wpd in waypointData.Values)
@@ -164,6 +172,10 @@ namespace WaypointManager
                             contractMap[wpd.waypoint.contractReference.ContractID] = new ContractContainer(wpd.waypoint.contractReference);
                         }
                         contractMap[wpd.waypoint.contractReference.ContractID].waypointByContract.Add(wpd);
+                    }
+                    else if (MapView.fetch != null && MapView.fetch.siteNodes.Exists(s => PSystemSetup.Instance.GetLaunchSiteDisplayName(s.siteObject.GetName()) == wpd.waypoint.name))
+                    {
+                        siteWaypoints.waypointByContract.Add(wpd);
                     }
                     else
                     {
@@ -179,7 +191,6 @@ namespace WaypointManager
                         contractMap.Remove(cc.contract.ContractID);
                     }
                 }
-
 
                 // Rebuild the by Celestial Body list
                 waypointByBody.Clear();

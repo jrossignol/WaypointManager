@@ -187,7 +187,7 @@ namespace WaypointManager
                 // Check for duplicates, ignore anything that is tied to a contract, since that's how we identify the launch sites
                 if (waypoint.contractReference == null &&
                     // Also check for a matching site node
-                    MapView.fetch != null && MapView.fetch.siteNodes.Exists(s => s.siteObject.GetName() == waypoint.name))
+                    MapView.fetch != null && MapView.fetch.siteNodes.Exists(s => PSystemSetup.Instance.GetLaunchSiteDisplayName(s.siteObject.GetName()) == waypoint.name))
                 {
                     // We need to have a huge tolerance because of Krakensbane - if the player is in the outer system, the world position for these waypoints loses a huge amount of accuracy
                     if (uniqueWaypoints.Exists(w => w.name == waypoint.name && w.index == waypoint.index && w.id == waypoint.id && Math.Abs(w.latitude - waypoint.latitude) < 1000 && Math.Abs(w.longitude - waypoint.longitude) < 1000))
@@ -415,9 +415,7 @@ namespace WaypointManager
             {
                 foreach (WaypointData.ContractContainer cc in WaypointData.ContractContainers)
                 {
-                    Contract c = cc.contract;
-                    string title = (c != null ? c.Title : "No contract");
-                    if (GUILayout.Button(title, headerButtonStyle, GUILayout.MaxWidth(GUI_WIDTH - 24.0f)))
+                    if (GUILayout.Button(cc.title, headerButtonStyle, GUILayout.MaxWidth(GUI_WIDTH - 24.0f)))
                     {
                         cc.hidden = !cc.hidden;
                     }
