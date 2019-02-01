@@ -33,6 +33,6 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0")]
-[assembly: AssemblyFileVersion("2.7.4")]
-[assembly: AssemblyInformationalVersion("2.7.4")]
+[assembly: AssemblyFileVersion("2.7.5")]
+[assembly: AssemblyInformationalVersion("2.7.5")]
 [assembly: KSPAssembly("WaypointManager", 1, 0)]
