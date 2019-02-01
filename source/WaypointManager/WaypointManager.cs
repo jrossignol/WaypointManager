@@ -185,9 +185,12 @@ namespace WaypointManager
                 Waypoint waypoint = waypoints[i];
 
                 // Check for duplicates, ignore anything that is tied to a contract, since that's how we identify the launch sites
-                if (waypoint.contractReference == null)
+                if (waypoint.contractReference == null &&
+                    // Also check for a matching site node
+                    MapView.fetch != null && MapView.fetch.siteNodes.Exists(s => s.siteObject.GetName() == waypoint.name))
                 {
-                    if (uniqueWaypoints.Exists(w => w.name == waypoint.name && w.index == waypoint.index && w.id == waypoint.id && Math.Abs(w.latitude - waypoint.latitude) < 1e-5 && Math.Abs(w.longitude - waypoint.longitude) < 1e-5))
+                    // We need to have a huge tolerance because of Krakensbane - if the player is in the outer system, the world position for these waypoints loses a huge amount of accuracy
+                    if (uniqueWaypoints.Exists(w => w.name == waypoint.name && w.index == waypoint.index && w.id == waypoint.id && Math.Abs(w.latitude - waypoint.latitude) < 1000 && Math.Abs(w.longitude - waypoint.longitude) < 1000))
                     {
                         // Don't do the proper removal, since then the sitenodes still try to draw
                         waypoints.RemoveAt(i);
