@@ -167,12 +167,17 @@ namespace WaypointManager
         {
             yield return new WaitForEndOfFrame();
 
-            float time = Time.fixedTime;
-            while (FinePrint.WaypointManager.Instance() == null && Time.fixedTime < time + 5)
+            // First wait for the instance to be not null
+            while (FinePrint.WaypointManager.Instance() == null)
             {
                 yield return new WaitForEndOfFrame();
             }
-
+            // THEN wait 5 seconds
+            float time = Time.fixedTime;
+            while (Time.fixedTime < time + 5)
+            {
+                yield return new WaitForEndOfFrame();
+            }
             // Wait another quarter second
             yield return new WaitForSeconds(0.25f);
 
