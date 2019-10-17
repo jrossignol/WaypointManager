@@ -1,3 +1,7 @@
+Waypoint Manager 2.8.0
+- Recompile for KSP 1.8.0
+- Fixed NRE when changing scenes (thanks Galenmacil).
+
 Waypoint Manager 2.7.5
 - Recompile for KSP 1.6.1
 - Group auto-generated site waypoints separately from custom waypoints.

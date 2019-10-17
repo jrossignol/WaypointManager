@@ -285,15 +285,13 @@ namespace WaypointManager
             Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
 
             // Don't draw if it's behind the camera
-            Camera camera = MapView.MapIsEnabled ? PlanetariumCamera.Camera : FlightCamera.fetch.mainCamera;
-            Vector3 cameraPos = ScaledSpace.ScaledToLocalSpace(camera.transform.position);
-            if (Vector3d.Dot(camera.transform.forward, scaledSpacePoint.normalized) < 0.0)
+            if (Vector3d.Dot(PlanetariumCamera.Camera.transform.forward, scaledSpacePoint.normalized) < 0.0)
             {
                 return;
             }
 
             // Translate to screen position
-            Vector3 screenPos = camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
+            Vector3 screenPos = PlanetariumCamera.Camera.WorldToScreenPoint(new Vector3((float)scaledSpacePoint.x, (float)scaledSpacePoint.y, (float)scaledSpacePoint.z));
 
             // Draw the marker at half-resolution (30 x 45) - that seems to match the one in the map view
             Rect markerRect = new Rect(screenPos.x - 15f, (float)Screen.height - screenPos.y - 45.0f, 30f, 45f);
@@ -303,6 +301,7 @@ namespace WaypointManager
 
             if (alpha < 0.0f)
             {
+                Vector3 cameraPos = ScaledSpace.ScaledToLocalSpace(PlanetariumCamera.Camera.transform.position);
                 bool occluded = WaypointData.IsOccluded(targetBody, cameraPos, localSpacePoint, altitude);
                 float desiredAlpha = occluded ? 0.3f : 1.0f * Config.opacity;
                 if (lastAlpha < 0.0f)
