@@ -1,6 +1,6 @@
 Waypoint Manager 2.8.0
 - Recompile for KSP 1.8.0
-- Fixed NRE when changing scenes (thanks Galenmacil).
+- Fixed NRE when changing scenes (thanks DomiKamu).
 - Workaround for minor stock bug - the Dessert Airfield has the wrong icon (thanks Jacke4913).
 
 Waypoint Manager 2.7.5
