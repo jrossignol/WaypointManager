@@ -403,19 +403,10 @@ namespace WaypointManager
 
             double time = (wpd.distanceToActive / v.horizontalSrfSpeed);
 
-            // Earthtime
-            uint SecondsPerYear = 31536000; // = 365d
-            uint SecondsPerDay = 86400;     // = 24h
-            uint SecondsPerHour = 3600;     // = 60m
-            uint SecondsPerMinute = 60;     // = 60s
-
-            if (GameSettings.KERBIN_TIME == true)
-            {
-                SecondsPerYear = 9201600;  // = 426d
-                SecondsPerDay = 21600;     // = 6h
-                SecondsPerHour = 3600;     // = 60m
-                SecondsPerMinute = 60;     // = 60s
-            }
+			uint SecondsPerYear = (uint)KSPUtil.dateTimeFormatter.Year;
+			uint SecondsPerDay = (uint)KSPUtil.dateTimeFormatter.Day;
+			uint SecondsPerHour = (uint)KSPUtil.dateTimeFormatter.Hour;
+			uint SecondsPerMinute = (uint)KSPUtil.dateTimeFormatter.Minute;
 
             int years = (int)(time / SecondsPerYear);
             time -= years * SecondsPerYear;
