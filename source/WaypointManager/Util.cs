@@ -136,7 +136,7 @@ namespace WaypointManager
         /// <returns>The CelestialBody object</returns>
         public static CelestialBody GetBody(string name)
         {
-            CelestialBody body = FlightGlobals.Bodies.Where(b => b.name == name).FirstOrDefault();
+            CelestialBody body = FlightGlobals.Bodies.Where(b => b.bodyName == name).FirstOrDefault();
             if (body == null)
             {
                 Debug.LogWarning("Couldn't find celestial body with name '" + name + "'.");

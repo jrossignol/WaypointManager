@@ -1,0 +1,9 @@
+Changelog
+
+	Patch from github user @SumGuyTwitches:
+		fix kraken location off by 8 degrees
+	Patch from Github user @taniwha:
+		Use dateTimeFormatter for time period lengths
+
+	Fixed RSS compatibility with changes listed in this issue on Github:
+		https://github.com/jrossignol/WaypointManager/issues/59

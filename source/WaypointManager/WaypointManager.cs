@@ -389,7 +389,7 @@ namespace WaypointManager
                 {
                     CelestialBody b = pair.Key;
                     bool hidden = hiddenBodies.ContainsKey(b) && hiddenBodies[b];
-                    if (GUILayout.Button(b.name, headerButtonStyle, GUILayout.MaxWidth(GUI_WIDTH - 24.0f)))
+                    if (GUILayout.Button(b.bodyName, headerButtonStyle, GUILayout.MaxWidth(GUI_WIDTH - 24.0f)))
                     {
                         hidden = !hidden;
                         hiddenBodies[b] = hidden;

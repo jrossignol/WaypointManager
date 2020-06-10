@@ -100,7 +100,7 @@ namespace WaypointManager
                     {
                         wpd = new WaypointData();
                         wpd.waypoint = w;
-                        wpd.celestialBody = Util.GetBody(w.celestialName);
+                        wpd.celestialBody = Util.GetBody(w.celestialBody.bodyName);
 
                         // Small stock bug - the Dessert Airfield has the wrong icon.  Fix it for Squad.
                         if (w.name == "Dessert Airfield" && w.id == "launchsite")
