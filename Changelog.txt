@@ -1,5 +1,9 @@
 Changelog
 
+2.8.2
+	Adoption by LinuxGuruGamer
+	Added support for ToolbarController
+	Added support for ClickThroughBlocker
 	Patch from github user @SumGuyTwitches:
 		fix kraken location off by 8 degrees
 	Patch from Github user @taniwha:

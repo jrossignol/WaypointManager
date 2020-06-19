@@ -7,10 +7,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaypointManager", "Waypoint
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E9463310-6814-47F6-8FBE-881501C4309C}"
 	ProjectSection(SolutionItems) = preProject
+		buildRelease.bat = buildRelease.bat
 		Changelog.txt = Changelog.txt
-		..\CHANGES.txt = ..\CHANGES.txt
-		..\LICENSE.txt = ..\LICENSE.txt
-		..\WaypointManager.version = ..\WaypointManager.version
+		CHANGES.txt = CHANGES.txt
+		deploy.bat = deploy.bat
+		jenkins.txt = jenkins.txt
+		LICENSE.txt = LICENSE.txt
+		WaypointManager.version = WaypointManager.version
 	EndProjectSection
 EndProject
 Global
