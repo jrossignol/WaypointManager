@@ -11,6 +11,9 @@ using Contracts;
 using FinePrint;
 using FinePrint.Utilities;
 
+using ToolbarControl_NS;
+using ClickThroughFix;
+
 namespace WaypointManager
 {
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
@@ -23,8 +26,9 @@ namespace WaypointManager
 
         public static WaypointManager Instance;
 
-        private ApplicationLauncherButton launcherButton = null;
-        private IButton toolbarButton;
+        //private ApplicationLauncherButton launcherButton = null;
+        //private IButton toolbarButton;
+        ToolbarControl toolbarControl;
 
         private static bool initialized = false;
         public bool showGUI = false;
@@ -59,10 +63,8 @@ namespace WaypointManager
 
                 LoadTextures();
                 LoadConfiguration();
-                LoadToolbar();
-
-                GameEvents.onGUIApplicationLauncherReady.Add(new EventVoid.OnEvent(SetupToolbar));
-                GameEvents.onGUIApplicationLauncherUnreadifying.Add(new EventData<GameScenes>.OnEvent(TeardownToolbar));
+                // LoadToolbar();
+                SetupToolbar();
                 GameEvents.onGameSceneLoadRequested.Add(new EventData<GameScenes>.OnEvent(OnGameSceneLoad));
                 GameEvents.onHideUI.Add(new EventVoid.OnEvent(OnHideUI));
                 GameEvents.onShowUI.Add(new EventVoid.OnEvent(OnShowUI));
@@ -83,70 +85,61 @@ namespace WaypointManager
 
         void OnDestroy()
         {
-            GameEvents.onGUIApplicationLauncherReady.Remove(new EventVoid.OnEvent(SetupToolbar));
-            GameEvents.onGUIApplicationLauncherUnreadifying.Remove(new EventData<GameScenes>.OnEvent(TeardownToolbar));
             GameEvents.onHideUI.Remove(OnHideUI);
             GameEvents.onShowUI.Remove(OnShowUI);
             GameEvents.onPlanetariumTargetChanged.Remove(new EventData<MapObject>.OnEvent(PlanetariumTargetChanged));
 
-            UnloadToolbar();
-
+            //
+            //UnloadToolbar();
+            TeardownToolbar();
             Config.Save();
         }
 
         private void LoadTextures()
         {
-            Config.toolbarIcon = GameDatabase.Instance.GetTexture("WaypointManager/icons/toolbar", false);
-            Config.addWaypointIcon = GameDatabase.Instance.GetTexture("WaypointManager/icons/addWaypoint", false);
-            Config.editWaypointIcon = GameDatabase.Instance.GetTexture("WaypointManager/icons/editWaypoint", false);
-            Config.deleteWaypointIcon = GameDatabase.Instance.GetTexture("WaypointManager/icons/deleteWaypoint", false);
-            Config.settingsIcon = GameDatabase.Instance.GetTexture("WaypointManager/icons/settings", false);
-            Config.closeIcon = GameDatabase.Instance.GetTexture("WaypointManager/icons/close", false);
+            Config.toolbarIcon = new Texture2D(2, 2);
+            ToolbarControl.LoadImageFromFile(ref Config.toolbarIcon, "GameData/WaypointManager/PluginData/icons/toolbar");
+
+            Config.addWaypointIcon = new Texture2D(2, 2);
+            ToolbarControl.LoadImageFromFile(ref Config.addWaypointIcon, "GameData/WaypointManager/PluginData/icons/addWaypoint");
+            Config.editWaypointIcon = new Texture2D(2, 2);
+            ToolbarControl.LoadImageFromFile(ref Config.editWaypointIcon, "GameData/WaypointManager/PluginData/icons/editWaypoint");
+            Config.deleteWaypointIcon = new Texture2D(2, 2);
+            ToolbarControl.LoadImageFromFile(ref Config.deleteWaypointIcon, "GameData/WaypointManager/PluginData/icons/deleteWaypoint");
+            Config.settingsIcon = new Texture2D(2, 2);
+            ToolbarControl.LoadImageFromFile(ref Config.settingsIcon, "GameData/WaypointManager/PluginData/icons/settings");
+            Config.closeIcon = new Texture2D(2, 2);
+            ToolbarControl.LoadImageFromFile(ref Config.closeIcon, "GameData/WaypointManager/PluginData/icons/close");
         }
+
+        internal const string MODID = "WaypointManager";
+        internal const string MODNAME = "Waypoint Manager";
 
         private void SetupToolbar()
         {
-            if (launcherButton == null && Config.useStockToolbar)
-            {
-                ApplicationLauncher.AppScenes visibleScenes = ApplicationLauncher.AppScenes.FLIGHT |
-                    ApplicationLauncher.AppScenes.MAPVIEW |
-                    ApplicationLauncher.AppScenes.TRACKSTATION;
-                launcherButton = ApplicationLauncher.Instance.AddModApplication(ToggleWindow, ToggleWindow, null, null, null, null,
-                    visibleScenes, Config.toolbarIcon);
-            }
+            toolbarControl = gameObject.AddComponent<ToolbarControl>();
+            toolbarControl.AddToAllToolbars(ToggleWindow, ToggleWindow,
+                ApplicationLauncher.AppScenes.FLIGHT |
+                ApplicationLauncher.AppScenes.MAPVIEW |
+                ApplicationLauncher.AppScenes.TRACKSTATION,
+                MODID,
+                "waypointMgr",
+                "WaypointManager/PluginData/icons/toolbar",
+                "WaypointManager/PluginData/icons/toolbarSmall",
+                "Clear all input locks"
+            );
         }
 
-        private void TeardownToolbar(GameScenes scene)
-        {
-            if (launcherButton != null)
-            {
-                ApplicationLauncher.Instance.RemoveModApplication(launcherButton);
-                launcherButton = null;
-            }
-        }
 
-        private void LoadToolbar()
-        {
-            if (ToolbarManager.ToolbarAvailable)
-            {
-                toolbarButton = ToolbarManager.Instance.add("WaypointManager", "button");
-                toolbarButton.TexturePath = "WaypointManager/icons/toolbarSmall";
-                toolbarButton.ToolTip = "Waypoint Manager";
-                toolbarButton.Visibility = new GameScenesVisibility(GameScenes.FLIGHT, GameScenes.TRACKSTATION);
-                toolbarButton.OnClick += (e) =>
-                {
-                    ToggleWindow();
-                };
-            }
-        }
 
-        private void UnloadToolbar()
+        private void TeardownToolbar()
         {
-            if (toolbarButton != null)
+            if (toolbarControl != null)
             {
-                toolbarButton.Destroy();
-                toolbarButton = null;
+                toolbarControl.OnDestroy();
+                Destroy(toolbarControl);
             }
+
         }
 
         private void OnGameSceneLoad(GameScenes scene)
@@ -178,7 +171,7 @@ namespace WaypointManager
                 {
                     string config = configNode.GetValue("name");
 
-                    Debug.Log("WaypointManager: Loading " + config +" icons.");
+                    Debug.Log("WaypointManager: Loading " + config + " icons.");
                     string url = configNode.GetValue("url");
                     if (url.Last() != '/')
                     {
@@ -212,7 +205,7 @@ namespace WaypointManager
                 }
             }
         }
-        
+
         private void ToggleWindow()
         {
             showGUI = !showGUI;
@@ -269,7 +262,7 @@ namespace WaypointManager
             if (showGUI && visible)
             {
                 var ainfoV = Attribute.GetCustomAttribute(GetType().Assembly, typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
-                Config.mainWindowPos = GUILayout.Window(
+                Config.mainWindowPos =ClickThruBlocker.GUILayoutWindow(
                     GetType().FullName.GetHashCode(),
                     Config.mainWindowPos,
                     WindowGUI,
@@ -288,10 +281,10 @@ namespace WaypointManager
                     if (settingsPosition.xMin == settingsPosition.xMax)
                     {
                         settingsPosition = new Rect(Config.mainWindowPos.xMax + SETTINGS_WIDTH + 4 > Screen.width ?
-                            Config.mainWindowPos.xMin - SETTINGS_WIDTH - 4: Config.mainWindowPos.xMax, Config.mainWindowPos.yMin, SETTINGS_WIDTH + 4, 1);
+                            Config.mainWindowPos.xMin - SETTINGS_WIDTH - 4 : Config.mainWindowPos.xMax, Config.mainWindowPos.yMin, SETTINGS_WIDTH + 4, 1);
                     }
 
-                    settingsPosition = GUILayout.Window(
+                    settingsPosition = ClickThruBlocker.GUILayoutWindow(
                         GetType().FullName.GetHashCode() + 1,
                         settingsPosition,
                         SettingsGUI,
@@ -424,7 +417,7 @@ namespace WaypointManager
             // Contract icon
             GUILayout.Label(ContractIcon(wpd), GUILayout.ExpandWidth(false), GUILayout.Height(38), GUILayout.Width(38));
             GUILayout.Space(2);
-            
+
             // Celestial body icon
             GUILayout.Label(CelestialBodyIcon(wpd.celestialBody.name), GUILayout.ExpandWidth(false));
             GUILayout.Space(2);
@@ -583,25 +576,6 @@ namespace WaypointManager
             if (GUILayout.Toggle(Config.displayDecimal, "Decimal") != Config.displayDecimal)
             {
                 Config.displayDecimal = true;
-            }
-
-
-            // Toolbar
-            if (ToolbarManager.ToolbarAvailable)
-            {
-                GUILayout.Label("Toolbar Display", headingStyle);
-                if (GUILayout.Toggle(Config.useStockToolbar, "Show icon in stock toolbar") != Config.useStockToolbar)
-                {
-                    Config.useStockToolbar = !Config.useStockToolbar;
-                    if (Config.useStockToolbar)
-                    {
-                        SetupToolbar();
-                    }
-                    else
-                    {
-                        TeardownToolbar(GameScenes.FLIGHT);
-                    }
-                }
             }
 
             // Opacity

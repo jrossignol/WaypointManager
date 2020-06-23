@@ -39,7 +39,13 @@
     <Reference Include="$(KSPDIR)\KSP_x64_Data\Managed\UnityEngine*.dll">
       <Private>False</Private>
     </Reference>
+    <Reference Include="ClickThroughBlocker">
+      <HintPath>R:\KSP_1.9.1_dev\GameData\000_ClickThroughBlocker\Plugins\ClickThroughBlocker.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="ToolbarControl">
+      <HintPath>R:\KSP_1.9.1_dev\GameData\001_ToolbarControl\Plugins\ToolbarControl.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyVersion.cs">
@@ -51,7 +57,7 @@
     <Compile Include="CustomWaypoints.cs" />
     <Compile Include="GameEvents.cs" />
     <Compile Include="InstallChecker.cs" />
-    <Compile Include="Toolbar\ToolbarWrapper.cs" />
+    <Compile Include="RegisterToolbar.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

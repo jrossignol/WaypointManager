@@ -8,6 +8,7 @@ using KSP.UI.Screens;
 using Contracts;
 using FinePrint;
 using FinePrint.Utilities;
+using ClickThroughFix;
 
 namespace WaypointManager
 {
@@ -340,7 +341,7 @@ namespace WaypointManager
             if (selectedWaypoint != null)
             {
                 GUI.skin = HighLogic.Skin;
-                windowPos = GUILayout.Window(10, windowPos, NavigationWindow, waypointName, GUILayout.MinWidth(224));
+                windowPos = ClickThruBlocker.GUILayoutWindow(10, windowPos, NavigationWindow, waypointName, GUILayout.MinWidth(224));
             }
         }
 

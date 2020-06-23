@@ -1,5 +1,8 @@
 Changelog
 
+2.8.2.1
+	Added custom landing site configs, make active using PatchManager and then import into WaypointManager
+
 2.8.2
 	Adoption by LinuxGuruGamer
 	Added support for ToolbarController
@@ -12,5 +15,3 @@ Changelog
 	Fixed RSS compatibility with changes listed in this issue on Github:
 		https://github.com/jrossignol/WaypointManager/issues/59
 
-2.8.2.1
-	Added custom landing site configs, make active using PatchManager and then import into WaypointManager

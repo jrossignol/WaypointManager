@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using FinePrint;
 using FinePrint.Utilities;
+using ClickThroughFix;
 
 namespace WaypointManager
 {
@@ -284,7 +285,7 @@ namespace WaypointManager
             {
                 if (windowMode != WindowMode.None && windowMode != WindowMode.Delete)
                 {
-                    wpWindowPos = GUILayout.Window(
+                    wpWindowPos = ClickThruBlocker.GUILayoutWindow(
                         typeof(WaypointManager).FullName.GetHashCode() + 2,
                         wpWindowPos,
                         WindowGUI,
@@ -305,7 +306,7 @@ namespace WaypointManager
                             iconPickerPosition = new Rect((Screen.width - ICON_PICKER_WIDTH) / 2.0f, wpWindowPos.yMax, ICON_PICKER_WIDTH, 1);
                         }
 
-                        iconPickerPosition = GUILayout.Window(
+                        iconPickerPosition = ClickThruBlocker.GUILayoutWindow(
                             typeof(WaypointManager).FullName.GetHashCode() + 3,
                             iconPickerPosition,
                             IconPickerGUI,
@@ -326,7 +327,7 @@ namespace WaypointManager
                 }
                 else if (windowMode == WindowMode.Delete)
                 {
-                    rmWindowPos = GUILayout.Window(
+                    rmWindowPos = ClickThruBlocker.GUILayoutWindow(
                         typeof(WaypointManager).FullName.GetHashCode() + 2,
                         rmWindowPos,
                         DeleteGUI,
@@ -341,7 +342,7 @@ namespace WaypointManager
 
                 if (showExportDialog)
                 {
-                    expWindowPos = GUILayout.Window(
+                    expWindowPos = ClickThruBlocker.GUILayoutWindow(
                         typeof(WaypointManager).FullName.GetHashCode() + 3,
                         expWindowPos,
                         ExportGUI,
