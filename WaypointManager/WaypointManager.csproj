@@ -56,8 +56,11 @@
     <Compile Include="CustomWaypointGUI.cs" />
     <Compile Include="CustomWaypoints.cs" />
     <Compile Include="GameEvents.cs" />
+    <Compile Include="ImportExport.cs" />
     <Compile Include="InstallChecker.cs" />
     <Compile Include="RegisterToolbar.cs" />
+    <Compile Include="Stolld\StyleCache.cs" />
+    <Compile Include="Stolld\StyleConverter.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

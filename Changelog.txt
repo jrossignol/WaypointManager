@@ -1,5 +1,13 @@
 Changelog
 
+2.8.2.2
+	Added page to select import of custom waypoints
+	Patchmanager configs removed
+	Moved icons into PluginData
+	Changed loading of icons to Toolbarcontroller.LoadImageFromFile
+	Added selection window to load custom waypoints
+	Split big CustomWaypoints.InterestingSites.cfg into planet specific files
+
 2.8.2.1
 	Added custom landing site configs, make active using PatchManager and then import into WaypointManager
 

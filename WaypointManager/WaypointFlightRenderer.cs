@@ -71,7 +71,7 @@ namespace WaypointManager
 
         public void OnGUI()
         {
-            if (visible)
+            if (visible && !ImportExport.helpDialogVisible)
             {
                 if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
                 {

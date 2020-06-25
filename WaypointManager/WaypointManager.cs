@@ -22,7 +22,7 @@ namespace WaypointManager
         static List<Waypoint> uniqueWaypoints = new List<Waypoint>();
 
         private const float GUI_WIDTH = 380;
-        private const float SETTINGS_WIDTH = 280;
+        internal const float SETTINGS_WIDTH = 280;
 
         public static WaypointManager Instance;
 
@@ -42,7 +42,7 @@ namespace WaypointManager
         private GUIStyle tipStyle;
 
         private Vector2 scrollPosition;
-        private Rect settingsPosition;
+        internal Rect settingsPosition;
 
         private Rect tooltipPosition;
         private List<string> toolTip = new List<string>();
@@ -177,12 +177,28 @@ namespace WaypointManager
                     {
                         url += '/';
                     }
+                    if (Directory.Exists("GameData/" + url))
+                    {
+
+                        foreach (var str in Directory.GetFiles("GameData/" + url))
+                        {
+                            var icon = new Texture2D(2, 2);
+                            ToolbarControl.LoadImageFromFile(ref icon, str);
+                            //string name = icon.name.Substring(icon.name.LastIndexOf('/') + 1);
+                            string name = Path.GetFileNameWithoutExtension(str);
+                            bodyIcons[name] = icon;
+                        }
+                    }
+
+#if false
                     foreach (GameDatabase.TextureInfo icon in GameDatabase.Instance.GetAllTexturesInFolder(url))
                     {
                         string name = icon.name.Substring(icon.name.LastIndexOf('/') + 1);
                         bodyIcons[name] = icon.texture;
                         Debug.Log("WaypointManager: Loaded icon for " + name + ".");
                     }
+#endif
+
                 }
                 catch (Exception e)
                 {
@@ -259,10 +275,10 @@ namespace WaypointManager
 
             GUI.depth = 0;
 
-            if (showGUI && visible)
+            if (showGUI && visible && !ImportExport.helpDialogVisible)
             {
                 var ainfoV = Attribute.GetCustomAttribute(GetType().Assembly, typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
-                Config.mainWindowPos =ClickThruBlocker.GUILayoutWindow(
+                Config.mainWindowPos = ClickThruBlocker.GUILayoutWindow(
                     GetType().FullName.GetHashCode(),
                     Config.mainWindowPos,
                     WindowGUI,
@@ -305,7 +321,8 @@ namespace WaypointManager
             }
 
             // Display custom waypoint gui windows
-            CustomWaypointGUI.OnGUI();
+            if (!ImportExport.helpDialogVisible)
+                CustomWaypointGUI.OnGUI();
 
             // Draw any tooltips
             DrawToolTip();
@@ -346,7 +363,9 @@ namespace WaypointManager
                 CustomWaypointGUI.AddWaypoint();
             }
             GUILayout.Space(4);
-            if (GUILayout.Button(new GUIContent(Config.settingsIcon, "Settings"), GUI.skin.label))
+
+   
+            if (GUILayout.Button(new GUIContent(Config.settingsIcon, "Settings"),  GUI.skin.label))
             {
                 showSettings = !showSettings;
                 if (!showSettings)
@@ -586,9 +605,19 @@ namespace WaypointManager
             {
                 CustomWaypoints.Export();
             }
-            if (GUILayout.Button(new GUIContent("Import Custom Waypoints", "Imports the custom waypoints from GameData/WaypointManager/CustomWaypoints.cfg")))
+            if (importExportWindow == null)
             {
-                CustomWaypoints.Import();
+                if (GUILayout.Button(new GUIContent("Import Custom Waypoints", "Imports the custom waypoints from GameData/WaypointManager/CustomWaypoints.cfg")))
+                {
+                    if (importExportWindow == null)
+                        importExportWindow = gameObject.AddComponent<ImportExport>();
+                    //CustomWaypoints.Import();
+                }
+            }
+            else
+            {
+                if (GUILayout.Button(new GUIContent("Cancel Import of Custom Waypoints", "Cancels the import of custom waypoints from GameData/WaypointManager/CustomWaypoints.cfg")))
+                    Destroy(importExportWindow);
             }
 
             GUILayout.EndVertical();
@@ -597,6 +626,7 @@ namespace WaypointManager
 
             SetToolTip(1);
         }
+        internal static MonoBehaviour importExportWindow = null;
 
         /// <summary>
         /// Set the current tooltip

@@ -15,11 +15,19 @@ namespace WaypointManager
     [KSPAddon(KSPAddon.Startup.MainMenu, true)]
     public class CustomWaypoints : MonoBehaviour
     {
+        public static string CustomWaypointsDirectory
+        {
+            get
+            {
+                return string.Join(Path.DirectorySeparatorChar.ToString(), new string[] { KSPUtil.ApplicationRootPath, "GameData", "WaypointManager", "PluginData" });
+
+            }
+        }
         public static string CustomWaypointsFileName
         {
             get
             {
-                return string.Join(Path.DirectorySeparatorChar.ToString(), new string[] { KSPUtil.ApplicationRootPath, "GameData", "WaypointManager", "PluginData", "CustomWaypoints.cfg" });
+                return string.Join(CustomWaypointsDirectory, "CustomWaypoints.cfg");
             }
         }
 
@@ -130,54 +138,14 @@ namespace WaypointManager
         {
             ConfigNode master = new ConfigNode("CUSTOM_WAYPOINTS");
             int fileCount = 0, preload = 0;
-            for (int i = 0; i < 2; i++)
+
+            ConfigNode configNode = null; ;
+            configNode = ConfigNode.Load(CustomWaypointsFileName);
+            fileCount = configNode.CountNodes;
+
+            if (configNode != null)
             {
-                ConfigNode configNode;
-                if (i == 0)
-                {
-                    configNode = ConfigNode.Load(CustomWaypointsFileName);
-                    fileCount = configNode.CountNodes;
-                }
-                else
-                {
-                    configNode = new ConfigNode();
-                    var customWayPoints = GameDatabase.Instance.GetConfigNodes(WAYPOINT_URL);
-                    foreach (var c in customWayPoints)
-                        configNode.AddNode(c);
-                    preload = configNode.CountNodes;
-                }
-                if (configNode != null)
-                {
-                    // Add the non-dupes into a new list
-                    foreach (ConfigNode child in configNode.GetNodes("WAYPOINT"))
-                    {
-                        bool isDuplicate = false;
-                        string celestialName = child.GetValue("celestialName");
-                        double latitude = double.Parse(child.GetValue("latitude"));
-                        double longitude = double.Parse(child.GetValue("longitude"));
-                        double altitude = double.Parse(child.GetValue("altitude"));
-
-                        if (FinePrint.WaypointManager.Instance() != null)
-                        {
-                            foreach (Waypoint wp in FinePrint.WaypointManager.Instance().Waypoints)
-                            {
-                                if (wp.celestialName == celestialName &&
-                                    Math.Abs(wp.latitude - latitude) < 0.00001 &&
-                                    Math.Abs(wp.longitude - longitude) < 0.00001 &&
-                                    Math.Abs(wp.altitude - altitude) < 0.1)
-                                {
-                                    isDuplicate = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (!isDuplicate)
-                        {
-                            master.AddNode(child);
-                        }
-                    }
-                }
+                AddWaypointsFromConfig(master, configNode);
             }
 
             if (master.CountNodes == 0)
@@ -198,6 +166,38 @@ namespace WaypointManager
                     6.0f, ScreenMessageStyle.UPPER_CENTER);
         }
 
+        internal static void AddWaypointsFromConfig(ConfigNode master, ConfigNode configNode)
+        {
+            // Add the non-dupes into a new list
+            foreach (ConfigNode child in configNode.GetNodes("WAYPOINT"))
+            {
+                bool isDuplicate = false;
+                string celestialName = child.GetValue("celestialName");
+                double latitude = double.Parse(child.GetValue("latitude"));
+                double longitude = double.Parse(child.GetValue("longitude"));
+                double altitude = double.Parse(child.GetValue("altitude"));
+
+                if (FinePrint.WaypointManager.Instance() != null)
+                {
+                    foreach (Waypoint wp in FinePrint.WaypointManager.Instance().Waypoints)
+                    {
+                        if (wp.celestialName == celestialName &&
+                            Math.Abs(wp.latitude - latitude) < 0.00001 &&
+                            Math.Abs(wp.longitude - longitude) < 0.00001 &&
+                            Math.Abs(wp.altitude - altitude) < 0.1)
+                        {
+                            isDuplicate = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!isDuplicate)
+                {
+                    master.AddNode(child);
+                }
+            }
+        }
         public static void Export()
         {
             if (File.Exists(CustomWaypointsFileName))
