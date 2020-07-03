@@ -4,11 +4,8 @@
     "\\CustomWaypoints",
     "\\GameData",
     "\\GameData\\WaypointManager",
-    "\\GameData\\WaypointManager\\icons",
-    "\\GameData\\WaypointManager\\PatchManager",
-    "\\GameData\\WaypointManager\\PatchManager\\ActiveMMPatches",
     "\\WaypointManager"
   ],
-  "SelectedNode": "\\GameData\\WaypointManager\\PatchManager\\PM_InterestingPlaces.cfg",
+  "SelectedNode": "\\WaypointManager\\WaypointManager.cs",
   "PreviewInSolutionExplorer": false
 }

@@ -1,5 +1,8 @@
 Changelog
 
+2.8.2.3
+	Fixed version file
+
 2.8.2.2
 	Added page to select import of custom waypoints
 	Patchmanager configs removed
