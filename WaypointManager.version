@@ -1,6 +1,6 @@
 {
   "NAME": "Waypoint Manager",
-  "URL": "https://ksp.spacetux.net/avc/WaypointManager",
+  "URL": "http://ksp.spacetux.net/avc/WaypointManager",
   "DOWNLOAD": "https://github.com/linuxgurugamer/WaypointManager/releases",
   "GITHUB": {
     "USERNAME": "jrossignol",
@@ -11,7 +11,7 @@
     "MAJOR": 2,
     "MINOR": 8,
     "PATCH": 2,
-    "BUILD": 3
+    "BUILD": 4
   },
   "KSP_VERSION": {
     "MAJOR": 1,
