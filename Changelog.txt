@@ -1,5 +1,8 @@
 Changelog
 
+2.8.2.5
+	Updated coordinates & altitude for the Armstrong Memorial
+
 2.8.2.4
 	Another error in version file, was https instead of http
 
