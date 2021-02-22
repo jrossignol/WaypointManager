@@ -1,11 +1,7 @@
 {
   "ExpandedNodes": [
-    "",
-    "\\CustomWaypoints",
-    "\\GameData",
-    "\\GameData\\WaypointManager",
-    "\\WaypointManager"
+    ""
   ],
-  "SelectedNode": "\\CustomWaypoints\\CustomWaypoints.LandingSites.cfg",
+  "SelectedNode": "\\WaypointManager.sln",
   "PreviewInSolutionExplorer": false
 }

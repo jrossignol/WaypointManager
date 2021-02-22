@@ -17,6 +17,7 @@ namespace WaypointManager
         {
             public Contract contract;
             public bool hidden = false;
+            public bool stockHidden = false;
             public List<WaypointData> waypointByContract = new List<WaypointData>();
             public string title;
 

@@ -1,5 +1,8 @@
 Changelog
 
+2.8.2.7
+	Fixed modname on the toolbar button
+
 2.8.2.6
 	Removed extra .version file
 

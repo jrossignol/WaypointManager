@@ -126,7 +126,7 @@ namespace WaypointManager
                 "waypointMgr",
                 "WaypointManager/PluginData/icons/toolbar",
                 "WaypointManager/PluginData/icons/toolbarSmall",
-                "Clear all input locks"
+                MODNAME
             );
         }
 
@@ -483,6 +483,18 @@ namespace WaypointManager
 
                 GUILayout.EndHorizontal();
                 GUILayout.EndVertical();
+            }
+            else
+            {
+                if (GUILayout.Button(new GUIContent(Config.editWaypointIcon, "Edit Stock Waypoint"), GUI.skin.label))
+                {
+                    CustomWaypointGUI.EditWaypoint(wpd.waypoint, true);
+                }
+                if (GUILayout.Button(new GUIContent(Config.deleteWaypointIcon, "Hide Stock Waypoint"), GUI.skin.label))
+                {
+                    CustomWaypointGUI.DeleteWaypoint(wpd.waypoint);
+                }
+
             }
 
             // Active waypoint toggle

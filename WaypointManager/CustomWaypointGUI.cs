@@ -26,8 +26,16 @@ namespace WaypointManager
             None,
             Add,
             Edit,
+            Edit_Stock,
             Delete
         }
+        private static string[] windowModeStr = {
+            "None",
+            "Add",
+            "Edit",
+            "Edit Stock",
+            "Delete"
+        };
 
         // So, what is this random list of numbers?  It's a side effect from the awesome
         // design decision in KSP/FinePrint to make stuff based on a random seed.  There
@@ -160,14 +168,17 @@ namespace WaypointManager
         /// <summary>
         /// Interface for showing the edit waypoint dialog.
         /// </summary>
-        public static void EditWaypoint(Waypoint waypoint)
+        public static void EditWaypoint(Waypoint waypoint, bool stock = false)
         {
             if (windowMode == WindowMode.None)
             {
                 wpWindowPos = new Rect((Screen.width - wpWindowPos.width) / 2.0f, (Screen.height - wpWindowPos.height) / 2.0f - 100f, wpWindowPos.width, wpWindowPos.height);
             }
 
-            windowMode = WindowMode.Edit;
+            if (stock)
+                windowMode = WindowMode.Edit_Stock;
+            else
+                windowMode = WindowMode.Edit;
             selectedWaypoint = waypoint;
 
             template.name = waypoint.name;
@@ -303,7 +314,7 @@ namespace WaypointManager
                         typeof(WaypointManager).FullName.GetHashCode() + 2,
                         wpWindowPos,
                         WindowGUI,
-                        windowMode.ToString() + " Waypoint",
+                        windowModeStr[(int)windowMode] + " Waypoint",
                         GUILayout.Height(1), GUILayout.ExpandHeight(true));
 
                     // Add the close icon

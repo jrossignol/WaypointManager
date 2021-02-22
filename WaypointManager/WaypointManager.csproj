@@ -81,34 +81,30 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-	set KSPDIR=$(KSPDIR)
+    <PostBuildEvent>set KSPDIR=$(KSPDIR)
 
-	IF "%25KSPDIR%25"=="" (
+IF "%25KSPDIR%25"=="" (
 
-		ECHO Configuration error - KSPDIR not specified in project.
+	ECHO Configuration error - KSPDIR not specified in project.
 
-		ECHO Either set KSPDIR environment variable or edit BetterLoadSaveGame.Common.props
+	ECHO Either set KSPDIR environment variable or edit BetterLoadSaveGame.Common.props
 
-		PAUSE
+	PAUSE
 
-		GOTO DONE
+	GOTO DONE
 
-	)
+)
 
-	start /D $(SolutionDir) /WAIT deploy.bat  $(TargetDir) $(TargetFileName)
+start /D $(SolutionDir) /WAIT deploy.bat  $(TargetDir) $(TargetFileName) $(TargetName)
 
-	if $(ConfigurationName) == Release (	
+if $(ConfigurationName) == Release (	
 
-		start /D $(SolutionDir) /WAIT buildRelease.bat $(TargetDir) $(TargetFileName)
+	start /D $(SolutionDir) /WAIT buildRelease.bat $(TargetDir) $(TargetFileName) $(TargetName)
 
-	)
-
-</PostBuildEvent>
+)</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>
-	"$(DevEnvDir)\texttransform.exe" "$(ProjectDir)AssemblyVersion.tt"</PreBuildEvent>
+    <PreBuildEvent>"$(DevEnvDir)\texttransform.exe" "$(ProjectDir)AssemblyVersion.tt"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
