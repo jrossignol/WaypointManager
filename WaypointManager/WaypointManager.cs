@@ -486,10 +486,12 @@ namespace WaypointManager
             }
             else
             {
+#if false
                 if (GUILayout.Button(new GUIContent(Config.editWaypointIcon, "Edit Stock Waypoint"), GUI.skin.label))
                 {
                     CustomWaypointGUI.EditWaypoint(wpd.waypoint, true);
                 }
+#endif
                 if (GUILayout.Button(new GUIContent(Config.deleteWaypointIcon, "Hide Stock Waypoint"), GUI.skin.label))
                 {
                     CustomWaypointGUI.DeleteWaypoint(wpd.waypoint);
