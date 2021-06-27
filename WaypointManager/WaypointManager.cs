@@ -13,6 +13,7 @@ using FinePrint.Utilities;
 
 using ToolbarControl_NS;
 using ClickThroughFix;
+using static WaypointManager.RegisterToolbar;
 
 namespace WaypointManager
 {
@@ -59,7 +60,7 @@ namespace WaypointManager
             {
                 // Log version info
                 var ainfoV = Attribute.GetCustomAttribute(typeof(WaypointManager).Assembly, typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
-                Debug.Log("WaypointManager " + ainfoV.InformationalVersion + " loading...");
+                Log.Info("WaypointManager " + ainfoV.InformationalVersion + " loading...");
 
                 LoadTextures();
                 LoadConfiguration();
@@ -72,7 +73,7 @@ namespace WaypointManager
 
                 Config.Load();
 
-                Debug.Log("WaypointManager " + ainfoV.InformationalVersion + " loaded.");
+                Log.Info("WaypointManager " + ainfoV.InformationalVersion + " loaded.");
 
                 Instance = this;
                 initialized = true;
@@ -171,7 +172,7 @@ namespace WaypointManager
                 {
                     string config = configNode.GetValue("name");
 
-                    Debug.Log("WaypointManager: Loading " + config + " icons.");
+                    Log.Info("WaypointManager: Loading " + config + " icons.");
                     string url = configNode.GetValue("url");
                     if (url.Last() != '/')
                     {
@@ -195,7 +196,7 @@ namespace WaypointManager
                     {
                         string name = icon.name.Substring(icon.name.LastIndexOf('/') + 1);
                         bodyIcons[name] = icon.texture;
-                        Debug.Log("WaypointManager: Loaded icon for " + name + ".");
+                        Log.Info("WaypointManager: Loaded icon for " + name + ".");
                     }
 #endif
 
@@ -364,8 +365,8 @@ namespace WaypointManager
             }
             GUILayout.Space(4);
 
-   
-            if (GUILayout.Button(new GUIContent(Config.settingsIcon, "Settings"),  GUI.skin.label))
+
+            if (GUILayout.Button(new GUIContent(Config.settingsIcon, "Settings"), GUI.skin.label))
             {
                 showSettings = !showSettings;
                 if (!showSettings)
@@ -613,8 +614,12 @@ namespace WaypointManager
 
             // Opacity
             GUILayout.Label("Waypoint Opacity", headingStyle);
+            GUILayout.BeginHorizontal();
             Config.opacity = GUILayout.HorizontalSlider(Config.opacity, 0.3f, 1.0f);
-
+            GUILayout.Space(5);
+            if (GUILayout.Button("Reset", GUILayout.Width(50)))
+                Config.opacity = 1.0f;
+            GUILayout.EndHorizontal();
             if (GUILayout.Button(new GUIContent("Export Custom Waypoints", "Exports the custom waypoints to GameData/WaypointManager/CustomWaypoints.cfg")))
             {
                 CustomWaypoints.Export();
@@ -634,6 +639,13 @@ namespace WaypointManager
                     Destroy(importExportWindow);
             }
 
+            GUILayout.Label("UI Scaling (" + (Config.scaling*100).ToString("F0") + "%)", headingStyle);
+            GUILayout.BeginHorizontal();
+            Config.scaling = GUILayout.HorizontalSlider(Config.scaling, 0.8f, 1.5f);
+            GUILayout.Space(5);
+            if (GUILayout.Button("Reset", GUILayout.Width(50)))
+                Config.scaling = 1.0f;
+            GUILayout.EndHorizontal();
             GUILayout.EndVertical();
 
             GUI.DragWindow();

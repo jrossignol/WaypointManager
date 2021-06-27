@@ -43,6 +43,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>R:\KSP_1.8.1_dev\GameData\000_ClickThroughBlocker\Plugins\ClickThroughBlocker.dll</HintPath>
     </Reference>
+    <Reference Include="KSP_Log">
+      <HintPath>R:\KSP_1.11.2_dev\GameData\SpaceTuxLibrary\Plugins\KSP_Log.dll</HintPath>
+    </Reference>
+    <Reference Include="SpaceTuxUtility">
+      <HintPath>R:\KSP_1.11.2_dev\GameData\SpaceTuxLibrary\Plugins\SpaceTuxUtility.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="ToolbarControl, Version=0.1.9.4, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

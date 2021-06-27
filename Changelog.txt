@@ -1,5 +1,10 @@
 Changelog
 
+2.8.3
+	Added new dependency, SpacetuxLibrary
+	Changed Debug.Log methods to Log.Info
+	Added UI Scaling
+
 2.8.2.7
 	Fixed modname on the toolbar button
 

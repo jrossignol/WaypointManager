@@ -7,6 +7,7 @@ using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using static WaypointManager.RegisterToolbar;
 
 namespace WaypointManager
 {
@@ -135,13 +136,13 @@ namespace WaypointManager
             int count = master.nodes.Count;
             if (count > 0)
             {
-                Debug.Log("[WM] Imported " + count + " waypoint" + (count != 1 ? "s" : "") + " from " + wayPointFile);
+                Log.Info("[WM] Imported " + count + " waypoint" + (count != 1 ? "s" : "") + " from " + wayPointFile);
                 ScreenMessages.PostScreenMessage("Imported " + count + " waypoint" + (count != 1 ? "s" : "") + " from " + wayPointFile,
                     6.0f, ScreenMessageStyle.UPPER_CENTER);
             }
             else
             {
-                Debug.Log("[WM] No new waypoints found to import");
+                Log.Info("[WM] No new waypoints found to import");
                 ScreenMessages.PostScreenMessage("No new waypoints found to import", 6f);
             }
 

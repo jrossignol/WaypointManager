@@ -62,6 +62,8 @@ namespace WaypointManager
 
         public static float opacity = 1.0f;
 
+        public static float scaling = 1.0f;
+
         public static Texture2D toolbarIcon;
         public static Texture2D addWaypointIcon;
         public static Texture2D editWaypointIcon;
@@ -87,6 +89,7 @@ namespace WaypointManager
             configNode.AddValue("hudAngle", hudAngle);
             configNode.AddValue("displayDecimal", displayDecimal);
             configNode.AddValue("opacity", opacity);
+            configNode.AddValue("scaling", scaling);
 
             configNode.Save(ConfigFileName,
                 "Waypoint Manager Configuration File\r\n" +
@@ -125,6 +128,8 @@ namespace WaypointManager
             hudAngle = configNode.HasValue("hudAngle") ? Convert.ToBoolean(configNode.GetValue("hudAngle")) : false;
             opacity = configNode.HasValue("opacity") ? (float)Convert.ToDouble(configNode.GetValue("opacity")) : 1.0f;
             displayDecimal = configNode.HasValue("displayDecimal") ? Convert.ToBoolean(configNode.GetValue("displayDecimal")) : false;
+
+            scaling = configNode.HasValue("scaling") ? (float)Convert.ToDouble(configNode.GetValue("scaling")) : 1.0f;
         }
 
         private static T GetEnumValue<T>(this ConfigNode configNode, string name)

@@ -103,14 +103,21 @@ namespace WaypointManager
             }
         }
 
+        static float OldUIScale = 0;
+        static float oldScaling = 0;
+        static float finalScaling;
         // Styles taken directly from Kerbal Engineer Redux - because they look great and this will
         // make our display consistent with that
         protected void SetupStyles()
         {
-            if (nameStyle != null)
+            if (/* nameStyle != null && */ OldUIScale == GameSettings.UI_SCALE && oldScaling == Config.scaling)
             {
                 return;
             }
+            OldUIScale = GameSettings.UI_SCALE;
+            oldScaling = Config.scaling;
+
+            finalScaling = GameSettings.UI_SCALE * Config.scaling;
 
             nameStyle = new GUIStyle(HighLogic.Skin.label)
             {
@@ -121,9 +128,9 @@ namespace WaypointManager
                 margin = new RectOffset(),
                 padding = new RectOffset(5, 0, 0, 0),
                 alignment = TextAnchor.MiddleRight,
-                fontSize = 11,
+                fontSize = (int)(11f * finalScaling),
                 fontStyle = FontStyle.Bold,
-                fixedHeight = 20.0f
+                fixedHeight = 20.0f * finalScaling
             };
 
             valueStyle = new GUIStyle(HighLogic.Skin.label)
@@ -131,16 +138,18 @@ namespace WaypointManager
                 margin = new RectOffset(),
                 padding = new RectOffset(0, 5, 0, 0),
                 alignment = TextAnchor.MiddleLeft,
-                fontSize = 11,
+                fontSize = (int)(11f * finalScaling),
                 fontStyle = FontStyle.Normal,
-                fixedHeight = 20.0f
+                fixedHeight = 20.0f * finalScaling
+
+
             };
 
             hintTextStyle = new GUIStyle(HighLogic.Skin.box)
             {
                 padding = new RectOffset(4, 4, 7, 4),
                 font = HighLogic.Skin.box.font,
-                fontSize = 13,
+                fontSize =(int)( 13 * finalScaling),
                 fontStyle = FontStyle.Normal,
                 fixedWidth = 0,
                 fixedHeight = 0,
@@ -148,6 +157,7 @@ namespace WaypointManager
                 stretchWidth = true
             };
         }
+
 
         protected void DrawWaypoint(WaypointData wpd)
         {
@@ -205,7 +215,7 @@ namespace WaypointManager
                             asbRectTransform = asb.GetComponent<RectTransform>();
                         }
 
-                        float ybase = (Screen.height / 2.0f) - asbRectTransform.position.y + asbRectTransform.sizeDelta.y * GameSettings.UI_SCALE * 0.5f + 4;
+                        float ybase = (Screen.height / 2.0f) - asbRectTransform.position.y + asbRectTransform.sizeDelta.y * finalScaling * 0.5f + 4;
                         if (ybase < 0)
                         {
                             ybase = 0;
