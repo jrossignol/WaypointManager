@@ -7,6 +7,8 @@ using UnityEngine;
 using FinePrint;
 using FinePrint.Utilities;
 using DDSHeaders;
+using ToolbarControl_NS;
+using static WaypointManager.RegisterToolbar;
 
 namespace WaypointManager
 {
@@ -38,7 +40,7 @@ namespace WaypointManager
             return 2 * (celestialBody.Radius + wpd.waypoint.height + wpd.waypoint.altitude) *
                 Math.Asin(Math.Sqrt(sin1 * sin1 + cos1 * cos2 * sin2 * sin2));
         }
-        
+
         /// <summary>
         /// Gets the distance in meters from the active vessel to the given waypoint.
         /// </summary>
@@ -166,23 +168,63 @@ namespace WaypointManager
         /// <param name="url">URL of the icon</param>
         /// <param name="seed">Seed to use for generating the color</param>
         /// <returns>The texture</returns>
+        /// 
         public static Texture2D GetContractIcon(string url, int seed)
         {
+            string key = url;
+
             // Check cache for texture
             Texture2D texture;
             Color color = SystemUtilities.RandomColor(seed, 1.0f, 1.0f, 1.0f);
-            if (!contractIcons.ContainsKey(url))
+            if (!contractIcons.ContainsKey(key))
             {
-                contractIcons[url] = new Dictionary<Color, Texture2D>();
+                contractIcons[key] = new Dictionary<Color, Texture2D>();
             }
-            if (!contractIcons[url].ContainsKey(color))
+            if (!contractIcons[key].ContainsKey(color))
             {
+                if (url.EndsWith(".png"))
+                    url = url.Substring(0, url.Length - 4);
+                if (url.StartsWith("GameData"))
+                    url = url.Substring(9);
+
                 Texture2D baseTexture = ContractDefs.sprites[url].texture;
+
+                url = url.Replace('\\', '/');
+                string url2 = url;
+                //if (!url.Contains('/'))
+                {
+                    string tmp = url;
+                    if (!tmp.Contains("PluginData"))
+                    {
+                        if (!url.StartsWith("GameData"))
+                            tmp = "/" + url;
+                        for (int i = 0; i < GameDatabase.Instance.databaseTexture.Count; i++)
+                        {
+                            if (GameDatabase.Instance.databaseTexture[i].file != null)
+                            {
+                                if (GameDatabase.Instance.databaseTexture[i].name.EndsWith(tmp) ||
+                                    GameDatabase.Instance.databaseTexture[i].name == url)
+                                {
+                                    url2 = GameDatabase.Instance.databaseTexture[i].file.fullPath;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (!url2.StartsWith("GameData"))
+                            url2 = KSPUtil.ApplicationRootPath + "GameData/" + url2;
+                    }
+                }
+                string path = url2;
+
+                if (path.EndsWith(".png") || path.EndsWith(".dds"))
+                    path = path.Substring(0, path.Length - 4);
 
                 try
                 {
                     Texture2D loadedTexture = null;
-                    string path = (url.Contains('/') ? "GameData/" : "GameData/Squad/Contracts/Icons/") + url;
+
                     // PNG loading
                     if (File.Exists(path + ".png"))
                     {
@@ -191,45 +233,51 @@ namespace WaypointManager
                         loadedTexture.LoadImage(File.ReadAllBytes(path.Replace('/', Path.DirectorySeparatorChar)));
                     }
                     // DDS loading
-                    else if (File.Exists(path + ".dds"))
+                    else
                     {
-                        path += ".dds";
-                        BinaryReader br = new BinaryReader(new MemoryStream(File.ReadAllBytes(path)));
+                        if (File.Exists(path + ".dds"))
+                        {
+                            path += ".dds";
+                            BinaryReader br = new BinaryReader(new MemoryStream(File.ReadAllBytes(path)));
 
-                        if (br.ReadUInt32() != DDSValues.uintMagic)
-                        {
-                            throw new Exception("Format issue with DDS texture '" + path + "'!");
-                        }
-                        DDSHeader ddsHeader = new DDSHeader(br);
-                        if (ddsHeader.ddspf.dwFourCC == DDSValues.uintDX10)
-                        {
-                            DDSHeaderDX10 ddsHeaderDx10 = new DDSHeaderDX10(br);
-                        }
+                            if (br.ReadUInt32() != DDSValues.uintMagic)
+                            {
+                                throw new Exception("Format issue with DDS texture '" + path + "'!");
+                            }
+                            DDSHeader ddsHeader = new DDSHeader(br);
+                            if (ddsHeader.ddspf.dwFourCC == DDSValues.uintDX10)
+                            {
+                                DDSHeaderDX10 ddsHeaderDx10 = new DDSHeaderDX10(br);
+                            }
 
-                        TextureFormat texFormat;
-                        if (ddsHeader.ddspf.dwFourCC == DDSValues.uintDXT1)
-                        {
-                            texFormat = UnityEngine.TextureFormat.DXT1;
-                        }
-                        else if (ddsHeader.ddspf.dwFourCC == DDSValues.uintDXT3)
-                        {
-                            texFormat = UnityEngine.TextureFormat.DXT1 | UnityEngine.TextureFormat.Alpha8;
-                        }
-                        else if (ddsHeader.ddspf.dwFourCC == DDSValues.uintDXT5)
-                        {
-                            texFormat = UnityEngine.TextureFormat.DXT5;
+                            TextureFormat texFormat;
+                            if (ddsHeader.ddspf.dwFourCC == DDSValues.uintDXT1)
+                            {
+                                texFormat = UnityEngine.TextureFormat.DXT1;
+                            }
+#if false
+// Not using DXT3 anymore
+                                else if (ddsHeader.ddspf.dwFourCC == DDSValues.uintDXT3)
+                                {
+                                    texFormat = UnityEngine.TextureFormat.DXT1 | UnityEngine.TextureFormat.Alpha8;
+                                }
+#endif
+                            else if (ddsHeader.ddspf.dwFourCC == DDSValues.uintDXT5)
+                            {
+                                texFormat = UnityEngine.TextureFormat.DXT5;
+                            }
+                            else
+                            {
+                                throw new Exception("Unhandled DDS format!");
+                            }
+
+                            loadedTexture = new Texture2D((int)ddsHeader.dwWidth, (int)ddsHeader.dwHeight, texFormat, false);
+                            loadedTexture.LoadRawTextureData(br.ReadBytes((int)(br.BaseStream.Length - br.BaseStream.Position)));
                         }
                         else
                         {
-                            throw new Exception("Unhandled DDS format!");
+                            throw new Exception("Couldn't find file for icon  '" + url + "'");
                         }
-
-                        loadedTexture = new Texture2D((int)ddsHeader.dwWidth, (int)ddsHeader.dwHeight, texFormat, false);
-                        loadedTexture.LoadRawTextureData(br.ReadBytes((int)(br.BaseStream.Length - br.BaseStream.Position)));
-                    }
-                    else
-                    {
-                        throw new Exception("Couldn't find file for icon  '" + url + "'");
                     }
 
                     Color[] pixels = loadedTexture.GetPixels();
@@ -240,19 +288,21 @@ namespace WaypointManager
                     texture = new Texture2D(baseTexture.width, baseTexture.height, TextureFormat.RGBA32, false);
                     texture.SetPixels(pixels);
                     texture.Apply(false, false);
-                    contractIcons[url][color] = texture;
+                    contractIcons[key][color] = texture;
                     UnityEngine.Object.Destroy(loadedTexture);
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("WaypointManager: Couldn't create texture for '" + url + "'!");
+                    Log.Error("WaypointManager: Couldn't create texture for '" + url + "'!");
+                    Log.Error("key: " + key);
+                    Log.Error("path: " + path);
                     Debug.LogException(e);
-                    texture = contractIcons[url][color] = baseTexture;
+                    texture = contractIcons[key][color] = baseTexture;
                 }
             }
             else
             {
-                texture = contractIcons[url][color];
+                texture = contractIcons[key][color];
             }
 
             return texture;

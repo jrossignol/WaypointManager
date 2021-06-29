@@ -106,11 +106,19 @@ namespace WaypointManager
         static float OldUIScale = 0;
         static float oldScaling = 0;
         static float finalScaling;
+
+        static float boxHeight;
+        static float leftBoxWidth;
+        static float leftBoxLeft;
+        static float rightBoxLeft;
+        static float rightBoxWidth;
+        static float halfScreenHeight;
+
         // Styles taken directly from Kerbal Engineer Redux - because they look great and this will
         // make our display consistent with that
         protected void SetupStyles()
         {
-            if (/* nameStyle != null && */ OldUIScale == GameSettings.UI_SCALE && oldScaling == Config.scaling)
+            if (OldUIScale == GameSettings.UI_SCALE && oldScaling == Config.scaling)
             {
                 return;
             }
@@ -118,6 +126,15 @@ namespace WaypointManager
             oldScaling = Config.scaling;
 
             finalScaling = GameSettings.UI_SCALE * Config.scaling;
+
+
+
+            boxHeight = 20f * finalScaling;
+            leftBoxWidth = Screen.width / 2f;
+            leftBoxLeft = 55f;
+            rightBoxLeft = Screen.width / 2f + 60f;
+            rightBoxWidth = 120f * finalScaling;
+            halfScreenHeight = Screen.height / 2.0f;
 
             nameStyle = new GUIStyle(HighLogic.Skin.label)
             {
@@ -149,7 +166,7 @@ namespace WaypointManager
             {
                 padding = new RectOffset(4, 4, 7, 4),
                 font = HighLogic.Skin.box.font,
-                fontSize =(int)( 13 * finalScaling),
+                fontSize = (int)(13 * finalScaling),
                 fontStyle = FontStyle.Normal,
                 fixedWidth = 0,
                 fixedHeight = 0,
@@ -215,35 +232,48 @@ namespace WaypointManager
                             asbRectTransform = asb.GetComponent<RectTransform>();
                         }
 
-                        float ybase = (Screen.height / 2.0f) - asbRectTransform.position.y + asbRectTransform.sizeDelta.y * finalScaling * 0.5f + 4;
+                        float ybase = halfScreenHeight - asbRectTransform.position.y + asbRectTransform.sizeDelta.y * 0.5f + 4;
                         if (ybase < 0)
                         {
                             ybase = 0;
                         }
 
+
                         string timeToWP = GetTimeToWaypoint(wpd);
                         if (Config.hudDistance)
                         {
-                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", nameStyle);
-                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                            //GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", nameStyle);
+                            //GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                            //    v.state != Vessel.State.DEAD ? Util.PrintDistance(wpd) : "N/A", valueStyle);
+                            //ybase += 18f;
+                            GUI.Label(new Rect(leftBoxLeft, ybase, leftBoxWidth, boxHeight), "Distance to " + label + ":", nameStyle);
+                            GUI.Label(new Rect(rightBoxLeft, ybase, rightBoxWidth, boxHeight),
                                 v.state != Vessel.State.DEAD ? Util.PrintDistance(wpd) : "N/A", valueStyle);
-                            ybase += 18f;
+                            ybase += boxHeight - 2;
                         }
 
                         if (timeToWP != null && Config.hudTime)
                         {
-                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "ETA to " + label + ":", nameStyle);
-                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                            //GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "ETA to " + label + ":", nameStyle);
+                            //GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                            //    v.state != Vessel.State.DEAD ? timeToWP : "N/A", valueStyle);
+                            //ybase += 18f;
+                            GUI.Label(new Rect(leftBoxLeft, ybase, leftBoxWidth, boxHeight), "ETA to " + label + ":", nameStyle);
+                            GUI.Label(new Rect(rightBoxLeft, ybase, rightBoxWidth, boxHeight),
                                 v.state != Vessel.State.DEAD ? timeToWP : "N/A", valueStyle);
-                            ybase += 18f;
+                            ybase += boxHeight - 2;
                         }
 
                         if (Config.hudHeading)
                         {
-                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Heading to " + label + ":", nameStyle);
-                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                            //GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Heading to " + label + ":", nameStyle);
+                            //GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                            //    v.state != Vessel.State.DEAD ? wpd.heading.ToString("N1") : "N/A", valueStyle);
+                            //ybase += 18f;
+                            GUI.Label(new Rect(leftBoxLeft, ybase, leftBoxWidth, boxHeight), "Heading to " + label + ":", nameStyle);
+                            GUI.Label(new Rect(rightBoxLeft, ybase, rightBoxWidth, boxHeight),
                                 v.state != Vessel.State.DEAD ? wpd.heading.ToString("N1") : "N/A", valueStyle);
-                            ybase += 18f;
+                            ybase += boxHeight - 2;
                         }
 
                         if (Config.hudAngle && v.mainBody == wpd.celestialBody)
@@ -252,19 +282,27 @@ namespace WaypointManager
                             double heightDist = wpd.waypoint.altitude + wpd.waypoint.height - v.altitude;
                             double angle = Math.Atan2(heightDist, distance) * 180.0 / Math.PI;
 
-                            GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Angle to " + label + ":", nameStyle);
-                            GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                            //GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Angle to " + label + ":", nameStyle);
+                            //GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                            //    v.state != Vessel.State.DEAD ? angle.ToString("N2") : "N/A", valueStyle);
+                            //ybase += 18f;
+                            GUI.Label(new Rect(leftBoxLeft, ybase, leftBoxWidth, boxHeight), "Angle to " + label + ":", nameStyle);
+                            GUI.Label(new Rect(rightBoxLeft, ybase, rightBoxWidth, boxHeight),
                                 v.state != Vessel.State.DEAD ? angle.ToString("N2") : "N/A", valueStyle);
-                            ybase += 18f;
+                            ybase += boxHeight - 2;
 
                             if (v.srfSpeed >= 0.1)
                             {
                                 double velAngle = 90 - Math.Acos(Vector3d.Dot(v.srf_velocity.normalized, v.upAxis)) * 180.0 / Math.PI;
 
-                                GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Velocity pitch angle:", nameStyle);
-                                GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                                //GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Velocity pitch angle:", nameStyle);
+                                //GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
+                                //    v.state != Vessel.State.DEAD ? velAngle.ToString("N2") : "N/A", valueStyle);
+                                //ybase += 18f;
+                                GUI.Label(new Rect(leftBoxLeft, ybase, leftBoxWidth, boxHeight), "Velocity pitch angle:", nameStyle);
+                                GUI.Label(new Rect(rightBoxLeft, ybase, rightBoxWidth, boxHeight),
                                     v.state != Vessel.State.DEAD ? velAngle.ToString("N2") : "N/A", valueStyle);
-                                ybase += 18f;
+                                //ybase += boxHeight - 2;
                             }
                         }
                     }
@@ -341,7 +379,7 @@ namespace WaypointManager
                     float width = 240f;
                     float height = hintTextStyle.CalcHeight(new GUIContent(label), width);
                     float yoffset = height + 48.0f;
-                    GUI.Box(new Rect(screenPos.x - width/2.0f, (float)Screen.height - screenPos.y - yoffset, width, height), label, hintTextStyle);
+                    GUI.Box(new Rect(screenPos.x - width / 2.0f, (float)Screen.height - screenPos.y - yoffset, width, height), label, hintTextStyle);
                 }
             }
         }
@@ -414,10 +452,10 @@ namespace WaypointManager
 
             double time = (wpd.distanceToActive / v.horizontalSrfSpeed);
 
-			uint SecondsPerYear = (uint)KSPUtil.dateTimeFormatter.Year;
-			uint SecondsPerDay = (uint)KSPUtil.dateTimeFormatter.Day;
-			uint SecondsPerHour = (uint)KSPUtil.dateTimeFormatter.Hour;
-			uint SecondsPerMinute = (uint)KSPUtil.dateTimeFormatter.Minute;
+            uint SecondsPerYear = (uint)KSPUtil.dateTimeFormatter.Year;
+            uint SecondsPerDay = (uint)KSPUtil.dateTimeFormatter.Day;
+            uint SecondsPerHour = (uint)KSPUtil.dateTimeFormatter.Hour;
+            uint SecondsPerMinute = (uint)KSPUtil.dateTimeFormatter.Minute;
 
             int years = (int)(time / SecondsPerYear);
             time -= years * SecondsPerYear;

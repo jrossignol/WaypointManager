@@ -8,6 +8,9 @@ rem VERSIONFILE is the name of the version file, usually the same as GAMEDATA,
 rem    but not always
 
 set H=%KSPDIR%
+
+rem set H=R:\KSP_1.12.0_Tetrix
+
 set GAMEDIR=WaypointManager
 set GAMEDATA="GameData"
 set VERSIONFILE=%GAMEDIR%.version
