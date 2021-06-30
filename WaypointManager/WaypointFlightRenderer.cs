@@ -365,7 +365,8 @@ namespace WaypointManager
                 // Draw the icon, but support blinking
                 if (!Util.IsNavPoint(wpd.waypoint) || !NavWaypoint.fetch.IsBlinking || (int)((Time.fixedTime - (int)Time.fixedTime) * 4) % 2 == 0)
                 {
-                    Graphics.DrawTexture(iconRect, ContractDefs.sprites[wpd.waypoint.id].texture, new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(wpd.waypoint.seed, wpd.currentAlpha));
+                    Graphics.DrawTexture(iconRect, /*ContractDefs.sprites[wpd.waypoint.id].texture */
+                        Util.GetContractIcon(wpd.waypoint.id, wpd.waypoint.seed), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(wpd.waypoint.seed, wpd.currentAlpha));
                 }
 
                 // Hint text!

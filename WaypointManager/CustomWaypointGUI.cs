@@ -8,6 +8,7 @@ using FinePrint;
 using FinePrint.Utilities;
 using ClickThroughFix;
 using ToolbarControl_NS;
+using static WaypointManager.RegisterToolbar;
 
 namespace WaypointManager
 {
@@ -468,6 +469,7 @@ namespace WaypointManager
             GUILayout.Space(4);
 
             GUILayout.BeginVertical();
+;
             if (GUILayout.Button(Util.GetContractIcon(template.id, template.seed)))
             {
                 showIconPicker = !showIconPicker;

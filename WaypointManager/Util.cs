@@ -180,8 +180,10 @@ namespace WaypointManager
             {
                 contractIcons[key] = new Dictionary<Color, Texture2D>();
             }
+
             if (!contractIcons[key].ContainsKey(color))
             {
+
                 if (url.EndsWith(".png"))
                     url = url.Substring(0, url.Length - 4);
                 if (url.StartsWith("GameData"))
@@ -191,31 +193,31 @@ namespace WaypointManager
 
                 url = url.Replace('\\', '/');
                 string url2 = url;
-                //if (!url.Contains('/'))
+
+                string tmp = url;
+                if (!tmp.Contains("PluginData"))
                 {
-                    string tmp = url;
-                    if (!tmp.Contains("PluginData"))
+                    if (!url.StartsWith("GameData"))
+                        tmp = "/" + url;
+
+                    for (int i = 0; i < GameDatabase.Instance.databaseTexture.Count; i++)
                     {
-                        if (!url.StartsWith("GameData"))
-                            tmp = "/" + url;
-                        for (int i = 0; i < GameDatabase.Instance.databaseTexture.Count; i++)
+                        if (GameDatabase.Instance.databaseTexture[i].file != null)
                         {
-                            if (GameDatabase.Instance.databaseTexture[i].file != null)
+                            if (GameDatabase.Instance.databaseTexture[i].name.EndsWith(tmp) ||
+                                GameDatabase.Instance.databaseTexture[i].name == url)
                             {
-                                if (GameDatabase.Instance.databaseTexture[i].name.EndsWith(tmp) ||
-                                    GameDatabase.Instance.databaseTexture[i].name == url)
-                                {
-                                    url2 = GameDatabase.Instance.databaseTexture[i].file.fullPath;
-                                }
+                                url2 = GameDatabase.Instance.databaseTexture[i].file.fullPath;
                             }
                         }
                     }
-                    else
-                    {
-                        if (!url2.StartsWith("GameData"))
-                            url2 = KSPUtil.ApplicationRootPath + "GameData/" + url2;
-                    }
                 }
+                else
+                {
+                    if (!url2.StartsWith("GameData"))
+                        url2 = KSPUtil.ApplicationRootPath + "GameData/" + url2;
+                }
+
                 string path = url2;
 
                 if (path.EndsWith(".png") || path.EndsWith(".dds"))
@@ -230,7 +232,7 @@ namespace WaypointManager
                     {
                         path += ".png";
                         loadedTexture = new Texture2D(baseTexture.width, baseTexture.height, TextureFormat.RGBA32, false);
-                        loadedTexture.LoadImage(File.ReadAllBytes(path.Replace('/', Path.DirectorySeparatorChar)));
+                        loadedTexture.LoadImage(File.ReadAllBytes(path.Replace('/', Path.DirectorySeparatorChar)));             
                     }
                     // DDS loading
                     else
@@ -285,10 +287,12 @@ namespace WaypointManager
                     {
                         pixels[i] *= color;
                     }
-                    texture = new Texture2D(baseTexture.width, baseTexture.height, TextureFormat.RGBA32, false);
+                    //texture = new Texture2D(baseTexture.width, baseTexture.height, TextureFormat.RGBA32, false);
+                    texture = new Texture2D(loadedTexture.width, loadedTexture.height, TextureFormat.RGBA32, false);
                     texture.SetPixels(pixels);
                     texture.Apply(false, false);
                     contractIcons[key][color] = texture;
+
                     UnityEngine.Object.Destroy(loadedTexture);
                 }
                 catch (Exception e)
@@ -373,7 +377,8 @@ namespace WaypointManager
             Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, 0.5f * (alpha - 0.3f) / 0.7f));
 
             // Draw the icon
-            Graphics.DrawTexture(iconRect, ContractDefs.sprites[id].texture, new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(seed, alpha));
+            Graphics.DrawTexture(iconRect, /* ContractDefs.sprites[id].texture */
+                GetContractIcon(id, seed), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(seed, alpha));
         }
 
     }
