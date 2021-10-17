@@ -1,6 +1,8 @@
 Changelog
 
-2.8.3.2
+2.8.3.3
+	Added AssemblyFileVersion
+	Updated version file for 1.12
 	Fixed custom icons
 
 2.8.3.1

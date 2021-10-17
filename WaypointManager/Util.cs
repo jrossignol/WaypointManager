@@ -334,6 +334,7 @@ namespace WaypointManager
 
         public static void DrawWaypoint(CelestialBody targetBody, double latitude, double longitude, double altitude, string id, int seed, float alpha = -1.0f)
         {
+            Log.Info("DrawWaypoint, id: " + id);
             // Translate to scaled space
             Vector3d localSpacePoint = targetBody.GetWorldSurfacePosition(latitude, longitude, altitude);
             Vector3d scaledSpacePoint = ScaledSpace.LocalToScaledSpace(localSpacePoint);
@@ -379,6 +380,7 @@ namespace WaypointManager
             // Draw the icon
             Graphics.DrawTexture(iconRect, /* ContractDefs.sprites[id].texture */
                 GetContractIcon(id, seed), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(seed, alpha));
+            Log.Info("id: " + id);
         }
 
     }

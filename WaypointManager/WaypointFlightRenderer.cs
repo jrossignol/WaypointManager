@@ -9,6 +9,7 @@ using Contracts;
 using FinePrint;
 using FinePrint.Utilities;
 using ClickThroughFix;
+using static WaypointManager.RegisterToolbar;
 
 namespace WaypointManager
 {

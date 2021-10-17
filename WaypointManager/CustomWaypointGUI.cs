@@ -469,8 +469,8 @@ namespace WaypointManager
             GUILayout.Space(4);
 
             GUILayout.BeginVertical();
-;
-            if (GUILayout.Button(Util.GetContractIcon(template.id, template.seed)))
+
+            if (GUILayout.Button(Util.GetContractIcon(template.id, template.seed), GUILayout.Width(40), GUILayout.Height(40)))
             {
                 showIconPicker = !showIconPicker;
 
@@ -627,6 +627,7 @@ namespace WaypointManager
         /// </summary>
         public static void DrawMarker()
         {
+            //Log.Info("DrawMarker, template.id: " + template.id);
             // Only handle on repaint events
             if (windowMode == WindowMode.Add && Event.current.type == EventType.Repaint)
             {
