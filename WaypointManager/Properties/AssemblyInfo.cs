@@ -36,4 +36,4 @@ using System.Runtime.InteropServices;
 //[assembly: AssemblyFileVersion("2.8.1")]
 
 [assembly: AssemblyInformationalVersion("2.8.1")]
-[assembly: KSPAssembly("WaypointManager", 1, 0)]
+//[assembly: KSPAssembly("WaypointManager", 1, 0)]

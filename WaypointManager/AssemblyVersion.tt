@@ -99,3 +99,4 @@
 
  [assembly: AssemblyFileVersion("<#= major #>.<#= minor #>.<#= patch #>.<#= build #>")]
  [assembly: AssemblyVersion("<#= major #>.<#= minor #>.<#= patch #>.<#= build #>")]
+ [assembly: KSPAssembly("WaypointManager", <#= major #>, <#= minor #>, <#= patch #>)]
