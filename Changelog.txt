@@ -1,5 +1,8 @@
 Changelog
 
+2.8.4.4
+	Fixed memory leak caused by the WaypointManagerGameEvents being unloaded
+
 2.8.3.3
 	Added AssemblyFileVersion
 	Updated version file for 1.12

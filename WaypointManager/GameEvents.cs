@@ -22,6 +22,7 @@ namespace WaypointManager
         void Awake()
         {
             onWaypointIconAdded.Add(new EventData<string>.OnEvent(WaypointIconAdded));
+            DontDestroyOnLoad(this);
         }
     }
 }
