@@ -235,9 +235,9 @@ namespace WaypointManager
                 foreach (ConfigNode configNode in iconConfig)
                 {
                     string dir = configNode.GetValue("url");
-                    if (Directory.Exists("GameData/" + dir))
+                    if (Directory.Exists(KSPUtil.ApplicationRootPath+"GameData/" + dir))
                     {
-                        foreach (var str in Directory.GetFiles("GameData/" + dir))
+                        foreach (var str in Directory.GetFiles(KSPUtil.ApplicationRootPath+"GameData/" + dir))
                         {
                             var icon = new Texture2D(2, 2);
                             ToolbarControl.LoadImageFromFile(ref icon, str);

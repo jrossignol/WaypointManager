@@ -99,18 +99,18 @@ namespace WaypointManager
         private void LoadTextures()
         {
             Config.toolbarIcon = new Texture2D(2, 2);
-            ToolbarControl.LoadImageFromFile(ref Config.toolbarIcon, "GameData/WaypointManager/PluginData/icons/toolbar");
+            ToolbarControl.LoadImageFromFile(ref Config.toolbarIcon, KSPUtil.ApplicationRootPath+"GameData/WaypointManager/PluginData/icons/toolbar");
 
             Config.addWaypointIcon = new Texture2D(2, 2);
-            ToolbarControl.LoadImageFromFile(ref Config.addWaypointIcon, "GameData/WaypointManager/PluginData/icons/addWaypoint");
+            ToolbarControl.LoadImageFromFile(ref Config.addWaypointIcon, KSPUtil.ApplicationRootPath + "GameData/WaypointManager/PluginData/icons/addWaypoint");
             Config.editWaypointIcon = new Texture2D(2, 2);
-            ToolbarControl.LoadImageFromFile(ref Config.editWaypointIcon, "GameData/WaypointManager/PluginData/icons/editWaypoint");
+            ToolbarControl.LoadImageFromFile(ref Config.editWaypointIcon, KSPUtil.ApplicationRootPath + "GameData/WaypointManager/PluginData/icons/editWaypoint");
             Config.deleteWaypointIcon = new Texture2D(2, 2);
-            ToolbarControl.LoadImageFromFile(ref Config.deleteWaypointIcon, "GameData/WaypointManager/PluginData/icons/deleteWaypoint");
+            ToolbarControl.LoadImageFromFile(ref Config.deleteWaypointIcon, KSPUtil.ApplicationRootPath + "GameData/WaypointManager/PluginData/icons/deleteWaypoint");
             Config.settingsIcon = new Texture2D(2, 2);
-            ToolbarControl.LoadImageFromFile(ref Config.settingsIcon, "GameData/WaypointManager/PluginData/icons/settings");
+            ToolbarControl.LoadImageFromFile(ref Config.settingsIcon, KSPUtil.ApplicationRootPath + "GameData/WaypointManager/PluginData/icons/settings");
             Config.closeIcon = new Texture2D(2, 2);
-            ToolbarControl.LoadImageFromFile(ref Config.closeIcon, "GameData/WaypointManager/PluginData/icons/close");
+            ToolbarControl.LoadImageFromFile(ref Config.closeIcon, KSPUtil.ApplicationRootPath + "GameData/WaypointManager/PluginData/icons/close");
         }
 
         internal const string MODID = "WaypointManager";
@@ -178,10 +178,10 @@ namespace WaypointManager
                     {
                         url += '/';
                     }
-                    if (Directory.Exists("GameData/" + url))
+                    if (Directory.Exists(KSPUtil.ApplicationRootPath + "GameData/" + url))
                     {
 
-                        foreach (var str in Directory.GetFiles("GameData/" + url))
+                        foreach (var str in Directory.GetFiles(KSPUtil.ApplicationRootPath + "GameData/" + url))
                         {
                             var icon = new Texture2D(2, 2);
                             ToolbarControl.LoadImageFromFile(ref icon, str);

@@ -70,6 +70,85 @@ namespace WaypointManager
             visible = true;
         }
 
+#if false
+        new bool enabled = false;
+
+        bool drag = false;
+        float offset_x;
+        float offset_y;
+
+        void OnMouseDown()
+        {
+            drag = true;
+            offset_x = rightBoxLeft - Input.mousePosition.x / Screen.width;
+            //offset_y = guiText.transform.position.y - (Screen.height - Input.mousePosition.y) / Screen.height;
+        }
+
+        void OnMouseUp()
+        {
+            drag = false;
+
+            rightBoxLeft = Input.mousePosition.x / Screen.width;
+            //Settings.position_y = (Screen.height - Input.mousePosition.y) / Screen.height;
+        }
+
+        float x, y;
+        public static KeyBinding PLUGIN_TOGGLE = new KeyBinding(KeyCode.F8);
+
+        void Update()
+        {
+            if (drag)
+            {
+                x = Input.mousePosition.x / Screen.width;
+                y = (Screen.height - Input.mousePosition.y) / Screen.height;
+                //guiText.transform.position = new Vector3(x + offset_x, y + offset_y, 0f);
+            }
+            else
+            {
+                x = Settings.position_x;
+                y = Settings.position_y;
+            }
+            if (PLUGIN_TOGGLE.GetKeyDown())
+            {
+#if true
+                if (Input.GetKey(KeyCode.LeftControl)
+                        || Input.GetKey(KeyCode.RightControl))
+                {
+                    if (!enabled)
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    enabled = !enabled;
+                    //guiText.enabled = enabled;
+
+                    //guiText.useGUILayout = false;
+                }
+#endif
+            }
+            if (enabled)
+            {
+                if (drag || fpsPos.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y)))
+                {
+                    bool b = Input.GetMouseButton(0);
+
+                    if (!drag && b)
+                    {
+                        OnMouseDown();
+                    }
+                    else
+                        if (drag && !b)
+                        OnMouseUp();
+                    drag = b;
+
+                }
+                else drag = false;
+            }
+        }
+#endif
+
         public void OnGUI()
         {
             if (visible && !ImportExport.helpDialogVisible)

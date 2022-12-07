@@ -1,6 +1,9 @@
 Changelog
 
-2.8.4.4
+2.8.3.5
+	Fixed path for loading files (broken by new launcher)
+
+2.8.3.4
 	Fixed memory leak caused by the WaypointManagerGameEvents being unloaded
 
 2.8.3.3
