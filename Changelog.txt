@@ -1,0 +1,61 @@
+Changelog
+
+2.8.3.5
+	Fixed path for loading files (broken by new launcher)
+
+2.8.3.4
+	Fixed memory leak caused by the WaypointManagerGameEvents being unloaded
+
+2.8.3.3
+	Added AssemblyFileVersion
+	Updated version file for 1.12
+	Fixed custom icons
+
+2.8.3.1
+	Fixed loading of contract icons
+	Optimized display of onscreen text
+	Fixed display of onscreen text position & removed word wrapping
+
+2.8.3
+	Added new dependency, SpacetuxLibrary
+	Changed Debug.Log methods to Log.Info
+	Added UI Scaling
+
+2.8.2.7
+	Fixed modname on the toolbar button
+
+2.8.2.6
+	Removed extra .version file
+
+2.8.2.5
+	Updated coordinates & altitude for the Armstrong Memorial
+
+2.8.2.4
+	Another error in version file, was https instead of http
+
+2.8.2.3
+	Fixed version file
+
+2.8.2.2
+	Added page to select import of custom waypoints
+	Patchmanager configs removed
+	Moved icons into PluginData
+	Changed loading of icons to Toolbarcontroller.LoadImageFromFile
+	Added selection window to load custom waypoints
+	Split big CustomWaypoints.InterestingSites.cfg into planet specific files
+
+2.8.2.1
+	Added custom landing site configs, make active using PatchManager and then import into WaypointManager
+
+2.8.2
+	Adoption by LinuxGuruGamer
+	Added support for ToolbarController
+	Added support for ClickThroughBlocker
+	Patch from github user @SumGuyTwitches:
+		fix kraken location off by 8 degrees
+	Patch from Github user @taniwha:
+		Use dateTimeFormatter for time period lengths
+
+	Fixed RSS compatibility with changes listed in this issue on Github:
+		https://github.com/jrossignol/WaypointManager/issues/59
+

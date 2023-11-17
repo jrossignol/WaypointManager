@@ -184,3 +184,7 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+/source/.vs/WaypointManager/v15/Server/sqlite3/db.lock
+/source/.vs/WaypointManager/v15/Server/sqlite3/storage.ide
+/source/.vs/WaypointManager/v15/Server/sqlite3/storage.ide-shm
+/source/.vs/WaypointManager/v15/Server/sqlite3/storage.ide-wal

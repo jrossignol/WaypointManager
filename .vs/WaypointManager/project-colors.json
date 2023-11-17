@@ -1,0 +1,21 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "c2c97615-1b94-4a31-9a68-042f6457403e": {
+      "ProjectGuid": "c2c97615-1b94-4a31-9a68-042f6457403e",
+      "DisplayName": "WaypointManager",
+      "ColorIndex": 0
+    },
+    "e9463310-6814-47f6-8fbe-881501c4309c": {
+      "ProjectGuid": "e9463310-6814-47f6-8fbe-881501c4309c",
+      "DisplayName": "Solution Items",
+      "ColorIndex": 1
+    },
+    "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3": {
+      "ProjectGuid": "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3",
+      "DisplayName": "Miscellaneous Files",
+      "ColorIndex": -1
+    }
+  },
+  "NextColorIndex": 2
+}
