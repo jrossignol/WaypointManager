@@ -27,8 +27,6 @@ namespace WaypointManager
 
         public static WaypointManager Instance;
 
-        //private ApplicationLauncherButton launcherButton = null;
-        //private IButton toolbarButton;
         ToolbarControl toolbarControl;
 
         private static bool initialized = false;
@@ -190,16 +188,6 @@ namespace WaypointManager
                             bodyIcons[name] = icon;
                         }
                     }
-
-#if false
-                    foreach (GameDatabase.TextureInfo icon in GameDatabase.Instance.GetAllTexturesInFolder(url))
-                    {
-                        string name = icon.name.Substring(icon.name.LastIndexOf('/') + 1);
-                        bodyIcons[name] = icon.texture;
-                        Log.Info("WaypointManager: Loaded icon for " + name + ".");
-                    }
-#endif
-
                 }
                 catch (Exception e)
                 {
@@ -442,48 +430,53 @@ namespace WaypointManager
             GUILayout.Label(CelestialBodyIcon(wpd.celestialBody.name), GUILayout.ExpandWidth(false));
             GUILayout.Space(2);
 
-            GUILayout.BeginVertical();
-
-            // Waypoint name, distance
-            GUILayout.BeginHorizontal();
-            string name = wpd.waypoint.name;
-            if (wpd.waypoint.isClustered)
+            using (new GUILayout.VerticalScope())
             {
-                name += " " + StringUtilities.IntegerToGreek(wpd.waypoint.index);
-            }
-            GUILayout.Label(name, labelStyle, GUILayout.Height(16), GUILayout.Width(GUI_WIDTH - 240), GUILayout.ExpandWidth(false));
-            if (FlightGlobals.currentMainBody == wpd.celestialBody)
-            {
-                GUILayout.Label("Dist: " + Util.PrintDistance(wpd), labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
-            }
-            GUILayout.EndHorizontal();
 
-            // Waypoint location
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Lat: " + Util.FormatCoordinate(wpd.waypoint.latitude, true), labelStyle, GUILayout.Height(16), GUILayout.Width(GUI_WIDTH / 2.0f - 72.0f), GUILayout.ExpandWidth(false));
-            GUILayout.Label("Lon: " + Util.FormatCoordinate(wpd.waypoint.longitude, false), labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
-            GUILayout.EndHorizontal();
+                // Waypoint name, distance
+                using (new GUILayout.HorizontalScope())
+                {
+                    string name = wpd.waypoint.name;
+                    if (wpd.waypoint.isClustered)
+                    {
+                        name += " " + StringUtilities.IntegerToGreek(wpd.waypoint.index);
+                    }
+                    GUILayout.Label(name, labelStyle, GUILayout.Height(16), GUILayout.Width(GUI_WIDTH - 240), GUILayout.ExpandWidth(false));
+                    if (FlightGlobals.currentMainBody == wpd.celestialBody)
+                    {
+                        GUILayout.Label("Dist: " + Util.PrintDistance(wpd), labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
+                    }
+                }
 
-            GUILayout.EndVertical();
+                // Waypoint location
+                using (new GUILayout.HorizontalScope())
+                {
+                    GUILayout.Label("Lat: " + Util.FormatCoordinate(wpd.waypoint.latitude, true), labelStyle, GUILayout.Height(16), GUILayout.Width(GUI_WIDTH / 2.0f - 72.0f), GUILayout.ExpandWidth(false));
+                    GUILayout.Label("Lon: " + Util.FormatCoordinate(wpd.waypoint.longitude, false), labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
+                }
+
+            }
             GUILayout.FlexibleSpace();
 
             if (CustomWaypoints.Instance.IsCustom(wpd.waypoint))
             {
-                GUILayout.BeginVertical();
-                GUILayout.Space(8);
-                GUILayout.BeginHorizontal();
-
-                if (GUILayout.Button(new GUIContent(Config.editWaypointIcon, "Edit Waypoint"), GUI.skin.label))
+                using (new GUILayout.VerticalScope())
                 {
-                    CustomWaypointGUI.EditWaypoint(wpd.waypoint);
-                }
-                if (GUILayout.Button(new GUIContent(Config.deleteWaypointIcon, "Delete Waypoint"), GUI.skin.label))
-                {
-                    CustomWaypointGUI.DeleteWaypoint(wpd.waypoint);
-                }
+                    GUILayout.Space(8);
+                    using (new GUILayout.HorizontalScope())
+                    {
 
-                GUILayout.EndHorizontal();
-                GUILayout.EndVertical();
+                        if (GUILayout.Button(new GUIContent(Config.editWaypointIcon, "Edit Waypoint"), GUI.skin.label))
+                        {
+                            CustomWaypointGUI.EditWaypoint(wpd.waypoint);
+                        }
+                        if (GUILayout.Button(new GUIContent(Config.deleteWaypointIcon, "Delete Waypoint"), GUI.skin.label))
+                        {
+                            CustomWaypointGUI.DeleteWaypoint(wpd.waypoint);
+                        }
+
+                    }
+                }
             }
             else
             {
@@ -544,109 +537,121 @@ namespace WaypointManager
 
         protected void SettingsGUI(int windowID)
         {
-            GUILayout.BeginVertical(GUILayout.Width(SETTINGS_WIDTH));
+            using (new GUILayout.VerticalScope())
+            {
+                GUILayout.BeginVertical(GUILayout.Width(SETTINGS_WIDTH));
 
-            // Distance calculation method
-            GUILayout.Label("Distance calculation", headingStyle);
-            GUIContent guiContent = new GUIContent("Lateral", "Calculates distance as the horizontal distance only.  Useful if you're looking to hit a landing spot exactly.");
-            if (GUILayout.Toggle(Config.distanceCalcMethod == Config.DistanceCalcMethod.LATERAL, guiContent))
-            {
-                Config.distanceCalcMethod = Config.DistanceCalcMethod.LATERAL;
-            }
-            guiContent = new GUIContent("Straight line", "Calculates distance in a direct line.");
-            if (GUILayout.Toggle(Config.distanceCalcMethod == Config.DistanceCalcMethod.STRAIGHT_LINE, guiContent))
-            {
-                Config.distanceCalcMethod = Config.DistanceCalcMethod.STRAIGHT_LINE;
-            }
-            guiContent = new GUIContent("Compromise", "Uses lateral distance if the vessel and waypoint altitude are relatively close, otherwise uses straight line distance.");
-            if (GUILayout.Toggle(Config.distanceCalcMethod == Config.DistanceCalcMethod.COMPROMISE, guiContent))
-            {
-                Config.distanceCalcMethod = Config.DistanceCalcMethod.COMPROMISE;
-            }
-
-            // In-Flight Waypoints :)
-            GUILayout.Label("Waypoints to display in-flight", headingStyle);
-            guiContent = new GUIContent("All", "Display all waypoints on the given celestial body while in flight.");
-            if (GUILayout.Toggle(Config.waypointDisplay == Config.WaypointDisplay.ALL, guiContent))
-            {
-                Config.waypointDisplay = Config.WaypointDisplay.ALL;
-            }
-            guiContent = new GUIContent("Active", "Display only the active waypoint while in flight.");
-            if (GUILayout.Toggle(Config.waypointDisplay == Config.WaypointDisplay.ACTIVE, guiContent))
-            {
-                Config.waypointDisplay = Config.WaypointDisplay.ACTIVE;
-            }
-            guiContent = new GUIContent("None", "Do not display any waypoints while in flight.");
-            if (GUILayout.Toggle(Config.waypointDisplay == Config.WaypointDisplay.NONE, guiContent))
-            {
-                Config.waypointDisplay = Config.WaypointDisplay.NONE;
-            }
-
-            // HUD
-            GUILayout.Label("Values to display below altimeter", headingStyle);
-            if (GUILayout.Toggle(Config.hudDistance, "Distance to target") != Config.hudDistance)
-            {
-                Config.hudDistance = !Config.hudDistance;
-            }
-            if (GUILayout.Toggle(Config.hudTime, "Time to target") != Config.hudTime)
-            {
-                Config.hudTime = !Config.hudTime;
-            }
-            if (GUILayout.Toggle(Config.hudHeading, "Heading to target") != Config.hudHeading)
-            {
-                Config.hudHeading = !Config.hudHeading;
-            }
-            if (GUILayout.Toggle(Config.hudAngle, "Glide slope angles") != Config.hudAngle)
-            {
-                Config.hudAngle = !Config.hudAngle;
-            }
-
-            // Display style
-            GUILayout.Label("Location display style", headingStyle);
-            if (GUILayout.Toggle(!Config.displayDecimal, "Degrees/Minutes/Seconds") == Config.displayDecimal)
-            {
-                Config.displayDecimal = false;
-            }
-            if (GUILayout.Toggle(Config.displayDecimal, "Decimal") != Config.displayDecimal)
-            {
-                Config.displayDecimal = true;
-            }
-
-            // Opacity
-            GUILayout.Label("Waypoint Opacity", headingStyle);
-            GUILayout.BeginHorizontal();
-            Config.opacity = GUILayout.HorizontalSlider(Config.opacity, 0.3f, 1.0f);
-            GUILayout.Space(5);
-            if (GUILayout.Button("Reset", GUILayout.Width(50)))
-                Config.opacity = 1.0f;
-            GUILayout.EndHorizontal();
-            if (GUILayout.Button(new GUIContent("Export Custom Waypoints", "Exports the custom waypoints to GameData/WaypointManager/CustomWaypoints.cfg")))
-            {
-                CustomWaypoints.Export();
-            }
-            if (importExportWindow == null)
-            {
-                if (GUILayout.Button(new GUIContent("Import Custom Waypoints", "Imports the custom waypoints from GameData/WaypointManager/CustomWaypoints.cfg")))
+                // Distance calculation method
+                GUILayout.Label("Distance calculation", headingStyle);
+                GUIContent guiContent = new GUIContent("Lateral", "Calculates distance as the horizontal distance only.  Useful if you're looking to hit a landing spot exactly.");
+                if (GUILayout.Toggle(Config.distanceCalcMethod == Config.DistanceCalcMethod.LATERAL, guiContent))
                 {
-                    if (importExportWindow == null)
-                        importExportWindow = gameObject.AddComponent<ImportExport>();
-                    //CustomWaypoints.Import();
+                    Config.distanceCalcMethod = Config.DistanceCalcMethod.LATERAL;
+                }
+                guiContent = new GUIContent("Straight line", "Calculates distance in a direct line.");
+                if (GUILayout.Toggle(Config.distanceCalcMethod == Config.DistanceCalcMethod.STRAIGHT_LINE, guiContent))
+                {
+                    Config.distanceCalcMethod = Config.DistanceCalcMethod.STRAIGHT_LINE;
+                }
+                guiContent = new GUIContent("Compromise", "Uses lateral distance if the vessel and waypoint altitude are relatively close, otherwise uses straight line distance.");
+                if (GUILayout.Toggle(Config.distanceCalcMethod == Config.DistanceCalcMethod.COMPROMISE, guiContent))
+                {
+                    Config.distanceCalcMethod = Config.DistanceCalcMethod.COMPROMISE;
+                }
+
+                // In-Flight Waypoints :)
+                GUILayout.Label("Waypoints to display in-flight", headingStyle);
+                guiContent = new GUIContent("All", "Display all waypoints on the given celestial body while in flight.");
+                if (GUILayout.Toggle(Config.waypointDisplay == Config.WaypointDisplay.ALL, guiContent))
+                {
+                    Config.waypointDisplay = Config.WaypointDisplay.ALL;
+                }
+                guiContent = new GUIContent("Active", "Display only the active waypoint while in flight.");
+                if (GUILayout.Toggle(Config.waypointDisplay == Config.WaypointDisplay.ACTIVE, guiContent))
+                {
+                    Config.waypointDisplay = Config.WaypointDisplay.ACTIVE;
+                }
+                guiContent = new GUIContent("None", "Do not display any waypoints while in flight.");
+                if (GUILayout.Toggle(Config.waypointDisplay == Config.WaypointDisplay.NONE, guiContent))
+                {
+                    Config.waypointDisplay = Config.WaypointDisplay.NONE;
+                }
+
+                // HUD
+                GUILayout.Label("Values to display below altimeter", headingStyle);
+                if (GUILayout.Toggle(Config.hudDistance, "Distance to target") != Config.hudDistance)
+                {
+                    Config.hudDistance = !Config.hudDistance;
+                }
+                if (GUILayout.Toggle(Config.hudTime, "Time to target") != Config.hudTime)
+                {
+                    Config.hudTime = !Config.hudTime;
+                }
+                if (GUILayout.Toggle(Config.hudHeading, "Heading to target") != Config.hudHeading)
+                {
+                    Config.hudHeading = !Config.hudHeading;
+                }
+                if (GUILayout.Toggle(Config.hudAngle, "Glide slope angles") != Config.hudAngle)
+                {
+                    Config.hudAngle = !Config.hudAngle;
+                }
+
+                // Display style
+                GUILayout.Label("Location display style", headingStyle);
+                if (GUILayout.Toggle(!Config.displayDecimal, "Degrees/Minutes/Seconds") == Config.displayDecimal)
+                {
+                    Config.displayDecimal = false;
+                }
+                if (GUILayout.Toggle(Config.displayDecimal, "Decimal") != Config.displayDecimal)
+                {
+                    Config.displayDecimal = true;
+                }
+
+                // Opacity
+                GUILayout.Label("Waypoint Opacity", headingStyle);
+                using (new GUILayout.HorizontalScope())
+                {
+                    Config.opacity = GUILayout.HorizontalSlider(Config.opacity, 0.3f, 1.0f);
+                    GUILayout.Space(5);
+                    if (GUILayout.Button("Reset", GUILayout.Width(50)))
+                        Config.opacity = 1.0f;
+                }
+                if (GUILayout.Button(new GUIContent("Export Custom Waypoints", "Exports the custom waypoints to GameData/WaypointManager/CustomWaypoints.cfg")))
+                {
+                    CustomWaypoints.Export();
+                }
+                if (importExportWindow == null)
+                {
+                    if (GUILayout.Button(new GUIContent("Import Custom Waypoints", "Imports the custom waypoints from GameData/WaypointManager/CustomWaypoints.cfg")))
+                    {
+                        if (importExportWindow == null)
+                            importExportWindow = gameObject.AddComponent<ImportExport>();
+                        //CustomWaypoints.Import();
+                    }
+                }
+                else
+                {
+                    if (GUILayout.Button(new GUIContent("Cancel Import of Custom Waypoints", "Cancels the import of custom waypoints from GameData/WaypointManager/CustomWaypoints.cfg")))
+                        Destroy(importExportWindow);
+                }
+
+                GUILayout.Label("UI Scaling (" + (Config.scaling * 100).ToString("F0") + "%)", headingStyle);
+                using (new GUILayout.HorizontalScope())
+                {
+                    Config.scaling = GUILayout.HorizontalSlider(Config.scaling, 0.8f, 1.5f);
+                    GUILayout.Space(5);
+                    if (GUILayout.Button("Reset", GUILayout.Width(50)))
+                        Config.scaling = 1.0f;
+                }
+                using (new GUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("Reset Display Position"))
+                    {
+                        Config.boxLeft = Config.boxTop = -1;
+                        Config.Save();
+                    }
                 }
             }
-            else
-            {
-                if (GUILayout.Button(new GUIContent("Cancel Import of Custom Waypoints", "Cancels the import of custom waypoints from GameData/WaypointManager/CustomWaypoints.cfg")))
-                    Destroy(importExportWindow);
-            }
-
-            GUILayout.Label("UI Scaling (" + (Config.scaling*100).ToString("F0") + "%)", headingStyle);
-            GUILayout.BeginHorizontal();
-            Config.scaling = GUILayout.HorizontalSlider(Config.scaling, 0.8f, 1.5f);
-            GUILayout.Space(5);
-            if (GUILayout.Button("Reset", GUILayout.Width(50)))
-                Config.scaling = 1.0f;
-            GUILayout.EndHorizontal();
-            GUILayout.EndVertical();
 
             GUI.DragWindow();
 

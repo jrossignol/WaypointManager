@@ -10,6 +10,7 @@ using FinePrint;
 using FinePrint.Utilities;
 using ClickThroughFix;
 using static WaypointManager.RegisterToolbar;
+using static FinePrint.ContractDefs;
 
 namespace WaypointManager
 {
@@ -70,7 +71,6 @@ namespace WaypointManager
             visible = true;
         }
 
-#if false
         new bool enabled = false;
 
         bool drag = false;
@@ -79,75 +79,44 @@ namespace WaypointManager
 
         void OnMouseDown()
         {
-            drag = true;
-            offset_x = rightBoxLeft - Input.mousePosition.x / Screen.width;
-            //offset_y = guiText.transform.position.y - (Screen.height - Input.mousePosition.y) / Screen.height;
+            if (!drag)
+            {
+                    offset_x = Input.mousePosition.x - Config.displayBox.x;
+                    offset_y = (Screen.height - Input.mousePosition.y) - Config.displayBox.y;
+            }
         }
 
         void OnMouseUp()
         {
-            drag = false;
-
-            rightBoxLeft = Input.mousePosition.x / Screen.width;
-            //Settings.position_y = (Screen.height - Input.mousePosition.y) / Screen.height;
+            Config.Save();
         }
-
-        float x, y;
-        public static KeyBinding PLUGIN_TOGGLE = new KeyBinding(KeyCode.F8);
 
         void Update()
         {
             if (drag)
             {
-                x = Input.mousePosition.x / Screen.width;
-                y = (Screen.height - Input.mousePosition.y) / Screen.height;
-                //guiText.transform.position = new Vector3(x + offset_x, y + offset_y, 0f);
+                Config.boxLeft = Math.Max(0, Input.mousePosition.x - offset_x);
+                Config.boxLeft = Math.Min(Config.boxLeft, Screen.width - boxWidth);
+                    
+                Config.boxTop = Math.Max(0,(Screen.height - Input.mousePosition.y) - offset_y);
+                Config.boxTop = Math.Min(Config.boxTop, Screen.height - fullBoxHeight);
             }
-            else
+            if (drag || Config.displayBox.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y)))
             {
-                x = Settings.position_x;
-                y = Settings.position_y;
-            }
-            if (PLUGIN_TOGGLE.GetKeyDown())
-            {
-#if true
-                if (Input.GetKey(KeyCode.LeftControl)
-                        || Input.GetKey(KeyCode.RightControl))
+                bool b = Input.GetMouseButton(0) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl));
+
+                if (!drag && b)
                 {
-                    if (!enabled)
-                    {
-                        return;
-                    }
+                    OnMouseDown();
                 }
                 else
-                {
-                    enabled = !enabled;
-                    //guiText.enabled = enabled;
+                    if (drag && !b)
+                    OnMouseUp();
+                drag = b;
 
-                    //guiText.useGUILayout = false;
-                }
-#endif
             }
-            if (enabled)
-            {
-                if (drag || fpsPos.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y)))
-                {
-                    bool b = Input.GetMouseButton(0);
-
-                    if (!drag && b)
-                    {
-                        OnMouseDown();
-                    }
-                    else
-                        if (drag && !b)
-                        OnMouseUp();
-                    drag = b;
-
-                }
-                else drag = false;
-            }
+            else drag = false;
         }
-#endif
 
         public void OnGUI()
         {
@@ -188,11 +157,6 @@ namespace WaypointManager
         static float finalScaling;
 
         static float boxHeight;
-        static float leftBoxWidth;
-        static float leftBoxLeft;
-        static float rightBoxLeft;
-        static float rightBoxWidth;
-        static float halfScreenHeight;
 
         // Styles taken directly from Kerbal Engineer Redux - because they look great and this will
         // make our display consistent with that
@@ -210,11 +174,6 @@ namespace WaypointManager
 
 
             boxHeight = 20f * finalScaling;
-            leftBoxWidth = Screen.width / 2f;
-            leftBoxLeft = 55f;
-            rightBoxLeft = Screen.width / 2f + 60f;
-            rightBoxWidth = 120f * finalScaling;
-            halfScreenHeight = Screen.height / 2.0f;
 
             nameStyle = new GUIStyle(HighLogic.Skin.label)
             {
@@ -238,8 +197,6 @@ namespace WaypointManager
                 fontSize = (int)(11f * finalScaling),
                 fontStyle = FontStyle.Normal,
                 fixedHeight = 20.0f * finalScaling
-
-
             };
 
             hintTextStyle = new GUIStyle(HighLogic.Skin.box)
@@ -312,48 +269,23 @@ namespace WaypointManager
                             asbRectTransform = asb.GetComponent<RectTransform>();
                         }
 
-                        float ybase = halfScreenHeight - asbRectTransform.position.y + asbRectTransform.sizeDelta.y * 0.5f + 4;
-                        if (ybase < 0)
-                        {
-                            ybase = 0;
-                        }
 
-
+                        fullBoxHeight = 0;
+                        boxWidth = 0;
                         string timeToWP = GetTimeToWaypoint(wpd);
                         if (Config.hudDistance)
                         {
-                            //GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Distance to " + label + ":", nameStyle);
-                            //GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
-                            //    v.state != Vessel.State.DEAD ? Util.PrintDistance(wpd) : "N/A", valueStyle);
-                            //ybase += 18f;
-                            GUI.Label(new Rect(leftBoxLeft, ybase, leftBoxWidth, boxHeight), "Distance to " + label + ":", nameStyle);
-                            GUI.Label(new Rect(rightBoxLeft, ybase, rightBoxWidth, boxHeight),
-                                v.state != Vessel.State.DEAD ? Util.PrintDistance(wpd) : "N/A", valueStyle);
-                            ybase += boxHeight - 2;
+                            ShowText("Distance to " + label + ":", v.state != Vessel.State.DEAD ? Util.PrintDistance(wpd) : "N/A");
                         }
 
                         if (timeToWP != null && Config.hudTime)
                         {
-                            //GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "ETA to " + label + ":", nameStyle);
-                            //GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
-                            //    v.state != Vessel.State.DEAD ? timeToWP : "N/A", valueStyle);
-                            //ybase += 18f;
-                            GUI.Label(new Rect(leftBoxLeft, ybase, leftBoxWidth, boxHeight), "ETA to " + label + ":", nameStyle);
-                            GUI.Label(new Rect(rightBoxLeft, ybase, rightBoxWidth, boxHeight),
-                                v.state != Vessel.State.DEAD ? timeToWP : "N/A", valueStyle);
-                            ybase += boxHeight - 2;
+                            ShowText("ETA to " + label + ":", v.state != Vessel.State.DEAD ? timeToWP : "N/A");
                         }
 
                         if (Config.hudHeading)
                         {
-                            //GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Heading to " + label + ":", nameStyle);
-                            //GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
-                            //    v.state != Vessel.State.DEAD ? wpd.heading.ToString("N1") : "N/A", valueStyle);
-                            //ybase += 18f;
-                            GUI.Label(new Rect(leftBoxLeft, ybase, leftBoxWidth, boxHeight), "Heading to " + label + ":", nameStyle);
-                            GUI.Label(new Rect(rightBoxLeft, ybase, rightBoxWidth, boxHeight),
-                                v.state != Vessel.State.DEAD ? wpd.heading.ToString("N1") : "N/A", valueStyle);
-                            ybase += boxHeight - 2;
+                            ShowText("Heading to " + label + ":", v.state != Vessel.State.DEAD ? wpd.heading.ToString("N1") : "N/A");
                         }
 
                         if (Config.hudAngle && v.mainBody == wpd.celestialBody)
@@ -362,29 +294,16 @@ namespace WaypointManager
                             double heightDist = wpd.waypoint.altitude + wpd.waypoint.height - v.altitude;
                             double angle = Math.Atan2(heightDist, distance) * 180.0 / Math.PI;
 
-                            //GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Angle to " + label + ":", nameStyle);
-                            //GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
-                            //    v.state != Vessel.State.DEAD ? angle.ToString("N2") : "N/A", valueStyle);
-                            //ybase += 18f;
-                            GUI.Label(new Rect(leftBoxLeft, ybase, leftBoxWidth, boxHeight), "Angle to " + label + ":", nameStyle);
-                            GUI.Label(new Rect(rightBoxLeft, ybase, rightBoxWidth, boxHeight),
-                                v.state != Vessel.State.DEAD ? angle.ToString("N2") : "N/A", valueStyle);
-                            ybase += boxHeight - 2;
+                            ShowText("Angle to " + label + ":", v.state != Vessel.State.DEAD ? angle.ToString("N2") : "N/A");
 
                             if (v.srfSpeed >= 0.1)
                             {
                                 double velAngle = 90 - Math.Acos(Vector3d.Dot(v.srf_velocity.normalized, v.upAxis)) * 180.0 / Math.PI;
 
-                                //GUI.Label(new Rect((float)Screen.width / 2.0f - 188f, ybase, 240f, 20f), "Velocity pitch angle:", nameStyle);
-                                //GUI.Label(new Rect((float)Screen.width / 2.0f + 60f, ybase, 120f, 20f),
-                                //    v.state != Vessel.State.DEAD ? velAngle.ToString("N2") : "N/A", valueStyle);
-                                //ybase += 18f;
-                                GUI.Label(new Rect(leftBoxLeft, ybase, leftBoxWidth, boxHeight), "Velocity pitch angle:", nameStyle);
-                                GUI.Label(new Rect(rightBoxLeft, ybase, rightBoxWidth, boxHeight),
-                                    v.state != Vessel.State.DEAD ? velAngle.ToString("N2") : "N/A", valueStyle);
-                                //ybase += boxHeight - 2;
+                                ShowText("Velocity pitch angle:", v.state != Vessel.State.DEAD ? velAngle.ToString("N2") : "N/A");
                             }
                         }
+                        Config.displayBox = new Rect(Config.boxLeft, Config.boxTop, boxWidth, fullBoxHeight);
                     }
                 }
             }
@@ -463,6 +382,35 @@ namespace WaypointManager
                     GUI.Box(new Rect(screenPos.x - width / 2.0f, (float)Screen.height - screenPos.y - yoffset, width, height), label, hintTextStyle);
                 }
             }
+        }
+
+
+        float boxWidth = 0;
+        float fullBoxHeight = 0;
+
+
+        private void ShowText(string leftText, string rightText)
+        {
+            GUIContent leftTmp = new GUIContent(leftText);
+            GUIContent rightTmp = new GUIContent(rightText);
+
+            Vector2 leftLabelBoxSize = nameStyle.CalcSize(leftTmp);
+            Vector2 rightLabelBoxSize = valueStyle.CalcSize(rightTmp);
+
+            if (Config.boxLeft < 0)
+            {
+                Config.boxLeft = (Screen.width - leftLabelBoxSize.x - rightLabelBoxSize.x - 5) / 2;
+            }
+            if (Config.boxTop < 0)
+            {
+                Config.boxTop = Math.Max(0, Screen.height / 2.0f - asbRectTransform.position.y + asbRectTransform.sizeDelta.y * 0.5f + 20);
+            }
+
+            GUI.Label(new Rect(Config.boxLeft, Config.boxTop + fullBoxHeight, leftLabelBoxSize.x, boxHeight), leftText, nameStyle);
+            GUI.Label(new Rect(Config.boxLeft + leftLabelBoxSize.x + 5, Config.boxTop + fullBoxHeight, rightLabelBoxSize.x, boxHeight), rightText, valueStyle);
+
+            fullBoxHeight += boxHeight - 2;
+            boxWidth = Math.Max(boxWidth, leftLabelBoxSize.x + 5 + rightLabelBoxSize.x);
         }
 
         private void ShowNavigationWindow()

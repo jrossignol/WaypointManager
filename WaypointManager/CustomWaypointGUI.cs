@@ -244,12 +244,6 @@ namespace WaypointManager
                             content.Add(new GUIContent(icon, str));
                         }
                     }
-#if false
-                    foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture.Where(t => t.name.StartsWith(dir)))
-                    {
-                        content.Add(new GUIContent(texInfo.texture, texInfo.name));
-                    }
-#endif
                 }
 
                 // Add custom icons

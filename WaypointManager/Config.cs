@@ -70,6 +70,9 @@ namespace WaypointManager
         public static Texture2D deleteWaypointIcon;
         public static Texture2D settingsIcon;
         public static Texture2D closeIcon;
+        public static Rect displayBox = new Rect(0,0,0,0);
+        internal static float boxTop = -1;
+        internal static float boxLeft = -1;
 
         /// <summary>
         /// Saves the configuration to the default configuration file.
@@ -90,6 +93,10 @@ namespace WaypointManager
             configNode.AddValue("displayDecimal", displayDecimal);
             configNode.AddValue("opacity", opacity);
             configNode.AddValue("scaling", scaling);
+
+            configNode.AddValue("boxTop", boxTop);
+            configNode.AddValue("boxLeft", boxLeft);
+
 
             configNode.Save(ConfigFileName,
                 "Waypoint Manager Configuration File\r\n" +
@@ -130,6 +137,12 @@ namespace WaypointManager
             displayDecimal = configNode.HasValue("displayDecimal") ? Convert.ToBoolean(configNode.GetValue("displayDecimal")) : false;
 
             scaling = configNode.HasValue("scaling") ? (float)Convert.ToDouble(configNode.GetValue("scaling")) : 1.0f;
+
+            if (configNode.HasValue("boxTop"))
+            {
+                boxLeft = (float)Convert.ToDouble(configNode.GetValue("boxLeft"));
+                boxTop = (float)Convert.ToDouble(configNode.GetValue("boxTop"));
+            }
         }
 
         private static T GetEnumValue<T>(this ConfigNode configNode, string name)

@@ -1,5 +1,10 @@
 Changelog
 
+2.8.4
+	Added ability to drag the onscreen live display of status to anywhere on screen (need to hold down either left or right control screen)
+	Added reset button to settings page to reset the position of the live display to the default
+	cleaned up some really old code
+
 2.8.3.5
 	Fixed path for loading files (broken by new launcher)
 
