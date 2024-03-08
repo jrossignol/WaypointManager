@@ -64,6 +64,8 @@ namespace WaypointManager
 
         public static float scaling = 1.0f;
 
+        public static float displayOpacity = 0.0f;
+
         public static Texture2D toolbarIcon;
         public static Texture2D addWaypointIcon;
         public static Texture2D editWaypointIcon;
@@ -96,7 +98,8 @@ namespace WaypointManager
 
             configNode.AddValue("boxTop", boxTop);
             configNode.AddValue("boxLeft", boxLeft);
-
+            configNode.AddValue("displayOpacity", displayOpacity);
+            
 
             configNode.Save(ConfigFileName,
                 "Waypoint Manager Configuration File\r\n" +
@@ -142,6 +145,11 @@ namespace WaypointManager
             {
                 boxLeft = (float)Convert.ToDouble(configNode.GetValue("boxLeft"));
                 boxTop = (float)Convert.ToDouble(configNode.GetValue("boxTop"));
+            }
+
+            if (configNode.HasValue("displayOpacity"))
+            {
+                displayOpacity = configNode.HasValue("displayOpacity") ? (float)Convert.ToDouble(configNode.GetValue("displayOpacity")) : 0.0f;
             }
         }
 

@@ -17,9 +17,9 @@ namespace WaypointManager
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     class WaypointFlightRenderer : MonoBehaviour
     {
-        private GUIStyle nameStyle = null;
-        private GUIStyle valueStyle = null;
-        private GUIStyle hintTextStyle = null;
+        private static GUIStyle nameStyle = null;
+        private static GUIStyle valueStyle = null;
+        private static GUIStyle hintTextStyle = null;
 
         private bool visible = true;
         private Waypoint selectedWaypoint = null;
@@ -81,8 +81,8 @@ namespace WaypointManager
         {
             if (!drag)
             {
-                    offset_x = Input.mousePosition.x - Config.displayBox.x;
-                    offset_y = (Screen.height - Input.mousePosition.y) - Config.displayBox.y;
+                offset_x = Input.mousePosition.x - Config.displayBox.x;
+                offset_y = (Screen.height - Input.mousePosition.y) - Config.displayBox.y;
             }
         }
 
@@ -97,8 +97,8 @@ namespace WaypointManager
             {
                 Config.boxLeft = Math.Max(0, Input.mousePosition.x - offset_x);
                 Config.boxLeft = Math.Min(Config.boxLeft, Screen.width - boxWidth);
-                    
-                Config.boxTop = Math.Max(0,(Screen.height - Input.mousePosition.y) - offset_y);
+
+                Config.boxTop = Math.Max(0, (Screen.height - Input.mousePosition.y) - offset_y);
                 Config.boxTop = Math.Min(Config.boxTop, Screen.height - fullBoxHeight);
             }
             if (drag || Config.displayBox.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y)))
@@ -158,11 +158,25 @@ namespace WaypointManager
 
         static float boxHeight;
 
+        private static Texture2D MakeTex(int width, int height, Color col)
+        {
+            Color[] pix = new Color[width * height];
+
+            for (int i = 0; i < pix.Length; i++)
+                pix[i] = col;
+
+            Texture2D result = new Texture2D(width, height);
+            result.SetPixels(pix);
+            result.Apply();
+
+            return result;
+        }
+
         // Styles taken directly from Kerbal Engineer Redux - because they look great and this will
         // make our display consistent with that
-        protected void SetupStyles()
+        internal static void SetupStyles(bool forceUpdate = false)
         {
-            if (OldUIScale == GameSettings.UI_SCALE && oldScaling == Config.scaling)
+            if (OldUIScale == GameSettings.UI_SCALE && oldScaling == Config.scaling && !forceUpdate)
             {
                 return;
             }
@@ -179,11 +193,12 @@ namespace WaypointManager
             {
                 normal =
                 {
-                    textColor = Color.white
+                    textColor = Color.white,
+                    background = MakeTex(100,1, new   Color(0.5f, 0.5f, 0.5f, Config.displayOpacity))
                 },
                 margin = new RectOffset(),
                 padding = new RectOffset(5, 0, 0, 0),
-                alignment = TextAnchor.MiddleRight,
+                alignment = TextAnchor.MiddleLeft,
                 fontSize = (int)(11f * finalScaling),
                 fontStyle = FontStyle.Bold,
                 fixedHeight = 20.0f * finalScaling
@@ -191,9 +206,14 @@ namespace WaypointManager
 
             valueStyle = new GUIStyle(HighLogic.Skin.label)
             {
+                normal =
+                {
+                    textColor = Color.green,
+                    background = MakeTex(100,1, new   Color(0.5f, 0.5f, 0.5f, Config.displayOpacity))
+                },
                 margin = new RectOffset(),
                 padding = new RectOffset(0, 5, 0, 0),
-                alignment = TextAnchor.MiddleLeft,
+                alignment = TextAnchor.MiddleRight,
                 fontSize = (int)(11f * finalScaling),
                 fontStyle = FontStyle.Normal,
                 fixedHeight = 20.0f * finalScaling
@@ -406,7 +426,7 @@ namespace WaypointManager
                 Config.boxTop = Math.Max(0, Screen.height / 2.0f - asbRectTransform.position.y + asbRectTransform.sizeDelta.y * 0.5f + 20);
             }
 
-            GUI.Label(new Rect(Config.boxLeft, Config.boxTop + fullBoxHeight, leftLabelBoxSize.x, boxHeight), leftText, nameStyle);
+            GUI.Label(new Rect(Config.boxLeft, Config.boxTop + fullBoxHeight, leftLabelBoxSize.x + 5f, boxHeight), leftText, nameStyle);
             GUI.Label(new Rect(Config.boxLeft + leftLabelBoxSize.x + 5, Config.boxTop + fullBoxHeight, rightLabelBoxSize.x, boxHeight), rightText, valueStyle);
 
             fullBoxHeight += boxHeight - 2;

@@ -1,5 +1,9 @@
 Changelog
 
+2.8.4.1
+	Fixed setting window not displaying (unintended sideeffect of the previous update)
+	Added colored background (grey) for onscreen display (controllable via slider in settings window)
+
 2.8.4
 	Added ability to drag the onscreen live display of status to anywhere on screen (need to hold down either left or right control screen)
 	Added reset button to settings page to reset the position of the live display to the default

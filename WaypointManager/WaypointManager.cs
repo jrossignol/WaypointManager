@@ -539,8 +539,6 @@ namespace WaypointManager
         {
             using (new GUILayout.VerticalScope())
             {
-                GUILayout.BeginVertical(GUILayout.Width(SETTINGS_WIDTH));
-
                 // Distance calculation method
                 GUILayout.Label("Distance calculation", headingStyle);
                 GUIContent guiContent = new GUIContent("Lateral", "Calculates distance as the horizontal distance only.  Useful if you're looking to hit a landing spot exactly.");
@@ -643,6 +641,22 @@ namespace WaypointManager
                     if (GUILayout.Button("Reset", GUILayout.Width(50)))
                         Config.scaling = 1.0f;
                 }
+                GUILayout.Label("Display Opacity");
+                using (new GUILayout.HorizontalScope())
+                {
+                    var oldOpacity = Config.displayOpacity;
+                    Config.displayOpacity = GUILayout.HorizontalSlider(Config.displayOpacity, 0.0f, 1f);
+#if false
+                    GUILayout.Space(5);
+                    if (GUILayout.Button("Reset", GUILayout.Width(50)))
+                        Config.displayOpacity = 0.0f;
+#endif
+                    if (oldOpacity != Config.displayOpacity)
+                    {
+                        WaypointFlightRenderer.SetupStyles(true);
+                    }
+
+                }
                 using (new GUILayout.HorizontalScope())
                 {
                     if (GUILayout.Button("Reset Display Position"))
@@ -657,6 +671,7 @@ namespace WaypointManager
 
             SetToolTip(1);
         }
+
         internal static MonoBehaviour importExportWindow = null;
 
         /// <summary>
