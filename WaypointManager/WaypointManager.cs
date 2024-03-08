@@ -97,7 +97,7 @@ namespace WaypointManager
         private void LoadTextures()
         {
             Config.toolbarIcon = new Texture2D(2, 2);
-            ToolbarControl.LoadImageFromFile(ref Config.toolbarIcon, KSPUtil.ApplicationRootPath+"GameData/WaypointManager/PluginData/icons/toolbar");
+            ToolbarControl.LoadImageFromFile(ref Config.toolbarIcon, KSPUtil.ApplicationRootPath + "GameData/WaypointManager/PluginData/icons/toolbar");
 
             Config.addWaypointIcon = new Texture2D(2, 2);
             ToolbarControl.LoadImageFromFile(ref Config.addWaypointIcon, KSPUtil.ApplicationRootPath + "GameData/WaypointManager/PluginData/icons/addWaypoint");
@@ -641,22 +641,25 @@ namespace WaypointManager
                     if (GUILayout.Button("Reset", GUILayout.Width(50)))
                         Config.scaling = 1.0f;
                 }
-                GUILayout.Label("Display Opacity");
-                using (new GUILayout.HorizontalScope())
-                {
-                    var oldOpacity = Config.displayOpacity;
-                    Config.displayOpacity = GUILayout.HorizontalSlider(Config.displayOpacity, 0.0f, 1f);
+                GUILayout.Label("Background Display Opacity");
+                var oldOpacity = Config.displayOpacity;
+                var oldBackground = Config.backgroundGrey;
+                Config.displayOpacity = GUILayout.HorizontalSlider(Config.displayOpacity, 0.0f, 1f);
+                GUILayout.Label("Background Display (grey scale)");
+                Config.backgroundGrey = GUILayout.HorizontalSlider(Config.backgroundGrey, 0.0f, 1f);
+
+
 #if false
                     GUILayout.Space(5);
                     if (GUILayout.Button("Reset", GUILayout.Width(50)))
                         Config.displayOpacity = 0.0f;
 #endif
-                    if (oldOpacity != Config.displayOpacity)
-                    {
-                        WaypointFlightRenderer.SetupStyles(true);
-                    }
-
+                if (oldOpacity != Config.displayOpacity || oldBackground != Config.backgroundGrey)
+                {
+                    WaypointFlightRenderer.SetupStyles(true);
                 }
+
+
                 using (new GUILayout.HorizontalScope())
                 {
                     if (GUILayout.Button("Reset Display Position"))

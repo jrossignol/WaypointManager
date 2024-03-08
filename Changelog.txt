@@ -1,5 +1,11 @@
 Changelog
 
+2.8.4.2
+	Fixed Next flight without changing any settings, grey background is absent
+	    Multiple initializions are needed because KSP/Unity is stupid and loses the background texture between scenes
+    Added ability to control the grey scale of the display background
+	Adjusted display lines to not overlap
+
 2.8.4.1
 	Fixed setting window not displaying (unintended sideeffect of the previous update)
 	Added colored background (grey) for onscreen display (controllable via slider in settings window)

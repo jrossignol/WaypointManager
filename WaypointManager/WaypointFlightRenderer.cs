@@ -144,6 +144,7 @@ namespace WaypointManager
                         DrawWaypoint(wpd);
                     }
                 }
+                else cnt = 0;
 
                 if (HighLogic.LoadedSceneIsFlight && (!MapView.MapIsEnabled || ContractSystem.Instance == null))
                 {
@@ -172,29 +173,32 @@ namespace WaypointManager
             return result;
         }
 
+        // cnt is needed becuase KSP/Unity is stupid and loses the background texture between scenes
+        // This makes sure that at least 2 cycles are done before it stops recreationg the texture
+        static int cnt = 0;
+
         // Styles taken directly from Kerbal Engineer Redux - because they look great and this will
         // make our display consistent with that
         internal static void SetupStyles(bool forceUpdate = false)
         {
             if (OldUIScale == GameSettings.UI_SCALE && oldScaling == Config.scaling && !forceUpdate)
             {
-                return;
+                if (cnt++ >1)
+                    return;
             }
             OldUIScale = GameSettings.UI_SCALE;
             oldScaling = Config.scaling;
 
             finalScaling = GameSettings.UI_SCALE * Config.scaling;
 
-
-
             boxHeight = 20f * finalScaling;
-
+            Texture2D backgroundTexture = MakeTex(2, 2, new Color(Config.backgroundGrey, Config.backgroundGrey, Config.backgroundGrey, Config.displayOpacity));
             nameStyle = new GUIStyle(HighLogic.Skin.label)
             {
                 normal =
                 {
                     textColor = Color.white,
-                    background = MakeTex(100,1, new   Color(0.5f, 0.5f, 0.5f, Config.displayOpacity))
+                    background = backgroundTexture
                 },
                 margin = new RectOffset(),
                 padding = new RectOffset(5, 0, 0, 0),
@@ -209,7 +213,7 @@ namespace WaypointManager
                 normal =
                 {
                     textColor = Color.green,
-                    background = MakeTex(100,1, new   Color(0.5f, 0.5f, 0.5f, Config.displayOpacity))
+                    background = backgroundTexture
                 },
                 margin = new RectOffset(),
                 padding = new RectOffset(0, 5, 0, 0),
@@ -221,6 +225,11 @@ namespace WaypointManager
 
             hintTextStyle = new GUIStyle(HighLogic.Skin.box)
             {
+                normal =
+                {
+                    textColor = Color.white,
+                    background = backgroundTexture
+                },
                 padding = new RectOffset(4, 4, 7, 4),
                 font = HighLogic.Skin.box.font,
                 fontSize = (int)(13 * finalScaling),
@@ -429,7 +438,7 @@ namespace WaypointManager
             GUI.Label(new Rect(Config.boxLeft, Config.boxTop + fullBoxHeight, leftLabelBoxSize.x + 5f, boxHeight), leftText, nameStyle);
             GUI.Label(new Rect(Config.boxLeft + leftLabelBoxSize.x + 5, Config.boxTop + fullBoxHeight, rightLabelBoxSize.x, boxHeight), rightText, valueStyle);
 
-            fullBoxHeight += boxHeight - 2;
+            fullBoxHeight += boxHeight; // - 2;
             boxWidth = Math.Max(boxWidth, leftLabelBoxSize.x + 5 + rightLabelBoxSize.x);
         }
 
